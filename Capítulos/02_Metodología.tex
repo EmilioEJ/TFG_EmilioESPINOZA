@@ -1,0 +1,148 @@
+\chapter{Metodología}
+\label{chap:metodologia}
+
+\section{Diagnóstico de la Situación Actual}
+La gestión actual de la información académica en la carrera de Tecnologías de la Información de la Universidad Tecnológica Indoamérica (UTI) se apoya en una infraestructura transaccional robusta conocida como Sistema de Gestión Académica (SGA). Si bien este sistema cumple eficientemente con los procesos de matriculación y registro de calificaciones, presenta limitaciones significativas en su capa de difusión de información de consulta rápida.
+
+Actualmente, cuando un estudiante necesita resolver inquietudes operativas —como la secuenciación de prerrequisitos en su malla curricular, modalidades de titulación o reglamentos de prácticas preprofesionales— el flujo de interacción es puramente estático y asíncrono. El estudiante debe autenticarse en el portal, navegar a través de una arquitectura de información basada en menús jerárquicos y, finalmente, descargar archivos en formato PDF. 
+
+Las principales limitaciones técnicas de este enfoque son:
+\begin{itemize}
+    \item \textbf{Carencia de búsqueda semántica:} Los repositorios actuales dependen de búsquedas por palabras clave exactas o navegación manual. El sistema no "comprende" la intención del usuario ni puede extraer párrafos específicos de un documento extenso (por ejemplo, un reglamento de 50 páginas) para responder una duda puntual.
+    \item \textbf{Ausencia de proactividad en la interfaz:} El sistema requiere que el usuario inicie la interacción mediante el uso de un periférico tradicional (teclado/ratón), sin aprovechar las capacidades del entorno físico, como la detección de presencia.
+    \item \textbf{Sobrecarga administrativa:} Al no existir un primer nivel de soporte interactivo capaz de interpretar las mallas curriculares, los estudiantes que no logran comprender los documentos estáticos acuden presencialmente a las secretarías, generando cuellos de botella para tareas inherentemente automatizables.
+\end{itemize}
+
+%\textit{[Analizar el estado inicial del sistema, proceso o infraestructura antes de la implementación del proyecto. Describir cómo funciona actualmente y las principales limitaciones técnicas.]}
+
+\section{Metodología de Desarrollo o Implementación}
+Dada la naturaleza del proyecto, que involucra la integración de múltiples capas tecnológicas avanzadas (Inteligencia Artificial, Visión Computacional y Renderizado 3D), se descartan los modelos tradicionales de desarrollo en cascada (\textit{Waterfall}). En su lugar, el proyecto se fundamenta en una \textbf{Metodología Iterativa e Incremental} sustentada en los principios del marco de trabajo ágil (\textit{Agile}), específicamente orientada a la creación de prototipos de software.
+
+Se justifica esta metodología empírica debido a que el ajuste de hiperparámetros en los Modelos de Lenguaje (LLMs) y la calibración de la latencia en el procesamiento de video en un servidor local requieren experimentación continua. El desarrollo se estructurará en las siguientes fases iterativas:
+
+\begin{itemize}
+    \item \textbf{Fase 1 - Configuración del Entorno Local y Análisis de Datos:} Recopilación, limpieza y segmentación (\textit{chunking}) de los documentos oficiales en formato PDF para su posterior indexación en la base de datos vectorial local.
+    \item \textbf{Fase 2 - Desarrollo del Motor Cognitivo (RAG):} Implementación de la Generación Aumentada por Recuperación. Se probarán modelos de incrustación (\textit{embeddings}) y LLMs optimizados para ejecución en servidor local, iterando hasta reducir las "alucinaciones" del modelo.
+    \item \textbf{Fase 3 - Desarrollo Sensorial (Visión y Voz):} Programación de algoritmos ligeros de visión artificial para la detección de presencia efímera, y acoplamiento de las APIs o modelos locales de Speech-to-Text (STT) y Text-to-Speech (TTS).
+    \item \textbf{Fase 4 - Integración Multimodal (Avatar 3D):} Consolidación del flujo. El audio generado por el TTS se sincronizará (\textit{lip-sync}) con las mallas faciales del avatar renderizado mediante WebGL o un entorno equivalente.
+    \item \textbf{Fase 5 - Pruebas y Ajustes de Rendimiento:} Despliegue en el servidor local destino. Se realizarán pruebas de estrés para medir el uso de GPU/CPU y la latencia end-to-end de las respuestas.
+\end{itemize}
+
+%\textit{[Describir y justificar la metodología empleada según la naturaleza del proyecto, indicando las fases y actividades a ejecutar. Por ejemplo, metodologías ágiles o tradicionales para software, o modelos de diseño, implementación o despliegue para hardware o infraestructura.]}
+
+
+\section{Técnicas e Instrumentos de Recolección de Información}
+Para garantizar la validez científica y el correcto desempeño técnico del prototipo, la recolección de información se dividirá en dos etapas metodológicas: la etapa de diagnóstico/desarrollo y la etapa de validación.
+
+\subsection{Técnicas para la Fase de Diagnóstico y Desarrollo}
+\begin{itemize}
+    \item \textbf{Revisión Documental:} Se empleará para alimentar el núcleo de conocimiento de la IA. El instrumento será una \textit{matriz de extracción de datos}, donde se catalogarán y normalizarán los textos de mallas curriculares, estatutos y sílabos de la carrera de TI antes de inyectarlos en la base de datos vectorial.
+    \item \textbf{Observación Directa No Participante:} Se utilizará para analizar la afluencia y el tipo de interacciones que tienen los estudiantes en las oficinas administrativas, lo que permitirá diseñar \textit{prompts} base (instrucciones de sistema) que preparen al asistente virtual para los escenarios de consulta más comunes.
+\end{itemize}
+
+\subsection{Técnicas para la Fase de Evaluación y Validación}
+\begin{itemize}
+    \item \textbf{Métricas de Registro Automático (\textit{Logging}):} Para evaluar el rendimiento técnico (Requerimientos No Funcionales), el sistema incluirá \textit{scripts} que registrarán variables cuantitativas como el tiempo de respuesta del sistema (latencia en milisegundos desde que el usuario deja de hablar hasta que el avatar responde) y el porcentaje de uso de la memoria/procesador del servidor local.
+    \item \textbf{Encuesta de Usabilidad (\textit{Survey}):} Tras realizar sesiones de prueba (Focus Group) con una muestra de estudiantes de TI, se aplicará un cuestionario basado en la Escala de Usabilidad del Sistema (SUS, por sus siglas en inglés). El instrumento constará de preguntas en escala de Likert para medir parámetros de interfaz, como la naturalidad de la voz, el nivel de acierto en las respuestas institucionales, la fluidez de la animación del avatar y la comodidad de interactuar con el sistema sin utilizar periféricos tradicionales.
+\end{itemize}
+
+%\textit{[Describir las técnicas utilizadas para obtener información durante el diagnóstico y la validación del proyecto, tales como entrevistas, encuestas u observación directa.]}
+
+\section{Requerimientos del Proyecto}
+
+La definición de los requerimientos establece las directrices técnicas y operativas que el sistema debe cumplir para satisfacer las necesidades identificadas en el planteamiento del problema. Estos se dividen en requerimientos funcionales, que describen el comportamiento del sistema, y requerimientos no funcionales, que definen los atributos de calidad de la arquitectura.
+
+
+\subsection{Requerimientos Funcionales}
+Los requerimientos funcionales (RF) detallan las tareas específicas, interacciones y procesos de datos que el prototipo del asistente virtual debe ser capaz de ejecutar:
+
+\begin{itemize}
+    \item \textbf{RF-01: Interacción Visual no Biométrica.} El sistema debe incorporar mecanismos de visión artificial orientados a apoyar la interacción del avatar, sin identificar personalmente al estudiante ni depender de una instalación física específica.
+    \item \textbf{RF-02: Transcripción de Voz a Texto (STT).} Una vez activo, el sistema debe ser capaz de capturar el audio del usuario a través de un micrófono y transcribir de forma precisa la pregunta hablada a formato de texto natural en idioma español.
+    \item \textbf{RF-03: Generación Aumentada por Recuperación (RAG).} El sistema debe procesar la consulta de texto y buscar similitudes semánticas dentro de una base de datos vectorial local que contenga los documentos oficiales de la Universidad Indoamérica (mallas curriculares, reglamentos).
+    \item \textbf{RF-04: Generación de Respuesta Contextualizada (LLM).} El sistema debe enviar el contexto recuperado (RF-03) al Modelo de Lenguaje de Gran Escala (LLM) para que este genere una respuesta coherente, precisa y basada \textit{exclusivamente} en la información institucional proporcionada, evitando alucinaciones.
+    \item \textbf{RF-05: Síntesis de Texto a Voz (TTS).} El sistema debe tomar la respuesta generada por el LLM y convertirla a un formato de audio hablado natural en español.
+    \item \textbf{RF-06: Gestión de Estados y Retorno a Reposo.} El sistema debe controlar los estados de conversación y, al detectar un tiempo de inactividad (\textit{timeout}) o la finalización de la consulta, el avatar debe despedirse y regresar al estado de reposo para ahorrar recursos de procesamiento.
+\end{itemize}
+%\textit{[Enumerar y describir los requerimientos funcionales que la solución debe cumplir.]}
+
+\subsection{Requerimientos No Funcionales}
+Los requerimientos no funcionales (RNF) especifican los criterios de rendimiento, seguridad, usabilidad y restricciones técnicas bajo las cuales operará el sistema en el servidor local:
+
+\begin{itemize}
+    \item \textbf{RNF-01: Privacidad y Ética de Datos (Security \& Privacy).} El módulo de visión artificial debe operar bajo el principio de ``Privacidad por Diseño''. No debe registrar, capturar ni almacenar en ninguna base de datos imágenes, videos ni plantillas biométricas faciales de los estudiantes. El procesamiento visual debe ser efímero, anónimo y limitado al soporte de la interacción.
+    \item \textbf{RNF-02: Rendimiento y Baja Latencia (Performance).} Al ser un sistema conversacional interactivo, el tiempo de respuesta (desde que el estudiante termina de hablar hasta que el avatar comienza a responder) debe estar optimizado para ejecutarse en el servidor local, buscando una latencia ideal no mayor a 3 a 5 segundos para mantener la naturalidad del diálogo.
+    \item \textbf{RNF-03: Restricción de Dominio (Accuracy).} El sistema debe estar programado con \textit{prompts} de sistema estrictos que limiten sus respuestas al ámbito académico de la carrera de TI. Si un usuario realiza consultas fuera de este alcance (ej. temas externos o preguntas capciosas), el sistema debe declinar la respuesta cortésmente.
+    \item \textbf{RNF-04: Independencia Transaccional (Isolation).} La arquitectura del asistente debe estar completamente aislada de la base de datos transaccional del Sistema de Gestión Académica (SGA). El sistema no tendrá permisos para matricular, modificar calificaciones ni consultar datos personales protegidos mediante autenticación.
+    \item \textbf{RNF-05: Escalabilidad del Conocimiento (Maintainability).} La arquitectura RAG debe permitir la actualización, adición o eliminación de normativas y documentos PDF de la base de conocimiento vectorial de manera sencilla, sin necesidad de reentrenar (\textit{fine-tuning}) el modelo de lenguaje base.
+    \item \textbf{RNF-06: Usabilidad "Hands-Free" (Usability).} La interacción con el asistente debe ser fluida y natural, priorizando el control por voz y visión artificial para que el estudiante no necesite utilizar teclados, ratones ni tocar pantallas interactivas de forma obligatoria.
+\end{itemize}
+%\textit{[Describir requerimientos relacionados con seguridad, rendimiento, disponibilidad, escalabilidad u otros aplicables.]}
+
+\section{Diseño de la Solución}
+El diseño de la solución propuesta se articula sobre una arquitectura modular y desacoplada, operando bajo un entorno de despliegue en un servidor local para garantizar el rendimiento, la seguridad y el procesamiento en tiempo real. El sistema se desglosa en tres capas lógicas fundamentales:
+
+\subsection{Capa de Percepción y Captura (Frontend Físico)}
+Esta capa actúa como el sensor del sistema. A través de una cámara web, un modelo ligero de visión artificial procesa el flujo de video en tiempo real. El diseño estipula que el sistema no guardará fotogramas; únicamente extraerá las coordenadas de la caja delimitadora (\textit{bounding box}) del rostro. Cuando el área del rostro supera un umbral específico de píxeles (indicando que el estudiante se ha acercado a la pantalla), el sistema envía un disparador (\textit{trigger}) lógico para "despertar" al asistente. Simultáneamente, un micrófono direccional se activa para capturar la solicitud del usuario.
+
+\subsection{Capa de Procesamiento Cognitivo (Motor de IA)}
+\label{sec:diseno_solucion}
+Es el núcleo lógico de la solución, estructurado mediante un flujo de datos secuencial:
+\begin{itemize}
+    \item \textbf{Speech-to-Text (STT):} Transcribe el audio del usuario a texto natural en español utilizando un procesamiento en *backend* (Whisper-v3 vía API), desacoplado del navegador para asegurar compatibilidad y baja latencia.
+    \item \textbf{Generación Aumentada por Recuperación (RAG):} El texto ingresa a un motor de búsqueda semántica. Utilizando incrustaciones (\textit{embeddings}), el sistema compara la consulta del estudiante con una base de datos vectorial pre-indexada que contiene las mallas curriculares y reglamentos de la carrera de TI.
+    \item \textbf{Modelo de Lenguaje (LLM):} Un modelo de ejecución local recibe la consulta del usuario junto con el contexto extraído por el RAG, generando una respuesta coherente, precisa y libre de alucinaciones.
+    \item \textbf{Text-to-Speech (TTS):} El texto generado por el LLM se sintetiza nuevamente a un archivo de audio.
+\end{itemize}
+
+\subsection{Capa de Renderizado e Interacción (Frontend Gráfico)}
+El audio sintetizado y la cadena de texto se envían al motor gráfico basado en tecnologías web (WebGL/Three.js). En esta capa reside el Avatar 3D, el cual recibe el archivo de audio, analiza sus fonemas y ejecuta algoritmos de sincronización labial (\textit{lip-sync}) para emular el habla natural mientras reproduce animaciones predefinidas (como parpadeo y gestos de manos).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.95\textwidth]{Logos/DiagramaFuncional2.png}
+  \caption{Arquitectura Lógica y flujo de datos del Asistente Virtual (Actualizado).}
+  \label{fig:arquitectura_logica}
+\end{figure}
+
+%\textit{[Describir el diseño técnico de la solución propuesta. Puede incluir arquitectura del sistema o infraestructura, diagramas lógicos y físicos, modelos de datos, componentes o configuraciones técnicas.]}
+
+\section{Justificación Técnica}
+La viabilidad técnica y operativa del Asistente Virtual Inteligente depende de una rigurosa selección de componentes y plataformas. A continuación, se justifican las decisiones arquitectónicas adoptadas para este proyecto:
+
+\subsection{Despliegue en Servidor Local (Edge/Local Computing)}
+A diferencia de las arquitecturas basadas enteramente en la nube, el despliegue del pipeline principal en un servidor local asegura una latencia mínima, aspecto crítico para mantener la fluidez en una conversación humano-computadora. Además, procesar las imágenes de la cámara web de manera local (sin enviarlas a servidores externos) garantiza el cumplimiento estricto del Requerimiento No Funcional de privacidad \cite{lightweightgaze2024}.
+
+\subsection{Implementación de la Arquitectura RAG frente a Fine-Tuning}
+Para dotar al LLM del conocimiento institucional, se seleccionó la arquitectura RAG (Retrieval-Augmented Generation) sobre el reentrenamiento (\textit{Fine-Tuning}). La literatura especializada demuestra que el \textit{Fine-Tuning} es computacionalmente costoso y altamente susceptible a alucinaciones cuando se le piden datos exactos \cite{pabon2025naia}. El enfoque RAG permite que la universidad actualice un reglamento (agregando un nuevo PDF a la base de datos) y el asistente adopte el nuevo conocimiento de forma inmediata sin necesidad de reentrenar el modelo, garantizando escalabilidad y bajo costo de mantenimiento.
+
+\subsection{Visión Artificial mediante Modelos Ligeros}
+Para el módulo de detección de presencia, se opta por librerías optimizadas para inferencia rápida (como MediaPipe o configuraciones de Haar Cascades). Estas herramientas operan eficientemente sin necesidad de tarjetas gráficas (GPUs) de gama alta, permitiendo que todo el peso computacional del hardware se reserve para la inferencia del Modelo de Lenguaje y el renderizado 3D del avatar.
+
+\subsection{Plataformas de Avatar Estandarizadas}
+Se justifica el uso de plataformas de avatares basadas en estándares abiertos (como GLTF o GLB, facilitados por herramientas como Ready Player Me) ejecutadas sobre WebGL en el navegador. Esta decisión técnica evita la dependencia de motores de videojuegos pesados (como Unreal Engine), lo que reduce la carga del sistema operativo y facilita una futura portabilidad del asistente a otras pantallas o terminales de la institución sin requerir configuraciones de software complejas.
+
+%\textit{[Argumentar técnicamente la selección de tecnologías, herramientas, plataformas, equipos o servicios utilizados en el proyecto.]}
+
+Ejemplo de cita metodológica: la justificación de decisiones técnicas puede apoyarse en literatura de diseño e implementación de sistemas como \cite{hevner2004design,humble2011devops}.
+
+\subsection{Ejemplo de Imagen 1}
+Ejemplo de referencia en el cuerpo del texto: la Imagen~\ref{img:ejemplo_1} puede usarse para documentar evidencia técnica del entorno, componentes o interfaz.
+
+\begin{imagen}[htbp]
+  \centering
+  \includegraphics[width=0.80\textwidth]{Capítulos/img/img_ejemplo_1.png}
+  \caption{Ejemplo de imagen para documentación visual de infraestructura o evidencias.}
+  \label{img:ejemplo_1}
+\end{imagen}
+\elaboradopor{Estudiante}
+\fuente{Captura referencial del proyecto}
+
+\subsection{Ejemplo de Ecuación 1}
+Otro ejemplo de referencia: la Ecuación~\ref{eq:disponibilidad} muestra un cálculo típico para validación de disponibilidad del servicio.
+
+\begin{equation}
+\label{eq:disponibilidad}
+Disponibilidad\,(\%) = \frac{T_{operativo}}{T_{total}} \times 100
+\end{equation}
+\addeqtolist{Cálculo de disponibilidad del servicio}

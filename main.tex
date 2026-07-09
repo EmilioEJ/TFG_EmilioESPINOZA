@@ -1,0 +1,121 @@
+% ============================================================
+% main.tex — Plantilla genérica para usar con uti_tfm.sty
+% Requiere en la misma carpeta del proyecto:
+%   - uti_tfm.sty
+%   - referencias.bib
+%   - Logos/LOGO-UTI.png
+%
+% Compilación recomendada (por Century Gothic):
+%   XeLaTeX → biber → XeLaTeX → XeLaTeX
+% ============================================================
+
+\documentclass[12pt,a4paper,oneside]{report}
+
+% Estilo UTI
+\usepackage{uti_tfm}
+
+% Referencias IEEE desde .bib
+\usepackage[hidelinks]{hyperref}
+\renewcommand{\bibname}{REFERENCIAS} % report/book
+% (si fuera article sería \renewcommand{\refname}{REFERENCIAS})
+
+% Útiles (opcionales)
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{easyReview}
+\makeatletter
+\providecommand{\UTI@tutor}{Tutor}
+\NewDocumentCommand{\ComentarioTutor}{m g}{%
+  \IfNoValueTF{#2}%
+    {\todo[inline]{\textbf{\UTI@tutor:} #1}}%
+    {\comment{#1}{\textbf{\UTI@tutor:} #2}}%
+}
+\makeatother
+
+\begin{document}
+
+% ==========================================================
+% PORTADA (sin numeración visible; NO cuenta para la numeración)
+% ==========================================================
+% Géneros permitidos: masculino | femenino
+% Si solo hay un autor, usa: \UTIDatosAutores{Autor/a 1}{genero}
+% Si hay dos autores, usa: \UTIDatosAutores{Autor/a 1}{genero 1}[Autor/a 2][genero 2]
+\UTIPortada
+{LOGO-UTI-1.png} % Logo (ruta)
+{FACULTAD DE INGENIERÍAS} % Facultad
+{INGENIERÍA EN TECNOLOGÍAS DE LA INFORMACIÓN} % Programa
+{Desarrollo de un prototipo de asistente virtual inteligente con interfaz de avatar 3D y visión artificial para la difusión de información académica de los estudiantes de una institución educativa} % Tema / Título
+{Trabajo de Titulación modalidad Trabajo de Integración Curricular} % Texto tipo de trabajo
+{\UTIDatosAutores{Paulo Emilio Espinoza Jiménez}{masculino}} % Autor/a(s)
+%{\UTIDatosAutores{Nombres Apellidos}{femenino}[Nombres Apellidos][femenino]} % Autor/a(s)
+{\UTIDatosTutor{Christian Eduardo Iza Llumigusín}{masculino}} % Tutor/a
+{Quito, Ecuador} % Ciudad, País
+{2026} % Año
+
+% ==========================================================
+% PÁGINAS PRELIMINARES (romanos minúscula: i, ii, iii...)
+% ==========================================================
+\UTIFrontMatter
+
+\input{Preliminares/01_RepositorioDigital}
+
+\input{Preliminares/02_AprobaciónTutor}
+
+\input{Preliminares/03_DeclaraciónAutenticidad}
+
+\input{Preliminares/04_AprobaciónLectores}
+
+
+\input{Preliminares/05_Dedicatoria}
+
+\input{Preliminares/06_Agradecimiento}
+
+
+
+% --------------------------
+% ÍNDICES (según el .sty)
+% --------------------------
+\input{Preliminares/07_Índices}
+
+\input{Preliminares/08_Resumen}
+
+\input{Preliminares/09_Abstract}
+% ==========================================================
+% CUERPO (arábigos CONTINUANDO el contador desde los romanos)
+% Nota: el .sty cambia el formato de página a arábigos sin reiniciar.
+% ==========================================================
+\UTIMainMatter
+
+% ==========================================================
+% CAPÍTULO I (se mostrará como: CAPÍTULO I)
+% ==========================================================
+\input{Capítulos/01_Introducción}
+% ==========================================================
+% CAPÍTULO II
+% ==========================================================
+\input{Capítulos/02_Metodología}
+% ==========================================================
+% CAPÍTULO III
+% ==========================================================
+\input{Capítulos/03_Implementación}
+% ==========================================================
+% CAPÍTULO IV
+% ==========================================================
+\input{Capítulos/04_Conclusiones}
+% ==========================================================
+% REFERENCIAS (capítulo NO numerado, en índice, IEEE desde .bib)
+% ==========================================================
+\input{Capítulos/05_Referencias}
+% ==========================================================
+% GLOSARIO (capítulo NO numerado)
+% ==========================================================
+
+\input{Capítulos/06_Glosario}
+% ==========================================================
+% ANEXOS (ANEXO A, ANEXO B, ... + Índice de Anexos)
+% ==========================================================
+\UTIAppendixMatter
+
+\input{Anexos/01_Anexo}
+
+\end{document}
