@@ -1,0 +1,157 @@
+% ============================================================
+% main.tex — Plantilla genérica para usar con uti_tfm.sty
+% Requiere en la misma carpeta del proyecto:
+%   - uti_tfm.sty
+%   - referencias.bib
+%   - Logos/LOGO-UTI.png
+%
+% Compilación recomendada (por Century Gothic):
+%   XeLaTeX → biber → XeLaTeX → XeLaTeX
+% ============================================================
+
+\documentclass[12pt,a4paper,oneside]{report}
+
+% Estilo UTI
+\usepackage{uti_tfm}
+
+% Referencias IEEE desde .bib (usa biber)
+\usepackage[hidelinks]{hyperref} % opcional pero recomendado
+\renewcommand{\bibname}{REFERENCIAS} % report/book
+% (si fuera article sería \renewcommand{\refname}{REFERENCIAS})
+
+
+
+% Útiles (opcionales)
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+
+
+\begin{document}
+
+% ==========================================================
+% PORTADA (sin numeración visible; NO cuenta para la numeración)
+% ==========================================================
+% Géneros permitidos: masculino | femenino
+% Si solo hay un autor, usa: \UTIDatosAutores{Autor/a 1}{genero}
+% Si hay dos autores, usa: \UTIDatosAutores{Autor/a 1}{genero 1}[Autor/a 2][genero 2]
+% Título en inglés utilizado en la página de Abstract:
+\UTIDatosTituloIngles{PROJECT TITLE IN ENGLISH}
+%
+% CATÁLOGO DE LÍNEAS Y SUBLÍNEAS DE INVESTIGACIÓN
+% Copie el par indicado en: \UTISeleccionInvestigacion{línea}{sublínea}
+%
+% LÍNEA 1: Análisis, diseño e implementación de infraestructura tecnológica
+%   {1}{1} Diseño y optimización de redes de comunicación.
+%   {1}{2} Ciberseguridad y protección de infraestructuras tecnológicas.
+%   {1}{3} Sistemas de almacenamiento y computación en la nube.
+%   {1}{4} Automatización y gestión de infraestructuras inteligentes.
+%
+% LÍNEA 2: Redes informáticas de comunicación
+%   {2}{1} Arquitecturas de redes avanzadas.
+%   {2}{2} Protocolos y estándares de comunicación.
+%   {2}{3} Ciberseguridad en redes.
+%   {2}{4} Redes inalámbricas e Internet de las Cosas (IoT).
+%
+% LÍNEA 3: Gestión de la información
+%   {3}{1} Almacenamiento y recuperación de información.
+%   {3}{2} Análisis y procesamiento de datos.
+%   {3}{3} Gobernanza y seguridad de la información.
+%   {3}{4} Ciclo de vida de la información.
+%   {3}{5} Sistemas de gestión del conocimiento.
+%   {3}{6} Visualización de información.
+%   {3}{7} Tecnologías emergentes en la gestión de información.
+%   {3}{8} Gestión de datos no estructurados.
+%
+% LÍNEA 4: Diseño, desarrollo e integración de sistemas basados en
+%          arquitecturas web, móviles y sistemas embebidos
+%   {4}{1} Diseño y desarrollo de aplicaciones web.
+%   {4}{2} Desarrollo de aplicaciones móviles.
+%   {4}{3} Integración de sistemas embebidos.
+%   {4}{4} Interoperabilidad entre plataformas.
+%   {4}{5} Seguridad en sistemas web, móviles y embebidos.
+%   {4}{6} Optimización del rendimiento.
+%   {4}{7} Aplicación de tecnologías emergentes.
+%   {4}{8} Sistemas basados en la nube y edge computing.
+%
+% Mantenga {0}{0} mientras la selección esté pendiente.
+% Ejemplo: \UTISeleccionInvestigacion{3}{2}
+\UTISeleccionInvestigacion{0}{0}
+\UTIPortada
+{LOGO-UTI-1.png} % Logo (ruta)
+{FACULTAD DE INGENIERÍAS} % Facultad
+{INGENIERÍA EN TECNOLOGÍAS DE LA INFORMACIÓN} % Programa
+{TÍTULO DEL PROYECTO} % Tema / Título
+{Trabajo de Titulación modalidad Trabajo de Integración Curricular} % Texto tipo de trabajo
+%{\UTIDatosAutores{Nombres Apellidos}{femenino}} % Autor/a(s)
+{\UTIDatosAutores{Nombres Apellidos}{femenino}[Nombres Apellidos][femenino]} % Autor/a(s)
+{\UTIDatosTutor{Nombres Apellidos}{masculino}} % Tutor/a
+{Quito, Ecuador} % Ciudad, País
+{2026} % Año
+
+% ==========================================================
+% PÁGINAS PRELIMINARES (romanos minúscula: i, ii, iii...)
+% ==========================================================
+\UTIFrontMatter
+
+\input{Preliminares/01_RepositorioDigital}
+
+\input{Preliminares/02_AprobaciónTutor}
+
+\input{Preliminares/03_DeclaraciónAutenticidad}
+
+\input{Preliminares/04_AprobaciónLectores}
+
+
+\input{Preliminares/05_Dedicatoria}
+
+\input{Preliminares/06_Agradecimiento}
+
+
+
+% --------------------------
+% ÍNDICES (según el .sty)
+% --------------------------
+\input{Preliminares/07_Índices}
+
+\input{Preliminares/08_Resumen}
+
+\input{Preliminares/09_Abstract}
+% ==========================================================
+% CUERPO (arábigos CONTINUANDO el contador desde los romanos)
+% Nota: el .sty cambia el formato de página a arábigos sin reiniciar.
+% ==========================================================
+\UTIMainMatter
+
+% ==========================================================
+% CAPÍTULO I (se mostrará como: CAPÍTULO I)
+% ==========================================================
+\input{Capítulos/01_Introducción}
+% ==========================================================
+% CAPÍTULO II
+% ==========================================================
+\input{Capítulos/02_Metodología}
+% ==========================================================
+% CAPÍTULO III
+% ==========================================================
+\input{Capítulos/03_Implementación}
+% ==========================================================
+% CAPÍTULO IV
+% ==========================================================
+\input{Capítulos/04_Conclusiones}
+% ==========================================================
+% REFERENCIAS (capítulo NO numerado, en índice, IEEE desde .bib)
+% ==========================================================
+\input{Capítulos/05_Referencias}
+% ==========================================================
+% GLOSARIO (capítulo NO numerado)
+% ==========================================================
+
+\input{Capítulos/06_Glosario}
+% ==========================================================
+% ANEXOS (ANEXO A, ANEXO B, ... + Índice de Anexos)
+% ==========================================================
+\UTIAppendixMatter
+
+\input{Anexos/01_Anexo}
+
+\end{document}
