@@ -9,16 +9,18 @@
   % Fallback para pdfLaTeX: TeX Gyre Adventor (similar a Century Gothic)
   \RequirePackage{tgadventor}
   \renewcommand{\familydefault}{\sfdefault}
+  \RequirePackage{newtxtext} % Times New Roman aproximada para la portada
   \RequirePackage{newtxmath} % matemática legible en modo pdfLaTeX
+  \newcommand{\UTIPortadaFuente}{\rmfamily}
 \else
   \RequirePackage{fontspec}
   \defaultfontfeatures{Ligatures=TeX}
-  \IfFontExistsTF{Century Gothic}{%
-    \setmainfont{Century Gothic}
-    \setsansfont{Century Gothic}
+  \setmainfont{Century Gothic}
+  \setsansfont{Century Gothic}
+  \IfFontExistsTF{Times New Roman}{%
+    \newfontfamily\UTIPortadaFuente{Times New Roman}%
   }{%
-    \setmainfont{TeX Gyre Adventor}
-    \setsansfont{TeX Gyre Adventor}
+    \newfontfamily\UTIPortadaFuente{TeX Gyre Termes}%
   }
   % Matemática (no existe “Century Gothic Math”): usa una fuente matemática estándar
   \RequirePackage{unicode-math}
@@ -30,11 +32,12 @@
 \RequirePackage{etoolbox}
 \RequirePackage{xparse}
 
-% --- Página y espaciado (A4 y márgenes ~3 cm, como el PDF) ---
+% --- Página y espaciado (A4): superior 3 cm, inferior 3 cm,
+%     izquierdo 4 cm y derecho 3 cm ---
 \RequirePackage{geometry}
 \geometry{
   a4paper,
-  left=3cm,right=3cm,
+  left=4cm,right=3cm,
   top=3cm,bottom=3cm,
   headheight=14pt,headsep=0pt,
   footskip=1.2cm
@@ -106,10 +109,6 @@
 \titlespacing*{\subsection}{0pt}{1.0\baselineskip}{0.4\baselineskip}
 
 % --- Tablas/Figuras/Imágenes (sin prefijo “No.”) ---
-\RequirePackage[table]{xcolor}
-\RequirePackage{array}
-\RequirePackage{longtable}
-\RequirePackage{pdflscape}
 \RequirePackage{caption}
 \RequirePackage{chngcntr}
 
@@ -198,6 +197,7 @@
 \newcommand{\UTI@facultad}{}
 \newcommand{\UTI@programa}{}
 \newcommand{\UTI@titulo}{}
+\newcommand{\UTI@tituloIngles}{}
 \newcommand{\UTI@tipotrabajo}{}
 \newcommand{\UTI@autorA}{}
 \newcommand{\UTI@generoAutorA}{masculino}
@@ -207,6 +207,46 @@
 \newcommand{\UTI@generoTutor}{masculino}
 \newcommand{\UTI@ciudadpais}{}
 \newcommand{\UTI@anio}{}
+
+% --- Catálogo de líneas y sublíneas de investigación ---
+% Selección: \UTISeleccionInvestigacion{número de línea}{número de sublínea}
+\csdef{UTI@linea@0}{\textit{[Seleccione la línea de investigación en main.tex.]}}
+\csdef{UTI@sublinea@0@0}{\textit{[Seleccione la sublínea de investigación en main.tex.]}}
+
+\csdef{UTI@linea@1}{Análisis, diseño e implementación de infraestructura tecnológica}
+\csdef{UTI@sublinea@1@1}{Diseño y optimización de redes de comunicación.}
+\csdef{UTI@sublinea@1@2}{Ciberseguridad y protección de infraestructuras tecnológicas.}
+\csdef{UTI@sublinea@1@3}{Sistemas de almacenamiento y computación en la nube.}
+\csdef{UTI@sublinea@1@4}{Automatización y gestión de infraestructuras inteligentes.}
+
+\csdef{UTI@linea@2}{Redes informáticas de comunicación}
+\csdef{UTI@sublinea@2@1}{Arquitecturas de redes avanzadas.}
+\csdef{UTI@sublinea@2@2}{Protocolos y estándares de comunicación.}
+\csdef{UTI@sublinea@2@3}{Ciberseguridad en redes.}
+\csdef{UTI@sublinea@2@4}{Redes inalámbricas e Internet de las Cosas (IoT).}
+
+\csdef{UTI@linea@3}{Gestión de la información}
+\csdef{UTI@sublinea@3@1}{Almacenamiento y recuperación de información.}
+\csdef{UTI@sublinea@3@2}{Análisis y procesamiento de datos.}
+\csdef{UTI@sublinea@3@3}{Gobernanza y seguridad de la información.}
+\csdef{UTI@sublinea@3@4}{Ciclo de vida de la información.}
+\csdef{UTI@sublinea@3@5}{Sistemas de gestión del conocimiento.}
+\csdef{UTI@sublinea@3@6}{Visualización de información.}
+\csdef{UTI@sublinea@3@7}{Tecnologías emergentes en la gestión de información.}
+\csdef{UTI@sublinea@3@8}{Gestión de datos no estructurados.}
+
+\csdef{UTI@linea@4}{Diseño, desarrollo e integración de sistemas basados en arquitecturas web, móviles y sistemas embebidos}
+\csdef{UTI@sublinea@4@1}{Diseño y desarrollo de aplicaciones web.}
+\csdef{UTI@sublinea@4@2}{Desarrollo de aplicaciones móviles.}
+\csdef{UTI@sublinea@4@3}{Integración de sistemas embebidos.}
+\csdef{UTI@sublinea@4@4}{Interoperabilidad entre plataformas.}
+\csdef{UTI@sublinea@4@5}{Seguridad en sistemas web, móviles y embebidos.}
+\csdef{UTI@sublinea@4@6}{Optimización del rendimiento.}
+\csdef{UTI@sublinea@4@7}{Aplicación de tecnologías emergentes.}
+\csdef{UTI@sublinea@4@8}{Sistemas basados en la nube y edge computing.}
+
+\newcommand{\UTI@lineaInvestigacion}{\csuse{UTI@linea@0}}
+\newcommand{\UTI@sublineaInvestigacion}{\csuse{UTI@sublinea@0@0}}
 
 \newcommand{\UTIIfFemaleTF}[3]{%
   \edef\UTI@tmpGender{#1}%
@@ -239,7 +279,17 @@
 
 \newcommand{\UTITituloProyecto}{\UTI@titulo}
 \newcommand{\UTITituloProyectoMayusculas}{\MakeUppercase{\UTI@titulo}}
+\newcommand{\UTITituloProyectoIngles}{%
+  \ifdefempty{\UTI@tituloIngles}{\UTITituloProyecto}{\UTI@tituloIngles}%
+}
+\newcommand{\UTITituloProyectoInglesMayusculas}{%
+  \MakeUppercase{\UTITituloProyectoIngles}%
+}
 \newcommand{\UTITipoTrabajo}{\UTI@tipotrabajo}
+\newcommand{\UTIFacultad}{\UTI@facultad}
+\newcommand{\UTIPrograma}{\UTI@programa}
+\newcommand{\UTILineaInvestigacion}{\UTI@lineaInvestigacion}
+\newcommand{\UTISublineaInvestigacion}{\UTI@sublineaInvestigacion}
 \newcommand{\UTITutorNombre}{\UTI@tutor}
 \newcommand{\UTICiudadPais}{\UTI@ciudadpais}
 \newcommand{\UTICiudadPaisPortada}{%
@@ -248,7 +298,7 @@
 \newcommand{\UTIAnio}{\UTI@anio}
 
 \def\UTIFormatCityCountry#1,#2,\@nil{%
-  #1\ifstrempty{#2}{}{ -{}- \ignorespaces#2}%
+  #1\ifstrempty{#2}{}{ -- \ignorespaces#2}%
 }
 
 \newcommand{\UTIAutoresPortada}{%
@@ -460,6 +510,23 @@
   \gdef\UTI@generoTutor{#2}%
 }
 
+\NewDocumentCommand{\UTIDatosTituloIngles}{m}{%
+  \gdef\UTI@tituloIngles{#1}%
+}
+
+\NewDocumentCommand{\UTISeleccionInvestigacion}{m m}{%
+  \ifcsdef{UTI@linea@#1}{%
+    \gdef\UTI@lineaInvestigacion{\csuse{UTI@linea@#1}}%
+  }{%
+    \PackageError{uti_tfm}{La línea de investigación #1 no existe}{Use un número entre 1 y 4, o 0 para dejarla pendiente.}%
+  }%
+  \ifcsdef{UTI@sublinea@#1@#2}{%
+    \gdef\UTI@sublineaInvestigacion{\csuse{UTI@sublinea@#1@#2}}%
+  }{%
+    \PackageError{uti_tfm}{La sublínea #2 no existe para la línea #1}{Revise el catálogo definido en uti_tfm.sty.}%
+  }%
+}
+
 % --- Comandos convenientes para numeración preliminar y cuerpo ---
 % Preliminares: romanos minúscula (i, ii, iii...) desde la primera página posterior a la portada
 \newcommand{\UTIFrontMatter}{%
@@ -474,6 +541,67 @@
   \thispagestyle{plain}%
   \begin{center}\bfseries\MakeUppercase{#1}\end{center}%
   \vspace{1em}%
+}
+
+% Página de Resumen/Abstract según la guía institucional.
+% #1 idioma (spanish/english), #2 título, #3 texto,
+% #4 etiqueta de palabras clave, #5 palabras clave.
+\NewDocumentCommand{\UTIResumenPagina}{m m +m m +m}{%
+  \clearpage
+  \thispagestyle{plain}%
+  \begingroup
+  \UTIPortadaFuente
+  \singlespacing
+  \fontsize{12}{14.4}\selectfont
+  \setlength{\parindent}{0pt}%
+
+  % Textos de cabecera específicos de cada idioma.
+  \def\UTI@resFacultad{\MakeUppercase{\UTIFacultad}}%
+  \def\UTI@resPrograma{\MakeUppercase{\UTIPrograma}}%
+  \def\UTI@resTemaEtiqueta{TEMA}%
+  \def\UTI@resTema{\UTITituloProyectoMayusculas}%
+  \def\UTI@resAutorEtiqueta{AUTOR(A)}%
+  \def\UTI@resTutorEtiqueta{TUTOR(A)}%
+  \ifstrequal{#1}{english}{%
+    \def\UTI@resFacultad{FACULTY OF ENGINEERING}%
+    \def\UTI@resPrograma{BACHELOR'S DEGREE IN INFORMATION TECHNOLOGY ENGINEERING}%
+    \def\UTI@resTemaEtiqueta{TOPIC}%
+    \def\UTI@resTema{\UTITituloProyectoInglesMayusculas}%
+    \def\UTI@resAutorEtiqueta{AUTHOR}%
+    \def\UTI@resTutorEtiqueta{ADVISOR}%
+  }{}%
+
+  \begin{center}
+    \textbf{UNIVERSIDAD INDOAMÉRICA}\par
+    \vspace{0.35cm}
+    \textbf{\UTI@resFacultad}\par
+    \vspace{0.35cm}
+    \textbf{\UTI@resPrograma}\par
+  \end{center}
+
+  \vspace{\baselineskip}
+  \noindent\textbf{\UTI@resTemaEtiqueta: \UTI@resTema}\par
+  \vspace{0.45cm}
+
+  \noindent\hspace*{0.42\textwidth}%
+  \begin{minipage}{0.58\textwidth}
+    \raggedright
+    \textbf{\UTI@resAutorEtiqueta:} \UTIAutoresTexto\par
+    \vspace{0.35cm}
+    \textbf{\UTI@resTutorEtiqueta:} \UTITutorNombre\par
+  \end{minipage}%
+
+  \vspace{\baselineskip}
+  \begin{center}
+    \textbf{\MakeUppercase{#2}}\par
+  \end{center}
+  \vspace{0.35cm}
+
+  \noindent\justifying #3\par
+
+  \vfill
+  \noindent\textbf{\MakeUppercase{#4}:} #5\par
+  \endgroup
 }
 
 % Cuerpo: cambia a arábigos SIN reiniciar el contador (continúa desde el último romano)
@@ -511,7 +639,7 @@
   \addanexotolist{Anexo \thechapter: #1}%
 }
 
-% --- Carátula (portada) estilo UTI (aproximación) ---
+% --- Carátula (portada) según la guía institucional ---
 \RequirePackage{graphicx}
 \NewDocumentCommand{\UTIPortada}{m m m m m m m m m}{%
 % #1 logo (ruta)  #2 Facultad  #3 Programa  #4 Tema/Título
@@ -528,44 +656,57 @@
 \gdef\UTI@anio{#9}%
 \begin{titlepage}
   \thispagestyle{empty}
+  \begingroup
+  \UTIPortadaFuente
+  \singlespacing
+  \setlength{\parindent}{0pt}%
+
   \begin{center}
-    \vspace*{1.2cm}
-    \includegraphics[width=0.18\textwidth]{Logos/#1}\par
-    \vspace{1.2cm}
-    {\bfseries\Large UNIVERSIDAD TECNOLÓGICA\par}
-    {\bfseries\Large INDOAMÉRICA\par}
-    \vspace{1.0cm}
-    {\bfseries\Large #2\par}
-    \vspace{0.8cm}
-    {\bfseries\large #3\par}
-    \vspace{1.1cm}
+    \includegraphics[width=3cm,height=3cm,keepaspectratio]{Logos/#1}\par
+    \vspace{0.7cm}
+    {\fontsize{16}{19.2}\selectfont\bfseries
+      UNIVERSIDAD INDOAMÉRICA\par}
+    \vspace{1cm}
+    {\fontsize{14}{16.8}\selectfont\bfseries
+      \MakeUppercase{#2}\par}
+    \vspace{0.35cm}
+    {\fontsize{12}{14.4}\selectfont\bfseries
+      \MakeUppercase{#3}\par}
   \end{center}
 
-  {\bfseries TEMA:\par}
-  \vspace{0.2cm}\hrule\vspace{0.7cm}
-  {\bfseries\large\MakeUppercase{#4}\par}
-  \vspace{0.7cm}\hrule\vspace{0.7cm}
+  \vspace{3\baselineskip}
+  {\fontsize{12}{14.4}\selectfont
+    \textbf{TEMA:}\par
+    \vspace{0.12cm}
+    \hrule height 1pt
+    \vspace{0.35cm}
+    \textbf{\MakeUppercase{#4}}\par
+    \vspace{0.35cm}
+    #5\par
 
-  {#5\par}
-
-  \vfill
-  \begin{center}
-    \begin{minipage}{0.65\textwidth}
+    \vspace{3\baselineskip}
+    \noindent\hspace*{0.5\textwidth}%
+    \begin{minipage}{0.5\textwidth}
       \raggedright
-      {\bfseries \UTIAutorEtiqueta\par}
-      {\UTIAutoresPortada\par}
-      \vspace{0.4cm}
-      {\bfseries \UTITutorEtiqueta\par}
-      {\UTITutorNombre\par}
-    \end{minipage}
-  \end{center}
-  \vfill
+      \textbf{Autor(a)}\par
+      \vspace{0.25cm}
+      \UTIAutoresPortada\par
+      \vspace{0.45cm}
+      \textbf{Tutor(a)}\par
+      \vspace{0.25cm}
+      \UTITutorNombre\par
+    \end{minipage}%
+  }
 
+  \vfill
   \begin{center}
-    {\MakeUppercase{\UTICiudadPaisPortada}\par}
-    \vspace{0.3cm}
-    {#9\par}
+    {\fontsize{12}{14.4}\selectfont
+      \MakeUppercase{\UTICiudadPaisPortada}\par
+      \vspace{0.35cm}
+      #9\par}
   \end{center}
+  \vspace*{0.5cm}
+  \endgroup
 \end{titlepage}
 \setcounter{page}{0}% evita que la portada cuente para la numeración
 }
