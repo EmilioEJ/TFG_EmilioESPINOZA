@@ -2,6 +2,9 @@
 \label{chap:introduccion}
 
 \section{Contextualización}
+
+\textcolor{red}{\textit{[TODO: Investigar y agregar aquí estadísticas sobre el contexto MACRO (tendencias globales de IA en educación superior), MESO (adopción de estas tecnologías en Ecuador o Latinoamérica) y MICRO (datos estadísticos de la UTI, como número de estudiantes o volumen de consultas en secretaría).]}}
+
  El área de aplicación específica para este proyecto es la carrera de Ingeniería en Tecnologías de la Información, donde se ha identificado que la gestión de la información académica para los estudiantes es predominantemente estática. Actualmente, el acceso a datos críticos sobre mallas curriculares, requisitos de graduación o perfiles profesionales depende de la navegación manual por el sitio web institucional o de la lectura de extensos archivos PDF, lo que deriva en una experiencia de usuario pasiva y demorada.
 
 El entorno universitario actual demanda canales de comunicación más ágiles que respondan a la necesidad de inmediatez de los estudiantes. La situación identificada revela una brecha entre la disponibilidad de la información y la facilidad con la que el usuario puede obtener respuestas precisas a sus inquietudes. Esta dispersión documental no solo dificulta la orientación de los alumnos de nuevo ingreso, sino que también genera una carga de consultas repetitivas que podrían automatizarse. En este contexto, surge la necesidad de modernizar estos puntos de contacto, transformando los repositorios de datos tradicionales en un entorno de consulta dinámico y proactivo que aproveche las tendencias actuales en interfaces humano-computadora.
@@ -22,6 +25,8 @@ Para que la implementación de un asistente virtual sea pertinente y genere un i
 Actualmente, cuando un estudiante de la carrera de TI requiere consultar su avance de malla curricular, prerrequisitos de asignaturas o normativas de titulación, debe autenticarse en el portal web del SGA mediante credenciales de acceso. Una vez dentro, la recuperación de la información se realiza navegando por diversos menús que, en su mayoría, derivan en la generación de reportes en formato PDF estático, diseñados idealmente para su impresión. Este modelo de interacción representa un paradigma de recuperación de información lineal y pasivo; si el estudiante presenta dudas de interpretación sobre la secuenciación de materias, el documento no ofrece retroalimentación dinámica, obligando al alumno a buscar asistencia presencial, lo que genera demoras y sobrecarga de consultas administrativas repetitivas.
 
 De manera contrastante, la Universidad Indoamérica posee un entorno altamente propicio para la innovación tecnológica. La institución impulsa activamente la investigación aplicada en inteligencia artificial y oferta programas académicos de posgrado especializados en IA, innovación empresarial y desarrollo de entornos virtuales. En este contexto, el prototipo de asistente virtual propuesto no busca reemplazar la infraestructura del SGA, sino acoplarse como una capa de interfaz moderna, transformando los repositorios de datos tradicionales en un canal de servicio inmediato, conversacional y proactivo.
+
+\textcolor{red}{\textit{[TODO: Agregar evidencia o estudios previos internos de la universidad relacionados con el tema o con proyectos de IA institucionales previos.]}}
 
 \subsection{Evolución Tecnológica: Asistentes Virtuales, Avatares 3D y Visión Artificial}
 La evolución de las interfaces humano-computadora en el ecosistema educativo ha transitado desde chatbots transaccionales basados puramente en texto hacia agentes conversacionales encarnados o multimodales. Si bien los modelos basados en texto logran automatizar respuestas, la evidencia empírica en la educación superior subraya que la dotación de características antropomórficas a los sistemas facilita la creación de entornos centrados en el estudiante, promoviendo la empatía y la presencia social \cite{robinson2024ai}.
@@ -103,15 +108,18 @@ Los efectos de esta infraestructura recaen directamente sobre la experiencia del
 
 
 \section{Justificación}
-%\textit{[Redactar un texto argumentativo que exponga la importancia del proyecto, su impacto técnico y operativo, la utilidad de la solución, los beneficiarios directos e indirectos y la factibilidad técnica y operativa de su implementación.]}
-
 La modernización de los canales de comunicación universitaria es un imperativo frente a una generación de estudiantes nativos digitales que demandan respuestas ágiles e interactivas. Este proyecto se justifica por su capacidad para transformar un modelo de consulta obsoleto en una experiencia dinámica, centralizada y tecnológicamente inmersiva mediante la implementación de un Asistente Virtual Inteligente.
 
-A nivel técnico y operativo, la incorporación de Procesamiento de Lenguaje Natural (PLN), visión artificial no biométrica y un avatar 3D permite crear una interfaz de consulta más natural e intuitiva. En lugar de obligar al estudiante a recorrer documentos extensos o menús institucionales, el sistema interpreta consultas en lenguaje natural y presenta respuestas contextualizadas, mejorando la asimilación de la información gracias al componente visual y conversacional del avatar.
+\subsection{Utilidad}
+A nivel técnico y operativo, la incorporación de Procesamiento de Lenguaje Natural (PLN), visión artificial no biométrica y un avatar 3D permite crear una interfaz de consulta más natural e intuitiva. En lugar de obligar al estudiante a recorrer documentos extensos o menús institucionales, el sistema interpreta consultas en lenguaje natural y presenta respuestas contextualizadas, mejorando la asimilación de la información gracias al componente visual y conversacional del avatar. La utilidad principal radica en su capacidad de operar de manera continua y estandarizada, asegurando que la información entregada sobre la carrera de TI sea siempre precisa y actualizada.
 
-La utilidad de la solución radica en su capacidad de operar de manera continua y estandarizada, asegurando que la información entregada sobre la carrera de TI sea siempre precisa y actualizada. Los beneficiarios directos de este proyecto son los estudiantes de la carrera, quienes obtendrán una herramienta de orientación intuitiva y resolutiva. Como beneficiarios indirectos, el personal administrativo y académico verá reducida la carga de atención de consultas rutinarias, permitiéndoles enfocar sus esfuerzos en tareas de mayor valor institucional. Además, el proyecto posiciona a la Universidad Indoamérica a la vanguardia en la adopción de interfaces humano-computadora avanzadas.
+\subsection{Beneficiarios}
+Los beneficiarios directos de este proyecto son los estudiantes de la carrera, quienes obtendrán una herramienta de orientación intuitiva y resolutiva. Como beneficiarios indirectos, el personal administrativo y académico verá reducida la carga de atención de consultas rutinarias, permitiéndoles enfocar sus esfuerzos en tareas de mayor valor institucional. 
 
-Finalmente, la ejecución de este proyecto es factible tanto a nivel técnico como operativo. Como estudiante de la carrera de TI, se cuenta con los conocimientos de desarrollo de software necesarios, y actualmente existen frameworks de inteligencia artificial, APIs de síntesis de voz, librerías de visión artificial y plataformas de creación de avatares que son altamente accesibles para integrarse en un prototipo funcional de software.
+\subsection{Factibilidad e Impacto Cuantificable}
+La ejecución de este proyecto es factible tanto a nivel técnico como operativo. Como estudiante de la carrera de TI, se cuenta con los conocimientos de desarrollo de software necesarios, y actualmente existen frameworks de inteligencia artificial, APIs de síntesis de voz, librerías de visión artificial y plataformas de creación de avatares que son altamente accesibles para integrarse en un prototipo funcional de software. Además, el proyecto posiciona a la Universidad Indoamérica a la vanguardia en la adopción de interfaces humano-computadora avanzadas.
+
+\textcolor{red}{\textit{[TODO: Cuantificar el impacto: indicar un estimado de cuántas horas hombre se ahorrarán al mes, o a cuántos estudiantes de la carrera (cifra exacta) beneficiará el proyecto.]}}
 
 \section{Objetivos}
 \subsection{Objetivo General}
@@ -120,12 +128,11 @@ Desarrollar un prototipo de Asistente Virtual Inteligente, provisto de una inter
 %\textit{[Redactar el propósito principal del proyecto, alineado con la solución propuesta e incluyendo explícitamente su implementación.]}
 \subsection{Objetivos Específicos}
 \begin{itemize}
-    \item \textbf{Analizar} los procesos actuales de gestión y consulta de documentación académica en la institución para determinar los requerimientos funcionales, no funcionales y la base de conocimiento conversacional del sistema.
-    \item \textbf{Diseñar} la arquitectura de software del asistente, definiendo la integración del módulo conversacional, el motor de Procesamiento de Lenguaje Natural (PLN), la base de conocimiento académica y el entorno gráfico del avatar 3D.
-    \item \textbf{Implementar} el prototipo del asistente virtual integrando los modelos de inteligencia artificial, la interfaz antropomórfica y los mecanismos de interacción visual no biométrica en un entorno de software controlado.
-    \item \textbf{Evaluar} el desempeño, precisión y usabilidad del prototipo mediante pruebas de interacción con estudiantes de la carrera, midiendo indicadores como la reducción de tiempos de consulta y el nivel de aceptación del usuario.
+    \item \textbf{Analizar} los procesos actuales de gestión y consulta de documentación académica en la institución mediante revisión documental y observación directa, para determinar los requerimientos funcionales, no funcionales y la base de conocimiento conversacional del sistema.
+    \item \textbf{Diseñar} la arquitectura de software del asistente aplicando patrones de diseño de microservicios y sistemas distribuidos, para definir con exactitud la integración del módulo conversacional, el motor RAG, la base de conocimiento académica y el entorno gráfico del avatar 3D.
+    \item \textbf{Implementar} el prototipo del asistente virtual integrando los modelos de inteligencia artificial locales, la interfaz antropomórfica web y los mecanismos de interacción visual no biométrica, para obtener una prueba de concepto interactiva funcional.
+    \item \textbf{Evaluar} el desempeño, precisión y usabilidad del prototipo mediante pruebas de interacción con una muestra de estudiantes y métricas de rendimiento computacional (latencia, uso de recursos), para validar empíricamente la viabilidad técnica de la solución propuesta.
 \end{itemize}
-%\textit{[Enumerar acciones concretas, medibles y verificables que permitan alcanzar el objetivo general. Los objetivos deben cubrir análisis, diseño, implementación y validación.]}
 
 \section{Alcance del Proyecto}
 %\textit{[Delimitar los límites del proyecto, especificando claramente los componentes, módulos o funcionalidades que se incluyen, así como aquellos que se excluyen.]}

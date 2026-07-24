@@ -1,15 +1,35 @@
-\Anexo{Título del Anexo A}
+\Anexo{Repositorio de Código y Configuraciones Técnicas}
 
-\textit{[Incluya una descripción breve del contenido del anexo. Ejemplo: documentación técnica, diagramas, configuraciones, evidencias o instrumentos aplicados.]}
+Este anexo detalla los enlaces a los repositorios donde se encuentra el código fuente del Asistente Virtual Inteligente, así como la configuración base de las variables de entorno para su correcto funcionamiento.
 
+\textbf{Repositorio de Código Fuente}
 \begin{itemize}
-  \item \textit{[Documentación técnica.]}
-  \item \textit{[Manuales de usuario y administración.]}
-  \item \textit{[Evidencias de pruebas.]}
-  \item \textit{[Autorizaciones y validaciones de la entidad receptora.]}
-  \item \textit{[Repositorio de versionamiento (enlace).]}
-  \item \textit{[Formatos de entrevistas y encuestas aplicadas.]}
+    \item \textbf{Asistente Virtual (Código Fuente):} \url{https://github.com/EmilioEJ/Asistente_Virtual}
+    \item \textbf{Documento de Tesis (LaTeX):} \url{https://github.com/EmilioEJ/TFG_EmilioESPINOZA}
 \end{itemize}
 
-% \Anexo{Título del Anexo B}
-% Contenido...
+\textbf{Configuración Base (Archivo .env)}
+A continuación se presenta un extracto de las variables de entorno necesarias para levantar el backend en FastAPI:
+
+\begin{verbatim}
+# Configuración del Servidor y CORS
+PORT=8000
+FRONTEND_URL=http://localhost:5173
+
+# Modelos y APIs de IA
+ELEVENLABS_API_KEY=tu_clave_aqui
+ELEVENLABS_VOICE_ID=voz_valeria
+GROQ_API_KEY=tu_clave_aqui
+WHISPER_MODEL=whisper-large-v3
+
+# Base de Datos Vectorial Local (ChromaDB)
+CHROMA_DB_PATH=./chroma_db
+EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+
+# Modelo LLM Local / API
+NEMOTRON_ENDPOINT=http://localhost:11434/api/generate
+\end{verbatim}
+
+\Anexo{Instrumento de Evaluación de Usabilidad}
+
+Para la evaluación del sistema, se utilizó un cuestionario basado en Google Forms distribuido a 13 estudiantes de la carrera. El cuestionario evaluó aspectos como la latencia percibida, la fluidez del avatar 3D, y la exactitud del motor RAG. Los resultados cuantitativos han sido procesados y graficados dentro del Capítulo III.

@@ -13,7 +13,7 @@ Las principales limitaciones técnicas de este enfoque son:
     \item \textbf{Sobrecarga administrativa:} Al no existir un primer nivel de soporte interactivo capaz de interpretar las mallas curriculares, los estudiantes que no logran comprender los documentos estáticos acuden presencialmente a las secretarías, generando cuellos de botella para tareas inherentemente automatizables.
 \end{itemize}
 
-%\textit{[Analizar el estado inicial del sistema, proceso o infraestructura antes de la implementación del proyecto. Describir cómo funciona actualmente y las principales limitaciones técnicas.]}
+\textcolor{red}{\textit{[TODO: Investigar e insertar aquí métricas del diagnóstico actual: tiempos promedio de consulta manual (en minutos), cantidad estimada de solicitudes de orientación al mes, índice de errores, o nivel de satisfacción actual de los estudiantes con el portal web.]}}
 
 \section{Área de Estudio}
 
@@ -24,7 +24,7 @@ Las principales limitaciones técnicas de este enfoque son:
   \renewcommand{\arraystretch}{1.35}
   \begin{tabular}{|p{0.39\textwidth}|p{0.53\textwidth}|}
     \hline
-    \textbf{Dominio:} & \textit{[Indique el dominio académico o científico del proyecto.]} \\
+    \textbf{Dominio:} & Inteligencia Artificial y Tecnologías Educativas \\
     \hline
     \textbf{Línea de investigación:} & \UTILineaInvestigacion \\
     \hline
@@ -32,19 +32,22 @@ Las principales limitaciones técnicas de este enfoque son:
     \hline
     \textbf{Campo:} & Tecnologías de la información y la comunicación (TIC) \\
     \hline
-    \textbf{Área:} & \textit{[Defina el área técnica específica del proyecto.]} \\
+    \textbf{Área:} & Desarrollo de Software e Interfaces Humano-Computadora \\
     \hline
-    \textbf{Aspectos:} & \textit{[Describa los procesos, tecnologías o problemas que serán analizados.]} \\
+    \textbf{Aspectos:} & Procesamiento de Lenguaje Natural (PLN), Visión Artificial, Interacción Multimodal, Renderizado 3D \\
     \hline
-    \textbf{Objeto de estudio:} & \textit{[Indique la organización, sistema, proceso o infraestructura objeto del estudio.]} \\
+    \textbf{Objeto de estudio:} & Asistente virtual inteligente para difusión de información académica \\
     \hline
-    \textbf{Periodo de estudio:} & \textit{[Indique las fechas o el intervalo de tiempo que comprende el estudio.]} \\
+    \textbf{Periodo de estudio:} & Enero 2026 - Julio 2026 \\
     \hline
   \end{tabular}
 \end{table}
 
 \section{Metodología de Desarrollo o Implementación}
-Dada la naturaleza del proyecto, que involucra la integración de múltiples capas tecnológicas avanzadas (Inteligencia Artificial, Visión Computacional y Renderizado 3D), se descartan los modelos tradicionales de desarrollo en cascada (\textit{Waterfall}). En su lugar, el proyecto se fundamenta en una \textbf{Metodología Iterativa e Incremental} sustentada en los principios del marco de trabajo ágil (\textit{Agile}), específicamente orientada a la creación de prototipos de software.
+
+Para abordar la complejidad tecnológica de este proyecto, se adopta un enfoque híbrido. Como metodología de investigación principal se emplea la \textbf{Metodología de Investigación en Ciencia de Diseño (DSRM - Design Science Research Methodology)}, la cual es el estándar para proyectos de tecnologías de la información orientados a la creación de artefactos innovadores que resuelven problemas organizacionales \cite{hevner2004design}. DSRM proporciona el marco riguroso para la conceptualización, el diseño arquitectónico y la validación empírica de la solución propuesta.
+
+Simultáneamente, para la construcción técnica del artefacto (el prototipo de software), que involucra la integración de múltiples capas tecnológicas avanzadas (Inteligencia Artificial, Visión Computacional y Renderizado 3D), se descartan los modelos tradicionales de desarrollo en cascada (\textit{Waterfall}). En su lugar, el proyecto se fundamenta en una \textbf{Metodología Iterativa e Incremental} sustentada en los principios del marco de trabajo ágil (\textit{Agile}), específicamente el marco Scrum para la creación ágil de prototipos funcionales \cite{humble2011devops}.
 
 Se justifica esta metodología empírica debido a que el ajuste de hiperparámetros en los Modelos de Lenguaje (LLMs) y la calibración de la latencia en el procesamiento de video en un servidor local requieren experimentación continua. El desarrollo se estructurará en las siguientes fases iterativas:
 

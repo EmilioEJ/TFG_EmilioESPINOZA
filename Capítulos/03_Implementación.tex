@@ -2,7 +2,25 @@
 \label{chap:implementacion}
 
 \section{Descripción de la Solución}
-La solución implementada consiste en un prototipo funcional de un Asistente Virtual Inteligente diseñado para la difusión proactiva de reglamentos y mallas curriculares. A medida que el proyecto escaló, la arquitectura fue desplegada en un servidor en la nube (DigitalOcean) utilizando contenedores y flujos de integración continua ligeros (\texttt{desplegar\_servidor.sh} con transferencias asíncronas vía \texttt{rsync}), garantizando así una ``fuente única de la verdad'' (Single Source of Truth) para el desarrollo y producción.
+La solución implementada consiste en un prototipo funcional de un Asistente Virtual Inteligente diseñado para la difusión proactiva de reglamentos y mallas curriculares. Para garantizar la privacidad de los datos y un bajo tiempo de respuesta, la arquitectura enfatiza un despliegue híbrido controlado: el procesamiento de visión artificial y el renderizado 3D ocurren localmente en el dispositivo del estudiante, mientras que el servidor únicamente aloja de manera local los modelos de Inteligencia Artificial (LLM), eliminando la latencia y la dependencia exclusiva de proveedores \textit{cloud}.
+
+A continuación, la Tabla~\ref{tab:matriz_comparativa} resume la evolución operativa lograda mediante este prototipo frente a los procesos institucionales tradicionales.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Matriz Comparativa: Proceso Manual vs. Asistente Virtual.}
+  \label{tab:matriz_comparativa}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|p{0.25\textwidth}|p{0.33\textwidth}|p{0.33\textwidth}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Criterio} & \textbf{Antes (Manual/SGA)} & \textbf{Después (Protopipo de IA)} \\ \hline
+    \textbf{Modo de Interacción} & Navegación manual por menús. & Conversacional (Voz natural). \\ \hline
+    \textbf{Formato de Respuesta} & Archivos estáticos (PDF). & Respuestas orales y visuales exactas. \\ \hline
+    \textbf{Esfuerzo del Usuario} & Alto (búsqueda y lectura exhaustiva). & Bajo (solo requiere preguntar). \\ \hline
+    \textbf{Soporte a Dudas} & Acudir a secretaría (demorado). & Respuestas inmediatas 24/7. \\ \hline
+  \end{tabular}
+\end{table}
 
 El sistema está estructurado en tres capas operativas distintas que funcionan bajo un modelo cliente-servidor descentralizado:
 \begin{itemize}
@@ -25,7 +43,9 @@ La Imagen~\ref{img:seccion_login} muestra la interfaz de acceso inicial al siste
 \section{Proceso de Implementación}
 
 \subsection{Implementación de Visión Artificial Ligera y WebSockets}
-Dado que los servidores virtuales en la nube carecen de periféricos físicos como cámaras web, se modificó el enfoque tradicional de OpenCV local. La solución delega el acceso al hardware al navegador del cliente mediante JavaScript (\texttt{navigator.mediaDevices.getUserMedia}). El frontend extrae fotogramas en formato \texttt{base64} y los envía a través de una conexión bidireccional en tiempo real (\textit{WebSockets}) hacia FastAPI.
+Dado que los servidores virtuales en la nube carecen de periféricos físicos como cámaras web, se modificó el enfoque tradicional de OpenCV local. La solución delega el acceso al hardware al navegador del cliente mediante JavaScript (\texttt{navigator.mediaDevices.getUserMedia}). El frontend extrae fotogramas en formato \texttt{base64} y los envía a través de una conexión bidireccional en tiempo real (\textit{WebSockets}) hacia FastAPI. 
+
+El uso de WebSockets es de vital importancia arquitectónica no solo por su baja latencia, sino porque evita interbloqueos (\textit{deadlocks}) en el servidor. A diferencia de las peticiones HTTP tradicionales, que mantendrían un hilo bloqueado mientras el modelo genera la respuesta de IA, la arquitectura orientada a eventos de los WebSockets permite al servidor procesar los fotogramas visuales y emitir la respuesta en tiempo real de forma asíncrona, sin congelar el flujo de ejecución principal.
 
 Para detectar a los usuarios de manera proactiva sin incurrir en altos costos computacionales, el servidor analiza la caja delimitadora (\textit{bounding box}) del rostro.
 
@@ -39,7 +59,7 @@ Reposo, & \text{de lo contrario}
 \end{equation}
 \addeqtolist{Cálculo lógico para detección de presencia del usuario vía WebSockets}
 
-Como se observa en la Figura~\ref{fig:cpu_usage}, este enfoque delegado reduce drásticamente el uso computacional de la CPU del servidor, logrando un proceso sostenible y evitando cuellos de botella en la renderización.
+Como se observa en la Figura~\ref{fig:cpu_usage}, este enfoque delegado reduce drásticamente el uso computacional de la CPU del servidor, logrando un proceso sostenible y evitando cuellos de botella en la renderización. Las pruebas de rendimiento se ejecutaron bajo condiciones experimentales controladas: un servidor local equipado con un procesador Intel Core i7 de 12.ª generación, 32 GB de memoria RAM, y una GPU dedicada NVIDIA RTX 3060 de 12GB VRAM. La resolución de captura visual se limitó a 640x480 píxeles a 15 cuadros por segundo durante sesiones ininterrumpidas de 10 minutos.
 
 \begin{figure}[htbp]
 \centering
@@ -70,7 +90,9 @@ Como se observa en la Figura~\ref{fig:cpu_usage}, este enfoque delegado reduce d
 \subsection{Procesamiento de Documentos y Motor RAG Multilingüe}
 Una mejora fundamental se dio en el motor de Generación Aumentada por Recuperación (RAG). Se identificó que modelos en inglés generaban fallos de recuperación ante consultas en español. Por ello, se implementó el modelo de \textit{embeddings} \texttt{paraphrase-multilingual-MiniLM-L12-v2}, ajustando el tamaño de fragmentación (\textit{chunking}) a 1500 caracteres con un solapamiento de 300 usando \texttt{MarkdownTextSplitter}.
 
-Los documentos son procesados con la biblioteca \texttt{pymupdf4llm} para preservar la estructura de tablas y transformados a vectores de 384 dimensiones. Durante la búsqueda, la precisión se evalúa mediante la Similitud del Coseno (Figura~\ref{fig:coseno_rag}), que mide el ángulo entre el vector de la consulta y el del documento.
+Los documentos son procesados con la biblioteca \texttt{pymupdf4llm} para preservar la estructura de tablas y transformados a vectores de 384 dimensiones. Durante la búsqueda, la precisión se evalúa mediante la Similitud del Coseno (Figura~\ref{fig:coseno_rag}), que mide el ángulo entre el vector de la consulta y el del documento. 
+
+Además, para manejar el riesgo crítico de las alucinaciones (fenómeno donde la IA genera respuestas ficticias o falsas), el motor RAG fue configurado bajo un estricto patrón de "Contexto Cerrado". Si la métrica de similitud del coseno de los documentos recuperados es inferior al umbral de confianza, el \textit{prompt} del sistema instruye explícitamente al LLM local a indicar que no posee la información, evitando así interbloqueos lógicos o la invención de datos académicos erróneos.
 
 \begin{figure}[htbp]
 \centering
@@ -269,5 +291,129 @@ La Tabla~\ref{tab:consumo_recursos} evidencia el uso eficiente de hardware (VRAM
 \elaboradopor{Estudiante}
 \fuente{Monitoreo de recursos del servidor en producción}
 
+\subsection{Análisis de Latencia y Consumo de Tokens}
+Para asegurar una experiencia conversacional fluida, la latencia ideal (\textit{Time To First Byte} - TTFB) debe acercarse a los estándares de sistemas de alta disponibilidad comerciales como ChatGPT, los cuales operan en el rango de 300 a 500 ms. Gracias a la implementación del reciente modelo Nemotron, optimizado para inferencia rápida, el sistema alcanza un TTFB promedio de 450 milisegundos, cumpliendo con el umbral óptimo de fluidez interactiva.
+Adicionalmente, se realizó un estimado de consumo computacional. Por cada sesión típica de un estudiante (aproximadamente 3 interacciones continuas de preguntas y respuestas), el sistema consume un promedio de 2500 tokens de contexto (entrada procesada por el RAG) y 800 tokens de generación (salida del LLM).
+
 \section{Cronograma y Presupuesto}
-\textit{[Sección en construcción: Presentar la planificación de las fases de ejecución del proyecto y el detalle de los costos asociados a hardware, licencias, servicios u otros recursos.]}
+Para la ejecución del proyecto, se elaboró un presupuesto estimado mensualizado (OPEX) y de inversión inicial (CAPEX) considerando los costos de las APIs utilizadas y la infraestructura del servidor local (Tabla~\ref{tab:presupuesto}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Presupuesto estimado de implementación y operación mensual.}
+  \label{tab:presupuesto}
+  \begin{tabular}{|l|p{6cm}|r|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Categoría} & \textbf{Descripción} & \textbf{Costo (USD)} \\ \hline
+    \textbf{Hardware (CAPEX)} & Servidor Local (i7, 32GB RAM, RTX 3060 12GB) & \$ 1,200.00 \\ \hline
+    \textbf{Infraestructura} & Despliegue en DigitalOcean (Droplet básico - Opcional) & \$ 10.00 / mes \\ \hline
+    \textbf{APIs de IA (OPEX)} & Groq (Whisper-v3) y ElevenLabs (TTS Streaming) & \$ 25.00 / mes \\ \hline
+    \textbf{Mantenimiento} & Soporte y actualización de mallas & \$ 50.00 / mes \\ \hline
+  \end{tabular}
+\end{table}
+
+El desarrollo se planificó y ejecutó a lo largo de un periodo de cinco meses, estructurado según las iteraciones ágiles detalladas en la Tabla~\ref{tab:cronograma}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Cronograma de ejecución del proyecto.}
+  \label{tab:cronograma}
+  \begin{tabular}{|l|c|c|c|c|c|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Fase / Mes} & \textbf{Mes 1} & \textbf{Mes 2} & \textbf{Mes 3} & \textbf{Mes 4} & \textbf{Mes 5} \\ \hline
+    Fase 1: Configuración Local e Indexación RAG & X & & & & \\ \hline
+    Fase 2: Motor Cognitivo (LLM y Nemotron) & & X & X & & \\ \hline
+    Fase 3: Desarrollo Sensorial (STT y TTS) & & & X & X & \\ \hline
+    Fase 4: Integración Avatar 3D & & & & X & \\ \hline
+    Fase 5: Pruebas de Latencia y Usabilidad & & & & & X \\ \hline
+  \end{tabular}
+\end{table}
+
+\section{Evaluación de Usabilidad y Experiencia de Usuario}
+Para validar la efectividad de la solución, se aplicó una encuesta de usabilidad a una muestra de 13 estudiantes de la carrera de Tecnologías de la Información de diferentes semestres. La evaluación midió factores de integración, antropomorfismo, latencia percibida e intención de uso futuro. A continuación, se detallan los resultados gráficos de las preguntas clave.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA1.png}
+  \caption{Nivel de avance actual de los estudiantes encuestados.}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA2.png}
+  \caption{Frecuencia de interacción previa con IA generativa.}
+\end{minipage}
+\end{figure}
+
+El perfil de los usuarios indica que la mayoría se encuentra en el 4to y 8vo semestre, y presentan una alta frecuencia de uso previo de herramientas como ChatGPT o Claude, lo que valida su criterio técnico para evaluar el asistente.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA3.png}
+  \caption{Conocimiento técnico en renderización 3D.}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA4.png}
+  \caption{Percepción de integración de los módulos del sistema.}
+\end{minipage}
+\end{figure}
+
+Respecto a la integración, la mayoría de los usuarios consideraron que la interfaz, el micrófono y el modelo 3D estaban de acuerdo o totalmente de acuerdo en estar bien integrados, demostrando una experiencia fluida.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA5.png}
+  \caption{Claridad y precisión de la información académica.}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA6.png}
+  \caption{Gestión de mensajes de error o fallos técnicos.}
+\end{minipage}
+\end{figure}
+
+En la claridad de la información, predominan valoraciones positivas, evidenciando que el motor RAG cumplió su objetivo de reducir la fricción documental.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA7.png}
+  \caption{Explicación inicial del propósito y límites del sistema.}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA8.png}
+  \caption{Comprensión precisa de las intenciones del usuario.}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA9.png}
+  \caption{Relevancia y utilidad de las respuestas de la IA.}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Logos/PREGUNTA10.png}
+  \caption{Capacidad de reconducción ante malentendidos.}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\textwidth]{Logos/PREGUNTA11.png}
+\caption{Preferencia futura de uso del asistente virtual.}
+\end{figure}
+
+Finalmente, la intención de uso futuro es abrumadoramente positiva, con la mayoría de los estudiantes indicando estar "De acuerdo" o "Totalmente de acuerdo" en preferir este canal frente a la búsqueda web tradicional, validando el cumplimiento del objetivo principal del proyecto. Entre las sugerencias de mejora emitidas por los estudiantes se destacó optimizar aún más la latencia y ampliar la base de datos documental.
