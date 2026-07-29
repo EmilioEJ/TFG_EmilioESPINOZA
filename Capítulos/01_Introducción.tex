@@ -3,7 +3,31 @@
 
 \section{Contextualización}
 
-\textcolor{red}{\textit{[TODO: Investigar y agregar aquí estadísticas sobre el contexto MACRO (tendencias globales de IA en educación superior), MESO (adopción de estas tecnologías en Ecuador o Latinoamérica) y MICRO (datos estadísticos de la UTI, como número de estudiantes o volumen de consultas en secretaría).]}}
+La adopción de tecnologías emergentes de Inteligencia Artificial (IA) en la educación superior se articula a través de tres niveles interdependientes de análisis: macroeconómico y nacional, meso o interinstitucional metropolitano, y micro o específicamente universitario.
+
+En el \textbf{contexto Macro (Ecuador)}, según el \textit{Índice Latinoamericano de Inteligencia Artificial (2024-2025)} \cite{ilia2024ecuador}, el país es catalogado en una etapa de ``adopción tardía'', pero con un crecimiento acelerado en el desarrollo de talento tecnológico e infraestructuras digitales. En la educación superior ecuatoriana, un estudio reciente demostró que el 87,3\% de los estudiantes universitarios reporta haber utilizado herramientas basadas en IA para fines formativos \cite{wiseguyreports2025}, cifra que alcanza un 94,2\% entre alumnos de facultades técnicas y científicas como la Ingeniería en Tecnologías de la Información. Los asistentes generativos conversacionales son utilizados por el 82,7\% de la población estudiantil; sin embargo, esta penetración ocurre predominantemente ``desde abajo'', de manera autodidacta y paralela a las plataformas oficiales, evidenciando la necesidad imperativa de contar con canales y estrategias institucionales formalmente gobernadas \cite{unescoin2024}.
+
+En el \textbf{contexto Meso (Universidades de Quito)}, diversas instituciones del distrito metropolitano lideran la adopción aplicada de inteligencia artificial en la automatización académica. La Pontificia Universidad Católica del Ecuador (PUCE) desarrolló \textit{Aurel\_AI} para transformar digitalmente su mesa de ayuda universitaria, así como \textit{LegalBot-EC}, un modelo de lenguaje local especializado en normativas legales ecuatorianas \cite{puce2024aurel}. Por su parte, la Universidad San Francisco de Quito (USFQ) y la Universidad Central del Ecuador (UCE) han desplegado modelos y motores locales para procesamiento analítico y soporte interno, preservando la privacidad de la información académica y demostrando la viabilidad técnica de sistemas autónomos en la región \cite{ilia2024ecuador}.
+
+En el \textbf{contexto Micro (Universidad Tecnológica Indoamérica - UTI)}, la institución —con sedes operativas consolidadas en Quito y Ambato— ha mantenido una oferta formativa orientada a la innovación digital. De acuerdo con los informes institucionales de Rendición de Cuentas \cite{uti2025rc}, la universidad registra una matrícula global que supera los 8.358 estudiantes (7.839 en programas de grado). En específico, la carrera de Ingeniería en Tecnologías de la Información reporta una población matriculada estable de aproximadamente 380 estudiantes activos en sus dos sedes, evidenciando un notable crecimiento en admisiones de primer nivel en el periodo académico reciente (68 nuevos alumnos: 47 en la sede Quito y 21 en la sede Ambato) \cite{uti2025rc}. Históricamente, la universidad ha superado la marca de 6.300 estudiantes regulares, generando un volumen masivo de consultas operativas que saturan los esquemas tradicionales de secretaría.
+
+La Tabla~\ref{tab:contexto_macro_meso_micro} sintetiza esta estructura analítica y los indicadores críticos de adopción tecnológica en cada dimensión.
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{3.3cm}|}
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Nivel de Contexto} & \textbf{Área Geográfica / Institución} & \textbf{Indicador de Adopción IA} & \textbf{Enfoque Tecnológico y Reto} \\ \hline
+\textbf{Macro} (Nacional) & República del Ecuador (Sistema Educativo Superior) & 87,3\% estudiantes usa IA (94,2\% en TI) \cite{ilia2024ecuador} & Adopción autodidacta ``desde abajo''; necesidad de gobernanza formal \\ \hline
+\textbf{Meso} (Metropolitano) & Universidades de Quito (PUCE, USFQ, UCE) & Proyectos locales: \textit{Aurel\_AI}, \textit{LegalBot-EC} \cite{puce2024aurel} & Modelos locales, privacidad de datos y automatización de soporte \\ \hline
+\textbf{Micro} (Institucional) & Universidad Tecnológica Indoamérica (UTI - Sede Quito/Ambato) & Matrícula de $>$8.358 alumnos ($\sim$380 en carrera TI) \cite{uti2025rc} & Evolucionar el portal SGA estático hacia un Asistente Virtual 3D proactivo \\ \hline
+\end{tabular}
+\caption{Estructura Analítica del Contexto Macro, Meso y Micro de Adopción de IA.}\label{tab:contexto_macro_meso_micro}
+\end{table}
 
  El área de aplicación específica para este proyecto es la carrera de Ingeniería en Tecnologías de la Información, donde se ha identificado que la gestión de la información académica para los estudiantes es predominantemente estática. Actualmente, el acceso a datos críticos sobre mallas curriculares, requisitos de graduación o perfiles profesionales depende de la navegación manual por el sitio web institucional o de la lectura de extensos archivos PDF, lo que deriva en una experiencia de usuario pasiva y demorada.
 
@@ -26,7 +50,33 @@ Actualmente, cuando un estudiante de la carrera de TI requiere consultar su avan
 
 De manera contrastante, la Universidad Indoamérica posee un entorno altamente propicio para la innovación tecnológica. La institución impulsa activamente la investigación aplicada en inteligencia artificial y oferta programas académicos de posgrado especializados en IA, innovación empresarial y desarrollo de entornos virtuales. En este contexto, el prototipo de asistente virtual propuesto no busca reemplazar la infraestructura del SGA, sino acoplarse como una capa de interfaz moderna, transformando los repositorios de datos tradicionales en un canal de servicio inmediato, conversacional y proactivo.
 
-\textcolor{red}{\textit{[TODO: Agregar evidencia o estudios previos internos de la universidad relacionados con el tema o con proyectos de IA institucionales previos.]}}
+El desarrollo del presente Asistente Virtual Multimodal no constituye un esfuerzo aislado, sino que se inscribe orgánicamente dentro de una sólida trayectoria de innovación e investigación aplicada en la Universidad Tecnológica Indoamérica. A través de sus centros de investigación —como el Centro de Investigación en Mecatrónica y Sistemas Interactivos (MIST) y el Centro de Investigación en Empresa, Sociedad y Tecnología (ESTec)— la universidad ha ejecutado múltiples proyectos emblemáticos de inteligencia artificial y computación inmersiva que constituyen antecedentes científicos directos para este trabajo:
+
+\begin{itemize}
+    \item \textbf{Detección Oncológica mediante Visión Artificial e IA (Proyecto MIST-CEDIA):} En alianza con la Corporación Ecuatoriana para el Desarrollo de la Investigación y la Academia (CEDIA), la UTI lidera un proyecto I+D+i de modelamiento de procesos biológicos e imágenes médicas para el análisis y detección temprana del cáncer de mama \cite{uti2025cedia}. Este antecedente consolida el dominio computacional de la institución en visión artificial y algoritmos de detección visual por cajas delimitadoras (\textit{bounding boxes}).
+    \item \textbf{Entornos Inmersivos 3D y Pensamiento Crítico en TI:} En la propia carrera de Ingeniería en Tecnologías de la Información, investigadores desarrollaron entornos de simulación en motores gráficos avanzados (\textit{Unreal Engine 5}), logrando incrementar el índice de pensamiento crítico de los estudiantes de un promedio de 3.3/10 a 4.1/10 \cite{uti2024unreal}. Ello demuestra empíricamente que la interacción con interfaces tridimensionales dinámicas mejora el rendimiento y la participación del estudiante.
+    \item \textbf{Análisis de Sentimientos mediante PNL:} A nivel de procesamiento semántico, investigadores de la UTI han aplicado técnicas avanzadas de Procesamiento de Lenguaje Natural (PLN) y análisis de Big Data para medir sentimientos y percepciones institucionales en medios digitales \cite{uti2024pln}.
+    \item \textbf{Evaluación Formativa Asistida por IA en Posgrados y Capacitación Docente:} La institución ha impulsado proyectos de evaluación continua asistida por IA para mitigar sesgos en programas académicos, al tiempo que ha capacitado a su profesorado en inteligencia artificial con expertos de talla mundial para posicionarse como un nodo de innovación iberoamericano \cite{uti2025rc}.
+\end{itemize}
+
+La Tabla~\ref{tab:proyectos_internos_uti} sistematiza los proyectos internos previos que sirven como cimiento metodológico y computacional para la integración del avatar 3D y el motor RAG conversacional en la carrera de TI.
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|}
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Proyecto Institucional} & \textbf{Unidad / Centro UTI} & \textbf{Tecnología Aplicada} & \textbf{Aporte al Asistente de Tesis} \\ \hline
+\textbf{Proyecto MIST-CEDIA} \cite{uti2025cedia} & Centro MIST / CEDIA & Visión artificial, imágenes y \textit{Deep Learning} & Arquitectura de detección visual en tiempo real (\textit{bounding boxes}) \\ \hline
+\textbf{Simulaciones 3D en TI} \cite{uti2024unreal} & Facultad TI & Motor gráfico 3D (\textit{Unreal Engine 5}) & Validación del impacto de interfaces 3D en el compromiso estudiantil \\ \hline
+\textbf{Análisis Sentimientos PNL} \cite{uti2024pln} & Facultad TI / ESTec & Procesamiento de Lenguaje Natural y Big Data & Comprensión semántica del lenguaje y consultas informales \\ \hline
+\textbf{Evaluación Formativa IA} \cite{uti2025rc} & Posgrados / Docencia & IA generativa en aulas virtuales & Integración curricular sin sesgos y estandarización del servicio \\ \hline
+\end{tabular}
+\caption{Antecedentes Institucionales de Investigación en IA y Sistemas Multimodales (UTI).}\label{tab:proyectos_internos_uti}
+\end{table}
 
 \subsection{Evolución Tecnológica: Asistentes Virtuales, Avatares 3D y Visión Artificial}
 La evolución de las interfaces humano-computadora en el ecosistema educativo ha transitado desde chatbots transaccionales basados puramente en texto hacia agentes conversacionales encarnados o multimodales. Si bien los modelos basados en texto logran automatizar respuestas, la evidencia empírica en la educación superior subraya que la dotación de características antropomórficas a los sistemas facilita la creación de entornos centrados en el estudiante, promoviendo la empatía y la presencia social \cite{robinson2024ai}.
