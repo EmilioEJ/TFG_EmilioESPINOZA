@@ -91,20 +91,24 @@
   {\MakeUppercase}
 \titlespacing*{name=\chapter,numberless}{0pt}{0pt}{1.8\baselineskip}
 
-% En el PDF las secciones aparecen SIN numeración visible
-\setcounter{secnumdepth}{0}
+% Secciones numeradas en formato arábigo por capítulo: 1.1, 1.2, 2.1...
+% Los capítulos conservan romanos en sus encabezados: CAPÍTULO I, II, III...
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
 
 \titleformat{\section}
   {\bfseries\large}
-  {}
-  {0pt}
+  {\thesection}
+  {0.75em}
   {}
 \titlespacing*{\section}{0pt}{1.2\baselineskip}{0.6\baselineskip}
 
 \titleformat{\subsection}
   {\bfseries\normalsize}
-  {}
-  {0pt}
+  {\thesubsection}
+  {0.75em}
   {}
 \titlespacing*{\subsection}{0pt}{1.0\baselineskip}{0.4\baselineskip}
 
@@ -161,6 +165,12 @@
 
 % --- Índices adicionales (Ecuaciones y Anexos) ---
 \RequirePackage{tocloft}
+
+% Mostrar explícitamente los capítulos en el Índice de Contenidos:
+% CAPÍTULO I: Introducción, CAPÍTULO II: Metodología, etc.
+\renewcommand{\cftchappresnum}{CAPÍTULO~}
+\renewcommand{\cftchapaftersnum}{:}
+\setlength{\cftchapnumwidth}{7.5em}
 
 % Índice de ecuaciones (manual): usa \addeqtolist{Título} dentro de una ecuación para registrarla.
 \newcommand{\listofecuacionesname}{Índice de Ecuaciones}
@@ -440,19 +450,19 @@
     \begin{center}
       \rule{8cm}{0.4pt}\par
       \UTI@autorA\par
-      (Número de cédula)
+      C.I.: 1722558374
     \end{center}
     \vspace{1.8cm}
     \begin{center}
       \rule{8cm}{0.4pt}\par
       \UTI@autorB\par
-      (Número de cédula)
+      C.I.: 1722558374
     \end{center}
   }{%
     \begin{center}
       \rule{8cm}{0.4pt}\par
       \UTI@autorA\par
-      (Número de cédula)
+      C.I.: 1722558374
     \end{center}
   }%
 }
@@ -630,7 +640,11 @@
   \clearpage
   \appendix
   \renewcommand{\thechapter}{\Alph{chapter}}%
+  \renewcommand{\thesection}{\thechapter.\arabic{section}}%
+  \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}%
   \renewcommand{\UTIChapterLabel}{ANEXO }%
+  % Desde este punto, las entradas numeradas del índice son anexos.
+  \addtocontents{toc}{\protect\renewcommand{\protect\cftchappresnum}{ANEXO~}}%
 }
 
 % Crea un anexo como capítulo y lo registra en el Índice de Anexos

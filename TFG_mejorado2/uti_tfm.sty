@@ -1,0 +1,728 @@
+% uti_tfm.sty — Estilo aproximado a la maquetación del PDF de referencia (UTI / Maestría Big Data)
+% Compilación recomendada: XeLaTeX o LuaLaTeX (para Century Gothic real).
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{uti_tfm}[2026/01/28 UTI TFM style]
+
+% --- Motor y tipografías (Century Gothic) ---
+\RequirePackage{iftex}
+\ifPDFTeX
+  % Fallback para pdfLaTeX: TeX Gyre Adventor (similar a Century Gothic)
+  \RequirePackage{tgadventor}
+  \renewcommand{\familydefault}{\sfdefault}
+  \RequirePackage{newtxtext} % Times New Roman aproximada para la portada
+  \RequirePackage{newtxmath} % matemática legible en modo pdfLaTeX
+  \newcommand{\UTIPortadaFuente}{\rmfamily}
+\else
+  \RequirePackage{fontspec}
+  \defaultfontfeatures{Ligatures=TeX}
+  \setmainfont{Century Gothic}
+  \setsansfont{Century Gothic}
+  \IfFontExistsTF{Times New Roman}{%
+    \newfontfamily\UTIPortadaFuente{Times New Roman}%
+  }{%
+    \newfontfamily\UTIPortadaFuente{TeX Gyre Termes}%
+  }
+  % Matemática (no existe “Century Gothic Math”): usa una fuente matemática estándar
+  \RequirePackage{unicode-math}
+  \setmathfont{TeX Gyre Termes Math}
+\fi
+
+% --- Idioma ---
+\RequirePackage[spanish,es-tabla]{babel}
+\RequirePackage{etoolbox}
+\RequirePackage{xparse}
+
+% --- Página y espaciado (A4): superior 3 cm, inferior 3 cm,
+%     izquierdo 4 cm y derecho 3 cm ---
+\RequirePackage{geometry}
+\geometry{
+  a4paper,
+  left=4cm,right=3cm,
+  top=3cm,bottom=3cm,
+  headheight=14pt,headsep=0pt,
+  footskip=1.2cm
+}
+
+\RequirePackage{setspace}
+\RequirePackage{needspace}
+\onehalfspacing
+
+% Justificación y párrafos
+\RequirePackage{ragged2e}
+\AtBeginDocument{\justifying}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+
+% --- Encabezados/pies: solo número centrado abajo ---
+\RequirePackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Asegurar que las páginas "plain" (apertura de capítulos, etc.) se vean igual
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+
+% --- Capítulos y secciones (estilo CAPÍTULO I + título centrado en mayúsculas) ---
+\RequirePackage{titlesec}
+
+% Capítulos numerados en romanos (I, II, III…)
+\renewcommand{\thechapter}{\Roman{chapter}}
+\newcommand{\UTIChapterLabel}{CAPÍTULO }
+
+\titleformat{\chapter}[display]
+  {\centering\bfseries\Large}
+  {\UTIChapterLabel \thechapter}
+  {0.8\baselineskip}
+  {\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{1.8\baselineskip}
+
+% Capítulos SIN numeración (p. ej., Bibliografía, Glosario) — sin “CAPÍTULO”
+\titleformat{name=\chapter,numberless}[display]
+  {\centering\bfseries\Large}
+  {}
+  {0.8\baselineskip}
+  {\MakeUppercase}
+\titlespacing*{name=\chapter,numberless}{0pt}{0pt}{1.8\baselineskip}
+
+% Secciones numeradas en formato arábigo por capítulo: 1.1, 1.2, 2.1...
+% Los capítulos conservan romanos en sus encabezados: CAPÍTULO I, II, III...
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+
+\titleformat{\section}
+  {\bfseries\large}
+  {\thesection}
+  {0.75em}
+  {}
+\titlespacing*{\section}{0pt}{1.2\baselineskip}{0.6\baselineskip}
+
+\titleformat{\subsection}
+  {\bfseries\normalsize}
+  {\thesubsection}
+  {0.75em}
+  {}
+\titlespacing*{\subsection}{0pt}{1.0\baselineskip}{0.4\baselineskip}
+
+% --- Tablas/Figuras/Imágenes (sin prefijo “No.”) ---
+\RequirePackage{caption}
+\RequirePackage{chngcntr}
+
+% Numeración continua (no reinicia por capítulo), como en el PDF
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{equation}{chapter}
+
+\renewcommand{\thefigure}{\arabic{figure}}
+\renewcommand{\thetable}{\arabic{table}}
+\renewcommand{\theequation}{\arabic{equation}}
+
+% “Figura 1: …”
+\captionsetup[figure]{%
+  name=Figura,
+  labelsep=colon,
+  labelfont=bf,
+  textfont=normalfont,
+  justification=justified,
+  singlelinecheck=false
+}
+
+% “Tabla 1: …”
+\captionsetup[table]{%
+  name=Tabla,
+  labelsep=colon,
+  labelfont=bf,
+  textfont=normalfont,
+  justification=justified,
+  singlelinecheck=false
+}
+
+% Nuevo flotante: Imagen (para separar de Gráficos si lo deseas)
+\RequirePackage{newfloat}
+\DeclareFloatingEnvironment[
+  fileext=loi,
+  listname={Índice de Imágenes},
+  name={Imagen}
+]{imagen}
+\counterwithout{imagen}{chapter}
+\renewcommand{\theimagen}{\arabic{imagen}}
+\captionsetup[imagen]{%
+  name=Imagen,
+  labelsep=colon,
+  labelfont=bf,
+  textfont=normalfont,
+  justification=justified,
+  singlelinecheck=false
+}
+
+% --- Índices adicionales (Ecuaciones y Anexos) ---
+\RequirePackage{tocloft}
+
+% Mostrar explícitamente los capítulos en el Índice de Contenidos:
+% CAPÍTULO I: Introducción, CAPÍTULO II: Metodología, etc.
+\renewcommand{\cftchappresnum}{CAPÍTULO~}
+\renewcommand{\cftchapaftersnum}{:}
+\setlength{\cftchapnumwidth}{7.5em}
+
+% Índice de ecuaciones (manual): usa \addeqtolist{Título} dentro de una ecuación para registrarla.
+\newcommand{\listofecuacionesname}{Índice de Ecuaciones}
+\newlistof{myeq}{loe}{\listofecuacionesname}
+\newcommand{\listofecuaciones}{\listofmyeq}
+\newcommand{\addeqtolist}[1]{%
+  \addcontentsline{loe}{myeq}{\protect\numberline{\theequation}#1}%
+}
+
+% Índice de anexos: usa \Anexo{Título} para crear el capítulo de anexo y registrarlo en el índice de anexos.
+\newcommand{\listofanexosname}{Índice de Anexos}
+\newlistof{myanx}{loa}{\listofanexosname}
+\newcommand{\listofanexos}{\listofmyanx}
+\newcommand{\addanexotolist}[1]{%
+  \addcontentsline{loa}{myanx}{#1}%
+}
+
+% --- Títulos de índices ---
+\addto\captionsspanish{%
+  \renewcommand{\contentsname}{Índice de Contenidos}%
+  \renewcommand{\listtablename}{Índice de Tablas}%
+  \renewcommand{\listfigurename}{Índice de Figuras}%
+}
+\providecommand{\listofimagenes}{\listof{imagen}{Índice de Imágenes}}
+
+% --- Utilidades “Elaborado por:” / “Fuente:” como en el PDF ---
+\newcommand{\elaboradopor}[1]{\par\noindent\textbf{Elaborado por:} #1\par}
+\newcommand{\fuente}[1]{\par\noindent\textbf{Fuente:} #1\par}
+
+\makeatletter
+
+% --- Metadatos reutilizables del trabajo ---
+\newcommand{\UTI@logo}{}
+\newcommand{\UTI@facultad}{}
+\newcommand{\UTI@programa}{}
+\newcommand{\UTI@titulo}{}
+\newcommand{\UTI@tituloIngles}{}
+\newcommand{\UTI@tipotrabajo}{}
+\newcommand{\UTI@autorA}{}
+\newcommand{\UTI@generoAutorA}{masculino}
+\newcommand{\UTI@autorB}{}
+\newcommand{\UTI@generoAutorB}{masculino}
+\newcommand{\UTI@tutor}{}
+\newcommand{\UTI@generoTutor}{masculino}
+\newcommand{\UTI@ciudadpais}{}
+\newcommand{\UTI@anio}{}
+
+% --- Catálogo de líneas y sublíneas de investigación ---
+% Selección: \UTISeleccionInvestigacion{número de línea}{número de sublínea}
+\csdef{UTI@linea@0}{\textit{[Seleccione la línea de investigación en main.tex.]}}
+\csdef{UTI@sublinea@0@0}{\textit{[Seleccione la sublínea de investigación en main.tex.]}}
+
+\csdef{UTI@linea@1}{Análisis, diseño e implementación de infraestructura tecnológica}
+\csdef{UTI@sublinea@1@1}{Diseño y optimización de redes de comunicación.}
+\csdef{UTI@sublinea@1@2}{Ciberseguridad y protección de infraestructuras tecnológicas.}
+\csdef{UTI@sublinea@1@3}{Sistemas de almacenamiento y computación en la nube.}
+\csdef{UTI@sublinea@1@4}{Automatización y gestión de infraestructuras inteligentes.}
+
+\csdef{UTI@linea@2}{Redes informáticas de comunicación}
+\csdef{UTI@sublinea@2@1}{Arquitecturas de redes avanzadas.}
+\csdef{UTI@sublinea@2@2}{Protocolos y estándares de comunicación.}
+\csdef{UTI@sublinea@2@3}{Ciberseguridad en redes.}
+\csdef{UTI@sublinea@2@4}{Redes inalámbricas e Internet de las Cosas (IoT).}
+
+\csdef{UTI@linea@3}{Gestión de la información}
+\csdef{UTI@sublinea@3@1}{Almacenamiento y recuperación de información.}
+\csdef{UTI@sublinea@3@2}{Análisis y procesamiento de datos.}
+\csdef{UTI@sublinea@3@3}{Gobernanza y seguridad de la información.}
+\csdef{UTI@sublinea@3@4}{Ciclo de vida de la información.}
+\csdef{UTI@sublinea@3@5}{Sistemas de gestión del conocimiento.}
+\csdef{UTI@sublinea@3@6}{Visualización de información.}
+\csdef{UTI@sublinea@3@7}{Tecnologías emergentes en la gestión de información.}
+\csdef{UTI@sublinea@3@8}{Gestión de datos no estructurados.}
+
+\csdef{UTI@linea@4}{Diseño, desarrollo e integración de sistemas basados en arquitecturas web, móviles y sistemas embebidos}
+\csdef{UTI@sublinea@4@1}{Diseño y desarrollo de aplicaciones web.}
+\csdef{UTI@sublinea@4@2}{Desarrollo de aplicaciones móviles.}
+\csdef{UTI@sublinea@4@3}{Integración de sistemas embebidos.}
+\csdef{UTI@sublinea@4@4}{Interoperabilidad entre plataformas.}
+\csdef{UTI@sublinea@4@5}{Seguridad en sistemas web, móviles y embebidos.}
+\csdef{UTI@sublinea@4@6}{Optimización del rendimiento.}
+\csdef{UTI@sublinea@4@7}{Aplicación de tecnologías emergentes.}
+\csdef{UTI@sublinea@4@8}{Sistemas basados en la nube y edge computing.}
+
+\newcommand{\UTI@lineaInvestigacion}{\csuse{UTI@linea@0}}
+\newcommand{\UTI@sublineaInvestigacion}{\csuse{UTI@sublinea@0@0}}
+
+\newcommand{\UTIIfFemaleTF}[3]{%
+  \edef\UTI@tmpGender{#1}%
+  \ifdefstring{\UTI@tmpGender}{femenino}{#2}{%
+    \ifdefstring{\UTI@tmpGender}{Femenino}{#2}{%
+      \ifdefstring{\UTI@tmpGender}{F}{#2}{%
+        \ifdefstring{\UTI@tmpGender}{f}{#2}{#3}%
+      }%
+    }%
+  }%
+}
+
+\newcommand{\UTIIfTwoAuthorsTF}[2]{%
+  \ifdefempty{\UTI@autorB}{#2}{#1}%
+}
+
+\newcommand{\UTIIfAllAuthorsFemaleTF}[2]{%
+  \UTIIfTwoAuthorsTF{%
+    \UTIIfFemaleTF{\UTI@generoAutorA}{%
+      \UTIIfFemaleTF{\UTI@generoAutorB}{#1}{#2}%
+    }{#2}%
+  }{%
+    \UTIIfFemaleTF{\UTI@generoAutorA}{#1}{#2}%
+  }%
+}
+
+\newcommand{\UTIIfTutorFemaleTF}[2]{%
+  \UTIIfFemaleTF{\UTI@generoTutor}{#1}{#2}%
+}
+
+\newcommand{\UTITituloProyecto}{\UTI@titulo}
+\newcommand{\UTITituloProyectoMayusculas}{\MakeUppercase{\UTI@titulo}}
+\newcommand{\UTITituloProyectoIngles}{%
+  \ifdefempty{\UTI@tituloIngles}{\UTITituloProyecto}{\UTI@tituloIngles}%
+}
+\newcommand{\UTITituloProyectoInglesMayusculas}{%
+  \MakeUppercase{\UTITituloProyectoIngles}%
+}
+\newcommand{\UTITipoTrabajo}{\UTI@tipotrabajo}
+\newcommand{\UTIFacultad}{\UTI@facultad}
+\newcommand{\UTIPrograma}{\UTI@programa}
+\newcommand{\UTILineaInvestigacion}{\UTI@lineaInvestigacion}
+\newcommand{\UTISublineaInvestigacion}{\UTI@sublineaInvestigacion}
+\newcommand{\UTITutorNombre}{\UTI@tutor}
+\newcommand{\UTICiudadPais}{\UTI@ciudadpais}
+\newcommand{\UTICiudadPaisPortada}{%
+  \expandafter\UTIFormatCityCountry\UTI@ciudadpais,\@nil
+}
+\newcommand{\UTIAnio}{\UTI@anio}
+
+\def\UTIFormatCityCountry#1,#2,\@nil{%
+  #1\ifstrempty{#2}{}{ -- \ignorespaces#2}%
+}
+
+\newcommand{\UTIAutoresPortada}{%
+  \UTIIfTwoAuthorsTF{\UTI@autorA\\\UTI@autorB}{\UTI@autorA}%
+}
+
+\newcommand{\UTIAutoresTexto}{%
+  \UTIIfTwoAuthorsTF{\UTI@autorA\ y \UTI@autorB}{\UTI@autorA}%
+}
+
+\newcommand{\UTIAutorUnoNombre}{\UTI@autorA}
+
+\newcommand{\UTIAutorDosNombre}{\UTI@autorB}
+
+\newcommand{\UTIAutoresFirma}{%
+  \UTIIfTwoAuthorsTF{\UTI@autorA\\\UTI@autorB}{\UTI@autorA}%
+}
+
+\newcommand{\UTIAutorEtiqueta}{%
+  \UTIIfTwoAuthorsTF{%
+    \UTIIfAllAuthorsFemaleTF{Autoras}{Autores}%
+  }{%
+    \UTIIfFemaleTF{\UTI@generoAutorA}{Autora}{Autor}%
+  }%
+}
+
+\newcommand{\UTIAutorEtiquetaMin}{%
+  \UTIIfTwoAuthorsTF{%
+    \UTIIfAllAuthorsFemaleTF{autoras}{autores}%
+  }{%
+    \UTIIfFemaleTF{\UTI@generoAutorA}{autora}{autor}%
+  }%
+}
+
+\newcommand{\UTIAutorEtiquetaPorGenero}[1]{%
+  \UTIIfFemaleTF{#1}{Autora}{Autor}%
+}
+
+\newcommand{\UTIAutoresPronombre}{%
+  \UTIIfTwoAuthorsTF{%
+    \UTIIfAllAuthorsFemaleTF{Nosotras}{Nosotros}%
+  }{Yo}%
+}
+
+\newcommand{\UTIAutoresPronombreMin}{%
+  \UTIIfTwoAuthorsTF{%
+    \UTIIfAllAuthorsFemaleTF{nosotras}{nosotros}%
+  }{yo}%
+}
+
+\newcommand{\UTITutorEtiqueta}{%
+  \UTIIfTutorFemaleTF{Tutora}{Tutor}%
+}
+
+\newcommand{\UTITutorEtiquetaMin}{%
+  \UTIIfTutorFemaleTF{tutora}{tutor}%
+}
+
+\newcommand{\UTIVerboDeclaro}{%
+  \UTIIfTwoAuthorsTF{declaramos}{declaro}%
+}
+
+\newcommand{\UTIVerboAutorizo}{%
+  \UTIIfTwoAuthorsTF{autorizamos}{autorizo}%
+}
+
+\newcommand{\UTIVerboAcepto}{%
+  \UTIIfTwoAuthorsTF{aceptamos}{acepto}%
+}
+
+\newcommand{\UTIVerboFirmo}{%
+  \UTIIfTwoAuthorsTF{firmamos}{firmo}%
+}
+
+\newcommand{\UTIVerboTramito}{%
+  \UTIIfTwoAuthorsTF{tramitaremos}{tramitaré}%
+}
+
+\newcommand{\UTIAutoresPoseedor}{%
+  \UTIIfTwoAuthorsTF{\UTIAutoresPronombreMin}{mi persona}%
+}
+
+\newcommand{\UTIAutoresResponsabilidad}{%
+  \UTIIfTwoAuthorsTF{%
+    \UTIIfAllAuthorsFemaleTF{de las autoras}{de los autores}%
+  }{%
+    \UTIIfFemaleTF{\UTI@generoAutorA}{de la autora}{del autor}%
+  }%
+}
+
+\newcommand{\UTITituloProfesionalAutorA}{%
+  \UTIIfFemaleTF{\UTI@generoAutorA}{Ingeniera en Tecnologías de la Información}{Ingeniero en Tecnologías de la Información}%
+}
+
+\newcommand{\UTITituloProfesionalAutorB}{%
+  \UTIIfFemaleTF{\UTI@generoAutorB}{Ingeniera en Tecnologías de la Información}{Ingeniero en Tecnologías de la Información}%
+}
+
+\newcommand{\UTITituloProfesionalSingular}{\UTITituloProfesionalAutorA}
+
+\newcommand{\UTITituloProfesionalPlural}{%
+  \UTITituloProfesionalAutorA\ e \UTITituloProfesionalAutorB%
+}
+
+\newcommand{\UTITituloProfesionalAutores}{%
+  \UTIIfTwoAuthorsTF{\UTITituloProfesionalPlural}{\UTITituloProfesionalSingular}%
+}
+
+\newcommand{\UTIFraseOptarTituloProfesional}{%
+  \UTIIfTwoAuthorsTF{a los títulos de \UTITituloProfesionalAutores, respectivamente,}{al grado de \UTITituloProfesionalAutores}%
+}
+
+\newcommand{\UTIFraseTituloProfesional}{%
+  \UTIIfTwoAuthorsTF{los Títulos de \UTITituloProfesionalAutores, respectivamente}{el Título de \UTITituloProfesionalAutores}%
+}
+
+\newcommand{\UTIFraseObtencionTituloProfesional}{%
+  \UTIIfTwoAuthorsTF{la obtención de los Títulos de \UTITituloProfesionalAutores, respectivamente}{la obtención del Título de \UTITituloProfesionalAutores}%
+}
+
+\newcommand{\UTICedulaEtiqueta}{%
+  \UTIIfTwoAuthorsTF{Números de Cédula}{Número de Cédula}%
+}
+
+\newcommand{\UTICorreoEtiqueta}{%
+  \UTIIfTwoAuthorsTF{Correos Electrónicos}{Correo Electrónico}%
+}
+
+\newcommand{\UTITelefonoEtiqueta}{%
+  \UTIIfTwoAuthorsTF{Teléfonos}{Teléfono}%
+}
+
+\newcommand{\UTIFirmaEtiqueta}{%
+  \UTIIfTwoAuthorsTF{Firmas}{Firma}%
+}
+
+\newcommand{\UTIFirmasAutoresBloque}{%
+  \UTIIfTwoAuthorsTF{%
+    \begin{center}
+      \rule{8cm}{0.4pt}\par
+      \UTI@autorA\par
+      (Número de cédula)
+    \end{center}
+    \vspace{1.8cm}
+    \begin{center}
+      \rule{8cm}{0.4pt}\par
+      \UTI@autorB\par
+      (Número de cédula)
+    \end{center}
+  }{%
+    \begin{center}
+      \rule{8cm}{0.4pt}\par
+      \UTI@autorA\par
+      (Número de cédula)
+    \end{center}
+  }%
+}
+
+\newcommand{\UTIFirmaTutorBloque}{%
+  \begin{center}
+    \rule{8cm}{0.4pt}\par
+    \UTITutorNombre
+  \end{center}
+}
+
+\newcommand{\UTIRepositorioAutorContenido}[2]{%
+  \noindent\textbf{\UTIAutorEtiquetaPorGenero{#2}:} #1\par
+  \vspace{0.2cm}
+  \noindent\textbf{Firma:}\par
+  \vspace{1.2cm}
+  \noindent\textbf{Número de Cédula:} 0000000000\par
+  \noindent\textbf{Dirección:} Provincia, ciudad, parroquia, barrio\par
+  \noindent\textbf{Correo Electrónico:} correo@ejemplo.com\par
+  \noindent\textbf{Teléfono:} 0999999999\par
+}
+
+\newcommand{\UTIRepositorioAutorBloque}[2]{%
+  \Needspace{10\baselineskip}%
+  \UTIRepositorioAutorContenido{#1}{#2}%
+}
+
+\newcommand{\UTIRepositorioAutoresBloque}{%
+  \UTIIfTwoAuthorsTF{%
+    \Needspace{10\baselineskip}%
+    \noindent
+    \begin{minipage}[t]{0.47\textwidth}
+      \raggedright
+      \UTIRepositorioAutorContenido{\UTI@autorA}{\UTI@generoAutorA}%
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.47\textwidth}
+      \raggedright
+      \UTIRepositorioAutorContenido{\UTI@autorB}{\UTI@generoAutorB}%
+    \end{minipage}%
+  }{}%
+  \UTIIfTwoAuthorsTF{}{%
+    \UTIRepositorioAutorBloque{\UTI@autorA}{\UTI@generoAutorA}%
+  }%
+}
+
+\NewDocumentCommand{\UTIDatosAutores}{m m O{} O{}}{%
+  \gdef\UTI@autorA{#1}%
+  \gdef\UTI@generoAutorA{#2}%
+  \gdef\UTI@autorB{#3}%
+  \gdef\UTI@generoAutorB{#4}%
+}
+
+\NewDocumentCommand{\UTIDatosTutor}{m m}{%
+  \gdef\UTI@tutor{#1}%
+  \gdef\UTI@generoTutor{#2}%
+}
+
+\NewDocumentCommand{\UTIDatosTituloIngles}{m}{%
+  \gdef\UTI@tituloIngles{#1}%
+}
+
+\NewDocumentCommand{\UTISeleccionInvestigacion}{m m}{%
+  \ifcsdef{UTI@linea@#1}{%
+    \gdef\UTI@lineaInvestigacion{\csuse{UTI@linea@#1}}%
+  }{%
+    \PackageError{uti_tfm}{La línea de investigación #1 no existe}{Use un número entre 1 y 4, o 0 para dejarla pendiente.}%
+  }%
+  \ifcsdef{UTI@sublinea@#1@#2}{%
+    \gdef\UTI@sublineaInvestigacion{\csuse{UTI@sublinea@#1@#2}}%
+  }{%
+    \PackageError{uti_tfm}{La sublínea #2 no existe para la línea #1}{Revise el catálogo definido en uti_tfm.sty.}%
+  }%
+}
+
+% --- Comandos convenientes para numeración preliminar y cuerpo ---
+% Preliminares: romanos minúscula (i, ii, iii...) desde la primera página posterior a la portada
+\newcommand{\UTIFrontMatter}{%
+  \clearpage
+  \pagenumbering{roman}% roman = minúscula por defecto
+  \setcounter{page}{1}%
+}
+
+% Título de página preliminar (centrado en mayúsculas, página con numeración)
+\newcommand{\UTIFrontTitle}[1]{%
+  \clearpage
+  \thispagestyle{plain}%
+  \begin{center}\bfseries\MakeUppercase{#1}\end{center}%
+  \vspace{1em}%
+}
+
+% Página de Resumen/Abstract según la guía institucional.
+% #1 idioma (spanish/english), #2 título, #3 texto,
+% #4 etiqueta de palabras clave, #5 palabras clave.
+\NewDocumentCommand{\UTIResumenPagina}{m m +m m +m}{%
+  \clearpage
+  \thispagestyle{plain}%
+  \begingroup
+  \UTIPortadaFuente
+  \singlespacing
+  \fontsize{12}{14.4}\selectfont
+  \setlength{\parindent}{0pt}%
+
+  % Textos de cabecera específicos de cada idioma.
+  \def\UTI@resFacultad{\MakeUppercase{\UTIFacultad}}%
+  \def\UTI@resPrograma{\MakeUppercase{\UTIPrograma}}%
+  \def\UTI@resTemaEtiqueta{TEMA}%
+  \def\UTI@resTema{\UTITituloProyectoMayusculas}%
+  \def\UTI@resAutorEtiqueta{AUTOR(A)}%
+  \def\UTI@resTutorEtiqueta{TUTOR(A)}%
+  \ifstrequal{#1}{english}{%
+    \def\UTI@resFacultad{FACULTY OF ENGINEERING}%
+    \def\UTI@resPrograma{BACHELOR'S DEGREE IN INFORMATION TECHNOLOGY ENGINEERING}%
+    \def\UTI@resTemaEtiqueta{TOPIC}%
+    \def\UTI@resTema{\UTITituloProyectoInglesMayusculas}%
+    \def\UTI@resAutorEtiqueta{AUTHOR}%
+    \def\UTI@resTutorEtiqueta{ADVISOR}%
+  }{}%
+
+  \begin{center}
+    \textbf{UNIVERSIDAD INDOAMÉRICA}\par
+    \vspace{0.35cm}
+    \textbf{\UTI@resFacultad}\par
+    \vspace{0.35cm}
+    \textbf{\UTI@resPrograma}\par
+  \end{center}
+
+  \vspace{\baselineskip}
+  \noindent\textbf{\UTI@resTemaEtiqueta: \UTI@resTema}\par
+  \vspace{0.45cm}
+
+  \noindent\hspace*{0.42\textwidth}%
+  \begin{minipage}{0.58\textwidth}
+    \raggedright
+    \textbf{\UTI@resAutorEtiqueta:} \UTIAutoresTexto\par
+    \vspace{0.35cm}
+    \textbf{\UTI@resTutorEtiqueta:} \UTITutorNombre\par
+  \end{minipage}%
+
+  \vspace{\baselineskip}
+  \begin{center}
+    \textbf{\MakeUppercase{#2}}\par
+  \end{center}
+  \vspace{0.35cm}
+
+  \noindent\justifying #3\par
+
+  \vfill
+  \noindent\textbf{\MakeUppercase{#4}:} #5\par
+  \endgroup
+}
+
+% Cuerpo: cambia a arábigos SIN reiniciar el contador (continúa desde el último romano)
+\newcommand{\UTIMainMatter}{%
+  \clearpage
+  \renewcommand{\thepage}{\arabic{page}}%
+  % Si hyperref está cargado, alinea los anclajes con el formato arábigo
+  \@ifpackageloaded{hyperref}{%
+    \@ifundefined{theHpage}{%
+      \newcommand{\theHpage}{\arabic{page}}%
+    }{%
+      \renewcommand{\theHpage}{\arabic{page}}%
+    }%
+  }{}%
+}
+
+% Variante: reinicia a 1 en el cuerpo (por si alguna vez lo necesitas)
+\newcommand{\UTIMainMatterReset}{%
+  \clearpage
+  \pagenumbering{arabic}%
+  \setcounter{page}{1}%
+}
+
+% Anexos: cambia la etiqueta del capítulo a “ANEXO” y la numeración a letras (A, B, C...)
+\newcommand{\UTIAppendixMatter}{%
+  \clearpage
+  \appendix
+  \renewcommand{\thechapter}{\Alph{chapter}}%
+  \renewcommand{\thesection}{\thechapter.\arabic{section}}%
+  \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}%
+  \renewcommand{\UTIChapterLabel}{ANEXO }%
+  % Desde este punto, las entradas numeradas del índice son anexos.
+  \addtocontents{toc}{\protect\renewcommand{\protect\cftchappresnum}{ANEXO~}}%
+}
+
+% Crea un anexo como capítulo y lo registra en el Índice de Anexos
+\newcommand{\Anexo}[1]{%
+  \chapter{#1}%
+  \addanexotolist{Anexo \thechapter: #1}%
+}
+
+% --- Carátula (portada) según la guía institucional ---
+\RequirePackage{graphicx}
+\NewDocumentCommand{\UTIPortada}{m m m m m m m m m}{%
+% #1 logo (ruta)  #2 Facultad  #3 Programa  #4 Tema/Título
+% #5 Tipo de trabajo  #6 \UTIDatosAutores{...}{...}[...][...]
+% #7 \UTIDatosTutor{...}{...}  #8 Ciudad–País  #9 Año
+\gdef\UTI@logo{#1}%
+\gdef\UTI@facultad{#2}%
+\gdef\UTI@programa{#3}%
+\gdef\UTI@titulo{#4}%
+\gdef\UTI@tipotrabajo{#5}%
+#6%
+#7%
+\gdef\UTI@ciudadpais{#8}%
+\gdef\UTI@anio{#9}%
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begingroup
+  \UTIPortadaFuente
+  \singlespacing
+  \setlength{\parindent}{0pt}%
+
+  \begin{center}
+    \includegraphics[width=3cm,height=3cm,keepaspectratio]{Logos/#1}\par
+    \vspace{0.7cm}
+    {\fontsize{16}{19.2}\selectfont\bfseries
+      UNIVERSIDAD INDOAMÉRICA\par}
+    \vspace{1cm}
+    {\fontsize{14}{16.8}\selectfont\bfseries
+      \MakeUppercase{#2}\par}
+    \vspace{0.35cm}
+    {\fontsize{12}{14.4}\selectfont\bfseries
+      \MakeUppercase{#3}\par}
+  \end{center}
+
+  \vspace{3\baselineskip}
+  {\fontsize{12}{14.4}\selectfont
+    \textbf{TEMA:}\par
+    \vspace{0.12cm}
+    \hrule height 1pt
+    \vspace{0.35cm}
+    \textbf{\MakeUppercase{#4}}\par
+    \vspace{0.35cm}
+    #5\par
+
+    \vspace{3\baselineskip}
+    \noindent\hspace*{0.5\textwidth}%
+    \begin{minipage}{0.5\textwidth}
+      \raggedright
+      \textbf{Autor(a)}\par
+      \vspace{0.25cm}
+      \UTIAutoresPortada\par
+      \vspace{0.45cm}
+      \textbf{Tutor(a)}\par
+      \vspace{0.25cm}
+      \UTITutorNombre\par
+    \end{minipage}%
+  }
+
+  \vfill
+  \begin{center}
+    {\fontsize{12}{14.4}\selectfont
+      \MakeUppercase{\UTICiudadPaisPortada}\par
+      \vspace{0.35cm}
+      #9\par}
+  \end{center}
+  \vspace*{0.5cm}
+  \endgroup
+\end{titlepage}
+\setcounter{page}{0}% evita que la portada cuente para la numeración
+}
+
+\makeatother

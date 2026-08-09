@@ -1,0 +1,551 @@
+% Manual de diseño de la plantilla UTI para trabajos de titulación
+% Compilar desde la raíz del proyecto con:
+%   latexmk -pdf -outdir=manual manual/Manual_de_Diseno.tex
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{top=3cm,bottom=3cm,left=4cm,right=3cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{UTIMorado}{HTML}{422568}
+\definecolor{UTINaranja}{HTML}{F56600}
+\definecolor{CodigoFondo}{HTML}{F4F2F7}
+
+\hypersetup{
+  pdftitle={Manual de Diseño de la Plantilla para Trabajos de Integración Curricular},
+  pdfauthor={Carrera de Ingeniería en Tecnologías de la Información},
+  colorlinks=true,
+  linkcolor=UTIMorado,
+  urlcolor=UTIMorado,
+  citecolor=UTIMorado
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Manual de Diseño}
+\fancyhead[R]{\small Ingeniería en Tecnologías de la Información}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\setlength{\headheight}{14pt}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{2em}
+\setlist{itemsep=0.25em,topsep=0.4em}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{CodigoFondo},
+  frame=single,
+  rulecolor=\color{UTIMorado},
+  breaklines=true,
+  columns=fullflexible,
+  showstringspaces=false,
+  keepspaces=true,
+  upquote=true,
+  literate=
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {¿}{{?`}}1
+}
+
+\newcommand{\criterio}[1]{\noindent\textbf{Criterio:} #1\par}
+\newcommand{\resultado}[1]{\noindent\textbf{Resultado esperado:} #1\par}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begin{center}
+    \vspace*{1.5cm}
+    {\color{UTIMorado}\rule{\textwidth}{2pt}}\\[1.2cm]
+    {\Large\bfseries UNIVERSIDAD INDOAMÉRICA\par}
+    \vspace{0.5cm}
+    {\large\bfseries FACULTAD DE INGENIERÍAS\par}
+    \vspace{0.3cm}
+    {\large\bfseries CARRERA DE INGENIERÍA EN TECNOLOGÍAS DE LA INFORMACIÓN\par}
+    \vfill
+    {\Huge\bfseries\color{UTIMorado} MANUAL DE DISEÑO\par}
+    \vspace{0.5cm}
+    {\LARGE Plantilla para Trabajos de Integración Curricular\par}
+    \vspace{1cm}
+    {\large Documento técnico para revisión y aprobación del Comité Curricular\par}
+    \vfill
+    \begin{tabular}{rl}
+      \textbf{Código documental:} & UTI--TIC--MD--01 \\
+      \textbf{Versión:} & 1.0 \\
+      \textbf{Estado:} & Propuesta para aprobación \\
+      \textbf{Fecha:} & 20 de julio de 2026 \\
+    \end{tabular}
+    \vfill
+    {\color{UTINaranja}\rule{\textwidth}{2pt}}
+  \end{center}
+\end{titlepage}
+
+\hypersetup{pageanchor=true}
+\pagenumbering{roman}
+
+\chapter*{Control del documento}
+\addcontentsline{toc}{chapter}{Control del documento}
+
+\begin{longtable}{|p{3.8cm}|p{8.8cm}|}
+  \hline
+  \textbf{Elemento} & \textbf{Definición} \\
+  \hline
+  Propietario del formato & Comité Curricular de la Carrera de Ingeniería en Tecnologías de la Información. \\
+  \hline
+  Responsable técnico & Coordinación de titulación o la unidad designada por el Comité Curricular. \\
+  \hline
+  Usuarios & Estudiantes, docentes tutores, lectores, miembros de tribunal y personal de apoyo académico. \\
+  \hline
+  Documento controlado & \texttt{uti\_tfm.sty}, estructura de carpetas y archivos base incluidos en el proyecto. \\
+  \hline
+  Finalidad & Normalizar la presentación de los Trabajos de Integración Curricular de la carrera. \\
+  \hline
+  Estado de esta versión & Propuesta técnica sujeta a revisión, observaciones y aprobación del Comité Curricular. \\
+  \hline
+\end{longtable}
+
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\chapter{Objeto, alcance y autoridad del manual}
+
+\section{Objeto}
+
+Este manual establece las decisiones de diseño, la arquitectura documental, las reglas tipográficas, los componentes reutilizables y los criterios de aceptación de la plantilla LaTeX para Trabajos de Integración Curricular de la Carrera de Ingeniería en Tecnologías de la Información.
+
+El documento sirve como referencia técnica para que el Comité Curricular pueda evaluar la coherencia del formato, aprobar una versión institucional y controlar futuras modificaciones.
+
+\section{Alcance}
+
+El manual cubre:
+
+\begin{itemize}
+  \item configuración de página y tipografías;
+  \item portada y páginas preliminares;
+  \item estructura sugerida de capítulos;
+  \item tablas, figuras, imágenes, ecuaciones, índices, anexos y referencias;
+  \item metadatos para uno o dos autores;
+  \item selección de líneas y sublíneas de investigación;
+  \item compilación, validación, control de cambios y pruebas de aceptación.
+\end{itemize}
+
+No determina el contenido científico específico de cada proyecto ni reemplaza la evaluación académica del tutor, lectores o tribunal.
+
+\section{Jerarquía normativa}
+
+Cuando exista diferencia entre este manual y una resolución, instructivo o disposición institucional posterior, prevalecerá el documento institucional vigente. Toda modificación aprobada deberá reflejarse simultáneamente en el archivo de estilo, la plantilla, el Manual de Diseño y el Manual de Uso.
+
+\chapter{Arquitectura del proyecto}
+
+\section{Estructura controlada}
+
+La plantilla separa la presentación, los metadatos y el contenido. La estructura base es la siguiente:
+
+\begin{lstlisting}
+main.tex
+uti_tfm.sty
+referencias.bib
+Logos/
+  LOGO-UTI-1.png
+Preliminares/
+  01_RepositorioDigital.tex
+  02_AprobacionTutor.tex
+  03_DeclaracionAutenticidad.tex
+  04_AprobacionLectores.tex
+  05_Dedicatoria.tex
+  06_Agradecimiento.tex
+  07_Indices.tex
+  08_Resumen.tex
+  09_Abstract.tex
+Capitulos/
+  01_Introduccion.tex
+  02_Metodologia.tex
+  03_Implementacion.tex
+  04_Conclusiones.tex
+  05_Referencias.tex
+  06_Glosario.tex
+  fig/
+  img/
+Anexos/
+  01_Anexo.tex
+manual/
+  Manual_de_Diseno.tex
+  Manual_de_Uso.tex
+\end{lstlisting}
+
+Los nombres reales de varias carpetas contienen tildes. Deben respetarse exactamente, incluidas mayúsculas, tildes y extensión del archivo.
+
+\section{Responsabilidad de cada componente}
+
+\begin{longtable}{|p{3.6cm}|p{9cm}|}
+  \hline
+  \textbf{Componente} & \textbf{Responsabilidad} \\
+  \hline
+  \texttt{main.tex} & Define metadatos, selecciona la línea de investigación y organiza el orden de inclusión de todas las partes. \\
+  \hline
+  \texttt{uti\_tfm.sty} & Centraliza márgenes, fuentes, títulos, numeración, portada, páginas especiales y comandos institucionales. \\
+  \hline
+  \texttt{Preliminares/} & Contiene documentos legales, dedicatorias, agradecimientos, índices, resumen y abstract. \\
+  \hline
+  \texttt{Capítulos/} & Contiene el desarrollo académico y técnico del trabajo. \\
+  \hline
+  \texttt{Anexos/} & Contiene material complementario registrado en el índice de anexos. \\
+  \hline
+  \texttt{referencias.bib} & Base bibliográfica utilizada por BibTeX con el estilo IEEEtran. \\
+  \hline
+  \texttt{Logos/} & Almacena los recursos gráficos institucionales autorizados. \\
+  \hline
+\end{longtable}
+
+\chapter{Especificación visual}
+
+\section{Página y márgenes}
+
+\begin{longtable}{|p{4cm}|p{4cm}|p{4.4cm}|}
+  \hline
+  \textbf{Propiedad} & \textbf{Valor aprobado en la plantilla} & \textbf{Implementación} \\
+  \hline
+  Tamaño de papel & A4 & Clase \texttt{report}, tamaño 12 puntos, A4 y una cara. \\
+  \hline
+  Margen superior & 3 cm & Paquete \texttt{geometry}. \\
+  \hline
+  Margen inferior & 3 cm & Paquete \texttt{geometry}. \\
+  \hline
+  Margen izquierdo & 4 cm & Permite encuadernación y lectura institucional. \\
+  \hline
+  Margen derecho & 3 cm & Mantiene el área útil definida. \\
+  \hline
+  Encabezado & Sin contenido visible & Se elimina la regla del encabezado. \\
+  \hline
+  Pie de página & Número centrado & Aplicado también al estilo \texttt{plain}. \\
+  \hline
+\end{longtable}
+
+\section{Tipografía y párrafo}
+
+\begin{itemize}
+  \item El cuerpo utiliza Century Gothic cuando se compila con XeLaTeX o LuaLaTeX y la fuente está instalada.
+  \item Con pdfLaTeX se utiliza TeX Gyre Adventor como alternativa compatible.
+  \item La portada, el resumen y el abstract utilizan Times New Roman; cuando no está disponible se emplea TeX Gyre Termes o NewTX como sustituto métrico.
+  \item El tamaño base del documento es de 12 puntos.
+  \item El cuerpo se configura con interlineado de 1,5; la portada, el resumen y el abstract usan interlineado sencillo.
+  \item Los párrafos se justifican, usan sangría inicial de 1,25 cm y no añaden espacio vertical adicional entre párrafos.
+\end{itemize}
+
+\section{Capítulos y apartados}
+
+Los capítulos se numeran con romanos y se presentan como \textbf{CAPÍTULO I}, \textbf{CAPÍTULO II}, etc. El título del capítulo aparece centrado y en mayúsculas. Los capítulos no numerados, como referencias y glosario, no muestran la palabra ``CAPÍTULO''.
+
+Las secciones muestran numeración arábiga vinculada al capítulo: \textbf{1.1}, \textbf{1.2}, \textbf{2.1}, etc. Las subsecciones emplean un tercer nivel, por ejemplo \textbf{1.1.1}. Los encabezados de capítulo conservan números romanos y el Índice de Contenidos los identifica explícitamente como \textbf{CAPÍTULO I}, \textbf{CAPÍTULO II}, etc.
+
+\section{Numeración de páginas}
+
+\begin{enumerate}
+  \item La portada no muestra número ni cuenta en la numeración.
+  \item Las páginas preliminares comienzan en romano minúsculo mediante el comando institucional \texttt{UTIFrontMatter}.
+  \item El cuerpo cambia a números arábigos mediante \texttt{UTIMainMatter}, sin reiniciar el contador.
+  \item La variante \texttt{UTIMainMatterReset} reinicia el cuerpo en 1 y solo debe habilitarse por decisión institucional.
+\end{enumerate}
+
+\chapter{Diseño de la portada}
+
+La portada se genera con \texttt{\textbackslash UTIPortada} y toma nueve parámetros. Su composición responde a los siguientes criterios:
+
+\begin{longtable}{|p{4.2cm}|p{8.4cm}|}
+  \hline
+  \textbf{Elemento} & \textbf{Especificación} \\
+  \hline
+  Logo & Centrado, con caja máxima de 3 cm por 3 cm y conservación de proporciones. \\
+  \hline
+  Universidad & ``UNIVERSIDAD INDOAMÉRICA'', negrita, 16 puntos. \\
+  \hline
+  Facultad & Mayúsculas, negrita, 14 puntos. \\
+  \hline
+  Carrera & Mayúsculas, negrita, 12 puntos. \\
+  \hline
+  Tema & Etiqueta en negrita, línea horizontal de 1 punto y título en mayúsculas. \\
+  \hline
+  Modalidad & Texto de la modalidad en 12 puntos. \\
+  \hline
+  Autor y tutor & Bloque ubicado en la mitad derecha del área de texto, adaptable a uno o dos autores. \\
+  \hline
+  Ciudad y año & Centrados en la parte inferior; ciudad y país se separan mediante raya. \\
+  \hline
+\end{longtable}
+
+La portada se encapsula en \texttt{titlepage}, no presenta pie de página y establece el contador en cero al finalizar.
+
+\chapter{Páginas preliminares}
+
+\section{Orden establecido}
+
+\begin{enumerate}
+  \item Autorización para consulta, reproducción y publicación electrónica.
+  \item Aprobación del tutor o tutora.
+  \item Declaración de autenticidad.
+  \item Aprobación de lectores.
+  \item Dedicatoria.
+  \item Agradecimiento.
+  \item Índices.
+  \item Resumen ejecutivo.
+  \item Abstract.
+\end{enumerate}
+
+Los textos legales reutilizan los metadatos definidos en \texttt{main.tex}. El estilo ajusta pronombres, etiquetas y conjugaciones cuando existe uno o dos autores y según los valores \texttt{masculino} o \texttt{femenino}.
+
+\section{Índices}
+
+La plantilla genera índices independientes de contenidos, tablas, figuras, imágenes, ecuaciones y anexos. Para que aparezcan correctamente deben realizarse compilaciones sucesivas hasta que los archivos auxiliares se estabilicen.
+
+\section{Resumen y abstract}
+
+Ambas páginas utilizan una composición equivalente y la fuente de portada:
+
+\begin{itemize}
+  \item nombre de la Universidad sin subrayado;
+  \item facultad y carrera;
+  \item título del proyecto, autor o autores y tutor;
+  \item título central de la sección;
+  \item un solo párrafo de hasta 300 palabras;
+  \item entre tres y cuatro descriptores o palabras clave en orden alfabético.
+\end{itemize}
+
+El abstract cambia automáticamente las etiquetas a \textbf{TOPIC}, \textbf{AUTHOR}, \textbf{ADVISOR} y \textbf{KEYWORDS}; además usa el título inglés parametrizado.
+
+\chapter{Estructura académica del cuerpo}
+
+\begin{longtable}{|p{3cm}|p{4.2cm}|p{5.4cm}|}
+  \hline
+  \textbf{Capítulo} & \textbf{Título} & \textbf{Contenido esperado} \\
+  \hline
+  I & Introducción & Contextualización, estado del arte, problema, justificación, objetivos, alcance y fundamentación teórica. \\
+  \hline
+  II & Metodología & Diagnóstico, área de estudio, metodología, recolección de información, requerimientos, diseño y justificación técnica. \\
+  \hline
+  III & Implementación, Pruebas y Resultados & Solución, proceso de implementación, pruebas, validación, resultados, cronograma y presupuesto. \\
+  \hline
+  IV & Conclusiones y Recomendaciones & Conclusiones, recomendaciones y trabajos futuros. \\
+  \hline
+  No numerado & Referencias & Fuentes citadas mediante IEEEtran y BibTeX. \\
+  \hline
+  No numerado & Glosario & Definiciones de términos y siglas relevantes. \\
+  \hline
+  Anexos & Anexo A, B, C, etc. & Evidencias, instrumentos, configuraciones y documentación complementaria. \\
+  \hline
+\end{longtable}
+
+Los textos entre corchetes y en cursiva son instrucciones de plantilla. Deben ser reemplazados por contenido definitivo antes de la entrega.
+
+\chapter{Metadatos y comandos públicos}
+
+\section{Datos centrales}
+
+\begin{longtable}{|p{5.2cm}|p{7.4cm}|}
+  \hline
+  \textbf{Comando} & \textbf{Función} \\
+  \hline
+  {\scriptsize\ttfamily\textbackslash UTIDatosTituloIngles\{...\}} & Registra el título utilizado en el abstract. Si se omite, el sistema utiliza el título español. \\
+  \hline
+  {\scriptsize\ttfamily\textbackslash UTISeleccionInvestigacion\{L\}\{S\}} & Selecciona una línea y una sublínea del catálogo institucional. \\
+  \hline
+  {\scriptsize\ttfamily\textbackslash UTIDatosAutores} & Registra uno o dos autores y su género gramatical. \\
+  \hline
+  {\scriptsize\ttfamily\textbackslash UTIDatosTutor} & Registra el tutor o tutora y su género gramatical. \\
+  \hline
+  {\scriptsize\ttfamily\textbackslash UTIPortada} & Registra facultad, carrera, tema, modalidad, ciudad, año y genera la portada. \\
+  \hline
+\end{longtable}
+
+\section{Líneas de investigación}
+
+El catálogo se encuentra en \texttt{uti\_tfm.sty}. La selección se realiza con dos índices. El primer índice corresponde a la línea y el segundo a la sublínea. El valor \texttt{\{0\}\{0\}} mantiene la selección pendiente.
+
+La tabla de Área de Estudio consume automáticamente la línea y sublínea seleccionadas. El campo se fija institucionalmente como ``Tecnologías de la información y la comunicación (TIC)''.
+
+\section{Área de estudio}
+
+La tabla institucional incluye dominio, línea, sublínea, campo, área, aspectos, objeto y periodo de estudio. Los campos no parametrizados se editan en \texttt{Capítulos/02\_Metodología.tex}.
+
+\chapter{Elementos técnicos y numeración}
+
+\section{Figuras, tablas e imágenes}
+
+Las figuras, tablas, imágenes y ecuaciones usan numeración arábiga continua; no reinician al cambiar de capítulo. Las leyendas tienen etiqueta en negrita, separador de dos puntos y texto justificado.
+
+La plantilla distingue:
+
+\begin{itemize}
+  \item \texttt{figure}: diagramas, gráficos, arquitecturas o esquemas;
+  \item \texttt{table}: datos organizados en filas y columnas;
+  \item \texttt{imagen}: fotografías, capturas de pantalla o evidencias visuales;
+  \item \texttt{equation}: expresiones matemáticas numeradas.
+\end{itemize}
+
+Los comandos \texttt{\textbackslash elaboradopor} y \texttt{\textbackslash fuente} registran autoría y procedencia. Toda pieza debe poseer una etiqueta única y ser mencionada mediante \texttt{\textbackslash ref} antes o después de su aparición.
+
+\section{Ecuaciones y anexos}
+
+Las ecuaciones se añaden manualmente a su índice con el comando \texttt{addeqtolist}. Los anexos se crean con \texttt{Anexo}, lo cual genera la letra correspondiente y actualiza el índice correspondiente.
+
+\chapter{Referencias y compilación}
+
+\section{Sistema bibliográfico}
+
+La versión actual utiliza BibTeX, no biber. El estilo bibliográfico es \texttt{IEEEtran} y la base utilizada es \texttt{referencias.bib}.
+
+Las citas se insertan mediante el comando \texttt{cite}. Todas las entradas de \texttt{referencias.bib} deben poseer autor, título, año y los campos exigidos por su tipo documental.
+
+\section{Secuencia de compilación}
+
+Para XeLaTeX:
+
+\begin{lstlisting}
+xelatex main.tex
+bibtex main
+xelatex main.tex
+xelatex main.tex
+\end{lstlisting}
+
+Para pdfLaTeX:
+
+\begin{lstlisting}
+pdflatex main.tex
+bibtex main
+pdflatex main.tex
+pdflatex main.tex
+\end{lstlisting}
+
+La alternativa recomendada para automatizar el proceso es:
+
+\begin{lstlisting}
+latexmk -xelatex main.tex
+% o, si Century Gothic no esta instalada:
+latexmk -pdf main.tex
+\end{lstlisting}
+
+\chapter{Gobierno, control de cambios y mantenimiento}
+
+\section{Elementos controlados por el Comité}
+
+Requieren aprobación previa:
+
+\begin{itemize}
+  \item márgenes, tamaño de papel y tipografías;
+  \item contenido y orden de páginas legales;
+  \item estructura obligatoria de capítulos;
+  \item formato de portada, resumen y abstract;
+  \item sistema de citación y estilo bibliográfico;
+  \item catálogo de líneas y sublíneas de investigación;
+  \item reglas de numeración e índices;
+  \item denominación de títulos profesionales y carrera.
+\end{itemize}
+
+\section{Elementos editables por el estudiante}
+
+El estudiante puede modificar metadatos, contenido académico, recursos visuales, bibliografía, anexos y campos descriptivos del Área de Estudio. No debe alterar \texttt{uti\_tfm.sty} ni eliminar páginas obligatorias sin autorización.
+
+\section{Procedimiento de cambio}
+
+\begin{enumerate}
+  \item Registrar la necesidad y su fundamento académico o normativo.
+  \item Identificar los archivos y documentos afectados.
+  \item Preparar una versión de prueba sin alterar la versión aprobada.
+  \item Compilar casos de uno y dos autores.
+  \item revisar portada, preliminares, índices, capítulos, referencias y anexos.
+  \item Presentar evidencia PDF al Comité Curricular.
+  \item Aprobar, asignar nueva versión y actualizar ambos manuales.
+\end{enumerate}
+
+\chapter{Criterios de aceptación}
+
+\section{Pruebas funcionales mínimas}
+
+\begin{longtable}{|p{4.1cm}|p{5.2cm}|p{3.3cm}|}
+  \hline
+  \textbf{Prueba} & \textbf{Criterio de aceptación} & \textbf{Evidencia} \\
+  \hline
+  Compilación limpia & El documento genera PDF sin errores que detengan el proceso. & Registro de compilación. \\
+  \hline
+  Márgenes & Se conservan 3/3/4/3 cm en superior, inferior, izquierdo y derecho. & Inspección del PDF. \\
+  \hline
+  Un autor & Pronombres, firmas y páginas preliminares aparecen en singular. & Caso de prueba. \\
+  \hline
+  Dos autores & Pronombres, firmas, dedicatorias y agradecimientos se adaptan al plural. & Caso de prueba. \\
+  \hline
+  Tutor o tutora & La etiqueta y el encabezado cambian según el género configurado. & Caso de prueba. \\
+  \hline
+  Línea de investigación & Un par válido carga la línea y sublínea correctas en Área de Estudio. & Tabla generada. \\
+  \hline
+  Índices & Contenidos, tablas, figuras, imágenes, ecuaciones y anexos se actualizan. & Páginas de índices. \\
+  \hline
+  Referencias & Las citas se numeran en orden y la bibliografía adopta IEEE. & Sección Referencias. \\
+  \hline
+  Abstract & Presenta datos en inglés y usa el título inglés configurado. & Página de Abstract. \\
+  \hline
+\end{longtable}
+
+\section{Lista de aprobación curricular}
+
+\begin{itemize}
+  \item[$\square$] La portada cumple la identidad y jerarquía institucional.
+  \item[$\square$] Los textos legales han sido revisados por la instancia competente.
+  \item[$\square$] La estructura académica corresponde al perfil de la carrera.
+  \item[$\square$] Las líneas de investigación coinciden con el catálogo vigente.
+  \item[$\square$] El formato IEEE ha sido ratificado para citas y referencias.
+  \item[$\square$] Los casos de uno y dos autores fueron validados.
+  \item[$\square$] Los dos motores de compilación previstos fueron evaluados.
+  \item[$\square$] El Manual de Uso es consistente con esta versión.
+\end{itemize}
+
+\chapter*{Registro de aprobación}
+\addcontentsline{toc}{chapter}{Registro de aprobación}
+
+\vspace{1cm}
+
+\begin{longtable}{|p{4cm}|p{4cm}|p{4cm}|}
+  \hline
+  \textbf{Rol} & \textbf{Nombre y firma} & \textbf{Fecha} \\
+  \hline
+  Coordinación de carrera & & \\
+  \hline
+  Coordinación de titulación & & \\
+  \hline
+  Presidencia del Comité Curricular & & \\
+  \hline
+  Secretaría del Comité Curricular & & \\
+  \hline
+\end{longtable}
+
+\vfill
+\noindent\textbf{Observaciones de aprobación:}
+
+\vspace{3cm}
+\hrule
+
+\end{document}

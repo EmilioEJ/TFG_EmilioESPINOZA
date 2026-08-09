@@ -1,0 +1,666 @@
+% Manual de uso de la plantilla UTI para trabajos de titulación
+% Compilar desde la raíz del proyecto con:
+%   latexmk -pdf -outdir=manual manual/Manual_de_Uso.tex
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{top=3cm,bottom=3cm,left=4cm,right=3cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{UTIMorado}{HTML}{422568}
+\definecolor{UTINaranja}{HTML}{F56600}
+\definecolor{CodigoFondo}{HTML}{F4F2F7}
+
+\hypersetup{
+  pdftitle={Manual de Uso de la Plantilla para Trabajos de Integración Curricular},
+  pdfauthor={Carrera de Ingeniería en Tecnologías de la Información},
+  colorlinks=true,
+  linkcolor=UTIMorado,
+  urlcolor=UTIMorado,
+  citecolor=UTIMorado
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Manual de Uso}
+\fancyhead[R]{\small Ingeniería en Tecnologías de la Información}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\setlength{\headheight}{14pt}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{2em}
+\setlist{itemsep=0.25em,topsep=0.4em}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{CodigoFondo},
+  frame=single,
+  rulecolor=\color{UTIMorado},
+  breaklines=true,
+  columns=fullflexible,
+  showstringspaces=false,
+  keepspaces=true,
+  upquote=true,
+  literate=
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {¿}{{?`}}1
+}
+
+\newcommand{\advertencia}[1]{%
+  \begin{center}
+    \fcolorbox{UTINaranja}{CodigoFondo}{%
+      \begin{minipage}{0.88\textwidth}
+        \textbf{Importante:} #1
+      \end{minipage}%
+    }
+  \end{center}
+}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begin{center}
+    \vspace*{1.5cm}
+    {\color{UTIMorado}\rule{\textwidth}{2pt}}\\[1.2cm]
+    {\Large\bfseries UNIVERSIDAD INDOAMÉRICA\par}
+    \vspace{0.5cm}
+    {\large\bfseries FACULTAD DE INGENIERÍAS\par}
+    \vspace{0.3cm}
+    {\large\bfseries CARRERA DE INGENIERÍA EN TECNOLOGÍAS DE LA INFORMACIÓN\par}
+    \vfill
+    {\Huge\bfseries\color{UTIMorado} MANUAL DE USO\par}
+    \vspace{0.5cm}
+    {\LARGE Plantilla para Trabajos de Integración Curricular\par}
+    \vspace{1cm}
+    {\large Guía práctica para estudiantes y docentes tutores\par}
+    \vfill
+    \begin{tabular}{rl}
+      \textbf{Código documental:} & UTI--TIC--MU--01 \\
+      \textbf{Versión:} & 1.0 \\
+      \textbf{Fecha:} & 20 de julio de 2026 \\
+    \end{tabular}
+    \vfill
+    {\color{UTINaranja}\rule{\textwidth}{2pt}}
+  \end{center}
+\end{titlepage}
+
+\hypersetup{pageanchor=true}
+\pagenumbering{roman}
+
+\chapter*{Cómo utilizar este manual}
+\addcontentsline{toc}{chapter}{Cómo utilizar este manual}
+
+Este documento guía la preparación completa del Trabajo de Integración Curricular usando la plantilla LaTeX institucional. Se recomienda seguir los capítulos en orden durante la configuración inicial y consultar las secciones técnicas cuando se incorporen tablas, figuras, ecuaciones, referencias o anexos.
+
+\advertencia{No modifique \texttt{uti\_tfm.sty}. Ese archivo contiene las reglas institucionales controladas por el Comité Curricular. Los cambios ordinarios se realizan en \texttt{main.tex}, \texttt{Preliminares/}, \texttt{Capítulos/}, \texttt{Anexos/} y \texttt{referencias.bib}.}
+
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\chapter{Preparación del entorno}
+
+\section{Requisitos}
+
+Para trabajar con la plantilla se necesita:
+
+\begin{itemize}
+  \item una distribución LaTeX actualizada, como TeX Live o MiKTeX;
+  \item un editor compatible, por ejemplo TeXstudio, TeXmaker, Overleaf o Visual Studio Code con LaTeX Workshop;
+  \item BibTeX para procesar las referencias IEEE;
+  \item un visor PDF;
+  \item la fuente Century Gothic si se utilizará XeLaTeX o LuaLaTeX.
+\end{itemize}
+
+Si Century Gothic no está disponible, puede compilarse con pdfLaTeX. La plantilla utilizará una fuente alternativa de aspecto similar.
+
+\section{Copia de trabajo}
+
+Antes de editar:
+
+\begin{enumerate}
+  \item duplique la carpeta completa del proyecto;
+  \item asigne a la copia un nombre identificable;
+  \item mantenga la estructura de carpetas;
+  \item no cambie nombres que contengan tildes sin actualizar también los comandos \texttt{\textbackslash input};
+  \item utilice control de versiones o copias de respaldo periódicas.
+\end{enumerate}
+
+\section{Archivos que debe editar}
+
+\begin{longtable}{|p{4cm}|p{8.6cm}|}
+  \hline
+  \textbf{Archivo o carpeta} & \textbf{Uso} \\
+  \hline
+  \texttt{main.tex} & Datos generales, autoría, tutor, título inglés, línea de investigación y orden del documento. \\
+  \hline
+  \texttt{Preliminares/} & Textos legales, dedicatoria, agradecimiento, resumen y abstract. \\
+  \hline
+  \texttt{Capítulos/} & Contenido académico y técnico principal. \\
+  \hline
+  \texttt{Anexos/} & Evidencias y material complementario. \\
+  \hline
+  \texttt{referencias.bib} & Datos bibliográficos de todas las fuentes citadas. \\
+  \hline
+  \texttt{Capítulos/fig/} & Diagramas, gráficos y figuras. \\
+  \hline
+  \texttt{Capítulos/img/} & Fotografías y capturas de pantalla. \\
+  \hline
+\end{longtable}
+
+\chapter{Configuración de datos generales}
+
+\section{Título inglés}
+
+En \texttt{main.tex}, reemplace el texto de ejemplo:
+
+\begin{lstlisting}
+\UTIDatosTituloIngles{ENGLISH PROJECT TITLE}
+\end{lstlisting}
+
+Este dato se utiliza únicamente en el abstract. Debe ser una traducción académica fiel del título español.
+
+\section{Selección de línea y sublínea}
+
+El comando recibe dos índices:
+
+\begin{lstlisting}
+\UTISeleccionInvestigacion{linea}{sublinea}
+\end{lstlisting}
+
+Por ejemplo, para seleccionar ``Gestión de la información'' y ``Análisis y procesamiento de datos'' se usa:
+
+\begin{lstlisting}
+\UTISeleccionInvestigacion{3}{2}
+\end{lstlisting}
+
+Mientras el tutor no haya validado la selección, mantenga:
+
+\begin{lstlisting}
+\UTISeleccionInvestigacion{0}{0}
+\end{lstlisting}
+
+\subsection{Catálogo de selección}
+
+\begin{longtable}{|p{2cm}|p{10.6cm}|}
+  \hline
+  \textbf{Índices} & \textbf{Línea y sublínea} \\
+  \hline
+  \multicolumn{2}{|p{12.6cm}|}{\textbf{Línea 1: Análisis, diseño e implementación de infraestructura tecnológica}} \\
+  \hline
+  \texttt{\{1\}\{1\}} & Diseño y optimización de redes de comunicación. \\
+  \hline
+  \texttt{\{1\}\{2\}} & Ciberseguridad y protección de infraestructuras tecnológicas. \\
+  \hline
+  \texttt{\{1\}\{3\}} & Sistemas de almacenamiento y computación en la nube. \\
+  \hline
+  \texttt{\{1\}\{4\}} & Automatización y gestión de infraestructuras inteligentes. \\
+  \hline
+  \multicolumn{2}{|p{12.6cm}|}{\textbf{Línea 2: Redes informáticas de comunicación}} \\
+  \hline
+  \texttt{\{2\}\{1\}} & Arquitecturas de redes avanzadas. \\
+  \hline
+  \texttt{\{2\}\{2\}} & Protocolos y estándares de comunicación. \\
+  \hline
+  \texttt{\{2\}\{3\}} & Ciberseguridad en redes. \\
+  \hline
+  \texttt{\{2\}\{4\}} & Redes inalámbricas e Internet de las Cosas (IoT). \\
+  \hline
+  \multicolumn{2}{|p{12.6cm}|}{\textbf{Línea 3: Gestión de la información}} \\
+  \hline
+  \texttt{\{3\}\{1\}} & Almacenamiento y recuperación de información. \\
+  \hline
+  \texttt{\{3\}\{2\}} & Análisis y procesamiento de datos. \\
+  \hline
+  \texttt{\{3\}\{3\}} & Gobernanza y seguridad de la información. \\
+  \hline
+  \texttt{\{3\}\{4\}} & Ciclo de vida de la información. \\
+  \hline
+  \texttt{\{3\}\{5\}} & Sistemas de gestión del conocimiento. \\
+  \hline
+  \texttt{\{3\}\{6\}} & Visualización de información. \\
+  \hline
+  \texttt{\{3\}\{7\}} & Tecnologías emergentes en la gestión de información. \\
+  \hline
+  \texttt{\{3\}\{8\}} & Gestión de datos no estructurados. \\
+  \hline
+  \multicolumn{2}{|p{12.6cm}|}{\textbf{Línea 4: Diseño, desarrollo e integración de sistemas basados en arquitecturas web, móviles y sistemas embebidos}} \\
+  \hline
+  \texttt{\{4\}\{1\}} & Diseño y desarrollo de aplicaciones web. \\
+  \hline
+  \texttt{\{4\}\{2\}} & Desarrollo de aplicaciones móviles. \\
+  \hline
+  \texttt{\{4\}\{3\}} & Integración de sistemas embebidos. \\
+  \hline
+  \texttt{\{4\}\{4\}} & Interoperabilidad entre plataformas. \\
+  \hline
+  \texttt{\{4\}\{5\}} & Seguridad en sistemas web, móviles y embebidos. \\
+  \hline
+  \texttt{\{4\}\{6\}} & Optimización del rendimiento. \\
+  \hline
+  \texttt{\{4\}\{7\}} & Aplicación de tecnologías emergentes. \\
+  \hline
+  \texttt{\{4\}\{8\}} & Sistemas basados en la nube y edge computing. \\
+  \hline
+\end{longtable}
+
+La línea y sublínea seleccionadas aparecen automáticamente en la tabla de Área de Estudio del capítulo II.
+
+\section{Portada}
+
+El bloque principal tiene la siguiente estructura:
+
+\begin{lstlisting}
+\UTIPortada
+{LOGO-UTI-1.png}
+{FACULTAD DE INGENIERÍAS}
+{INGENIERÍA EN TECNOLOGÍAS DE LA INFORMACIÓN}
+{TÍTULO DEL PROYECTO}
+{Trabajo de Titulación modalidad Trabajo de Integración Curricular}
+{\UTIDatosAutores{Nombres Apellidos}{femenino}}
+{\UTIDatosTutor{Nombres Apellidos}{masculino}}
+{Quito, Ecuador}
+{2026}
+\end{lstlisting}
+
+Cambie únicamente el contenido dentro de cada par de llaves. No elimine argumentos ni modifique su orden.
+
+\section{Uno o dos autores}
+
+Para un autor:
+
+\begin{lstlisting}
+{\UTIDatosAutores{Ana Perez}{femenino}}
+\end{lstlisting}
+
+Para dos autores:
+
+\begin{lstlisting}
+{\UTIDatosAutores{Ana Perez}{femenino}
+  [Carlos Lopez][masculino]}
+\end{lstlisting}
+
+Valores permitidos para el género: \texttt{masculino} y \texttt{femenino}. Estos valores controlan pronombres, etiquetas, conjugaciones y títulos profesionales en las páginas preliminares.
+
+\section{Tutor o tutora}
+
+\begin{lstlisting}
+{\UTIDatosTutor{Mgtr. Nombre Apellido}{masculino}}
+% o
+{\UTIDatosTutor{Mgtr. Nombre Apellido}{femenino}}
+\end{lstlisting}
+
+Incluya únicamente el grado académico más alto que corresponda mostrar.
+
+\chapter{Edición de páginas preliminares}
+
+\section{Documentos legales}
+
+Revise los archivos \texttt{01} a \texttt{04} de \texttt{Preliminares/}. Los nombres, el título, la ciudad, el año y el género se toman automáticamente de \texttt{main.tex}. Debe completar manualmente:
+
+\begin{itemize}
+  \item fecha exacta;
+  \item cédula, dirección, correo y teléfono;
+  \item nombres de lectores o miembros del tribunal;
+  \item firmas cuando corresponda en la versión final.
+\end{itemize}
+
+No cambie el contenido legal sin autorización institucional.
+
+\section{Dedicatoria y agradecimiento}
+
+Edite \texttt{05\_Dedicatoria.tex} y \texttt{06\_Agradecimiento.tex}. Si existen dos autores, la plantilla genera una página para cada persona. Reemplace las instrucciones de ejemplo por el texto definitivo.
+
+\section{Resumen ejecutivo}
+
+Edite el tercer argumento de \texttt{\textbackslash UTIResumenPagina} en \texttt{08\_Resumen.tex}. Requisitos:
+
+\begin{itemize}
+  \item un solo párrafo;
+  \item máximo 300 palabras;
+  \item problema, objetivo, metodología, resultados y conclusiones;
+  \item redacción impersonal, clara y precisa;
+  \item de tres a cuatro descriptores, ordenados alfabéticamente.
+\end{itemize}
+
+Elimine \texttt{\textbackslash textit} y los corchetes de instrucción al introducir el texto final.
+
+\section{Abstract}
+
+Edite \texttt{09\_Abstract.tex}. Debe ser equivalente al resumen, no una traducción automática sin revisión. La cabecera se presenta en inglés y el título se obtiene de \texttt{\textbackslash UTIDatosTituloIngles}.
+
+\chapter{Redacción del cuerpo}
+
+\section{Regla general}
+
+Todo texto en cursiva y entre corchetes es una instrucción. Debe eliminarse y sustituirse por contenido académico definitivo.
+
+Para añadir apartados utilice:
+
+\begin{lstlisting}
+\section{Nombre de la sección}
+Texto del apartado.
+
+\subsection{Nombre de la subsección}
+Texto de la subsección.
+\end{lstlisting}
+
+No escriba manualmente números delante de los títulos. La plantilla controla su presentación.
+
+Las secciones aparecerán automáticamente como \textbf{1.1}, \textbf{1.2}, \textbf{2.1}, etc.; las subsecciones como \textbf{1.1.1}. En el Índice de Contenidos, los capítulos se muestran explícitamente como \textbf{CAPÍTULO I}, \textbf{CAPÍTULO II}, etc.
+
+\section{Capítulo I: Introducción}
+
+Desarrolle contextualización, estado del arte, problema, justificación, objetivos, alcance y fundamentación teórica. El estado del arte debe comparar fuentes pertinentes y relacionarlas con el proyecto, no limitarse a una lista de resúmenes.
+
+\section{Capítulo II: Metodología}
+
+Complete el diagnóstico, el Área de Estudio, la metodología, las técnicas de recolección, los requerimientos, el diseño y la justificación técnica.
+
+En la tabla de Área de Estudio, la línea, sublínea y campo son automáticos. Edite directamente dominio, área, aspectos, objeto y periodo de estudio.
+
+\section{Capítulo III: Implementación, Pruebas y Resultados}
+
+Documente la solución implementada, las actividades ejecutadas, las pruebas y los resultados medibles. Compare la situación inicial con la posterior y conserve evidencias verificables.
+
+\section{Capítulo IV: Conclusiones y Recomendaciones}
+
+Cada conclusión debe relacionarse con los objetivos y resultados. Las recomendaciones deben derivarse de hallazgos reales. Los trabajos futuros deben plantear extensiones factibles.
+
+\chapter{Inserción de elementos}
+
+\section{Figuras}
+
+Utilice figuras para diagramas, arquitecturas, gráficos o esquemas:
+
+\begin{lstlisting}
+Como se observa en la Figura~\ref{fig:arquitectura}, ...
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.80\textwidth]
+    {Capítulos/fig/arquitectura.png}
+  \caption{Arquitectura de la solución.}
+  \label{fig:arquitectura}
+\end{figure}
+\elaboradopor{Estudiante}
+\fuente{Elaboración propia}
+\end{lstlisting}
+
+La etiqueta debe ser única. No escriba ``Figura 1'' manualmente; use \texttt{\textbackslash ref}.
+
+\section{Imágenes y capturas}
+
+Para fotografías o capturas utilice el entorno \texttt{imagen}:
+
+\begin{lstlisting}
+\begin{imagen}[htbp]
+  \centering
+  \includegraphics[width=0.80\textwidth]
+    {Capítulos/img/panel.png}
+  \caption{Panel de administración implementado.}
+  \label{img:panel}
+\end{imagen}
+\elaboradopor{Estudiante}
+\fuente{Captura del entorno de pruebas}
+\end{lstlisting}
+
+\section{Tablas}
+
+\begin{lstlisting}
+\begin{table}[htbp]
+  \centering
+  \caption{Resultados de las pruebas.}
+  \label{tab:resultados}
+  \begin{tabular}{|l|c|c|}
+    \hline
+    Metrica & Antes & Despues \\
+    \hline
+    Tiempo de respuesta & 850 ms & 320 ms \\
+    \hline
+  \end{tabular}
+\end{table}
+\elaboradopor{Estudiante}
+\fuente{Resultados experimentales}
+\end{lstlisting}
+
+Si la tabla excede el ancho disponible, reduzca el contenido, use columnas de párrafo o divídala. No reduzca el tamaño hasta volverla ilegible.
+
+\section{Ecuaciones}
+
+\begin{lstlisting}
+\begin{equation}
+\label{eq:disponibilidad}
+Disponibilidad\,(\%) =
+\frac{T_{operativo}}{T_{total}} \times 100
+\end{equation}
+\addeqtolist{Cálculo de disponibilidad del servicio}
+\end{lstlisting}
+
+Mencione la ecuación mediante \texttt{Ecuación\textasciitilde\textbackslash ref\{eq:disponibilidad\}}.
+
+\section{Referencias cruzadas}
+
+Ejemplos:
+
+\begin{lstlisting}
+Capítulo~\ref{chap:metodologia}
+Tabla~\ref{tab:resultados}
+Figura~\ref{fig:arquitectura}
+Imagen~\ref{img:panel}
+Ecuación~\ref{eq:disponibilidad}
+\end{lstlisting}
+
+El símbolo \texttt{\textasciitilde} evita que el nombre y el número se separen al final de una línea.
+
+\chapter{Citas y referencias IEEE}
+
+\section{Agregar una fuente}
+
+Incluya cada fuente en \texttt{referencias.bib}. Ejemplo:
+
+\begin{lstlisting}
+@article{apellido2026titulo,
+  author  = {Nombre Apellido and Nombre Apellido},
+  title   = {Título del artículo},
+  journal = {Nombre de la revista},
+  volume  = {10},
+  number  = {2},
+  pages   = {10--20},
+  year    = {2026},
+  doi     = {10.0000/ejemplo}
+}
+\end{lstlisting}
+
+La clave \texttt{apellido2026titulo} debe ser única.
+
+\section{Citar dentro del texto}
+
+\begin{lstlisting}
+La arquitectura propuesta reduce la latencia del servicio \cite{apellido2026titulo}.
+
+Distintos estudios sustentan esta decisión \cite{clave1,clave2,clave3}.
+\end{lstlisting}
+
+No escriba manualmente números como \texttt{[1]}. BibTeX asigna y actualiza la numeración.
+
+\section{Calidad de fuentes}
+
+Priorice artículos científicos, libros académicos, normas técnicas, documentación oficial y actas de congresos. Verifique autor, título, año, editorial o revista, páginas, DOI y URL cuando corresponda.
+
+\chapter{Glosario y anexos}
+
+\section{Glosario}
+
+Edite \texttt{Capítulos/06\_Glosario.tex}:
+
+\begin{lstlisting}
+\begin{description}
+  \item[API] Interfaz de programación de aplicaciones.
+  \item[IoT] Internet de las Cosas.
+\end{description}
+\end{lstlisting}
+
+Incluya únicamente términos relevantes que requieran aclaración.
+
+\section{Anexos}
+
+El primer anexo se crea así:
+
+\begin{lstlisting}
+\Anexo{Manual técnico de la solución}
+
+Contenido del anexo.
+\end{lstlisting}
+
+Para añadir otro anexo:
+
+\begin{lstlisting}
+\Anexo{Instrumento de entrevista}
+
+Contenido del segundo anexo.
+\end{lstlisting}
+
+La plantilla asigna automáticamente A, B, C y actualiza el índice de anexos.
+
+\chapter{Compilación del documento}
+
+\section{Método recomendado}
+
+Desde la carpeta principal del proyecto:
+
+\begin{lstlisting}
+latexmk -xelatex main.tex
+\end{lstlisting}
+
+Este método requiere Century Gothic. Si la fuente no está instalada:
+
+\begin{lstlisting}
+latexmk -pdf main.tex
+\end{lstlisting}
+
+\section{Compilación manual}
+
+Con XeLaTeX:
+
+\begin{lstlisting}
+xelatex main.tex
+bibtex main
+xelatex main.tex
+xelatex main.tex
+\end{lstlisting}
+
+Con pdfLaTeX:
+
+\begin{lstlisting}
+pdflatex main.tex
+bibtex main
+pdflatex main.tex
+pdflatex main.tex
+\end{lstlisting}
+
+La bibliografía actual utiliza BibTeX. No ejecute biber salvo que el sistema bibliográfico sea cambiado oficialmente.
+
+\section{Cuándo recompilar}
+
+Compile nuevamente cuando cambie citas, bibliografía, títulos, etiquetas, índices, anexos, tablas, figuras o imágenes. Dos pasadas finales eliminan la mayoría de referencias pendientes.
+
+\chapter{Solución de problemas}
+
+\begingroup
+\small
+\singlespacing
+\begin{longtable}{|p{4.2cm}|p{4.2cm}|p{4.2cm}|}
+  \hline
+  \textbf{Problema} & \textbf{Causa probable} & \textbf{Solución} \\
+  \hline
+  Century Gothic no encontrada & La fuente no está instalada. & Instálela conforme a la licencia o compile con pdfLaTeX. \\
+  \hline
+  Aparecen signos \texttt{??} & Faltan pasadas de compilación o la etiqueta no existe. & Compile dos veces y revise \texttt{\textbackslash label}. \\
+  \hline
+  No aparece una referencia & BibTeX no se ejecutó o la clave es incorrecta. & Ejecute la secuencia completa y compare la clave con \texttt{referencias.bib}. \\
+  \hline
+  Imagen no encontrada & Ruta, nombre, extensión o mayúsculas incorrectas. & Verifique el archivo y copie la ruta exacta. \\
+  \hline
+  Código de línea inválido & El par seleccionado no existe. & Consulte el catálogo y corrija ambos índices. \\
+  \hline
+  Tabla fuera del margen & Columnas demasiado anchas. & Use columnas \texttt{p\{...\}}, reduzca texto o divida la tabla. \\
+  \hline
+  Índice desactualizado & Archivos auxiliares pendientes. & Compile hasta que no se soliciten nuevas ejecuciones. \\
+  \hline
+  Texto legal en género incorrecto & Género mal configurado. & Use exactamente \texttt{masculino} o \texttt{femenino}. \\
+  \hline
+  El abstract muestra el título español & No se configuró el título inglés. & Complete el título inglés en \texttt{main.tex}. \\
+  \hline
+\end{longtable}
+\endgroup
+
+\chapter{Lista de verificación final}
+
+\section{Contenido}
+
+\begin{itemize}
+  \item[$\square$] Se eliminaron todos los textos de instrucción entre corchetes.
+  \item[$\square$] Los objetivos coinciden con las conclusiones y resultados.
+  \item[$\square$] Todas las figuras, tablas, imágenes y ecuaciones se mencionan en el texto.
+  \item[$\square$] Cada cita tiene una referencia y cada referencia fue citada.
+  \item[$\square$] El resumen y el abstract son equivalentes y no superan 300 palabras.
+  \item[$\square$] La línea y sublínea fueron validadas por el tutor.
+  \item[$\square$] El periodo y objeto de estudio están claramente definidos.
+\end{itemize}
+
+\section{Formato}
+
+\begin{itemize}
+  \item[$\square$] La portada contiene datos definitivos.
+  \item[$\square$] Los márgenes y la numeración de páginas son correctos.
+  \item[$\square$] Los índices están actualizados.
+  \item[$\square$] Las leyendas y fuentes son legibles.
+  \item[$\square$] No existen referencias con \texttt{??}.
+  \item[$\square$] El PDF abre correctamente y todas las páginas son visibles.
+  \item[$\square$] El nombre del archivo final cumple la convención indicada por la carrera.
+\end{itemize}
+
+\section{Entrega}
+
+Antes de entregar, conserve:
+
+\begin{itemize}
+  \item PDF final;
+  \item carpeta completa del proyecto LaTeX;
+  \item archivos de imágenes y diagramas originales;
+  \item base \texttt{referencias.bib};
+  \item respaldos o repositorio de control de versiones;
+  \item anexos y evidencias solicitadas por tutor o tribunal.
+\end{itemize}
+
+\advertencia{La aceptación del formato no reemplaza la revisión académica. El estudiante debe atender las observaciones del tutor, lectores, tribunal y Comité Curricular.}
+
+\end{document}
