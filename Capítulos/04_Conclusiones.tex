@@ -4,13 +4,15 @@
 A partir del desarrollo e implementación del Asistente Virtual Inteligente, se han establecido las siguientes conclusiones respecto al cumplimiento de los objetivos planteados:
 
 \begin{itemize}
-    \item \textbf{Análisis de los Procesos de Gestión:} El análisis de los procesos actuales de gestión documental demostró que el acceso a la información académica generaba demoras y alta dependencia del personal administrativo. Al sistematizar las consultas comunes, se definió una base de conocimiento sólida y se determinó que la principal limitación técnica del proceso tradicional era la falta de búsqueda semántica, justificando los requerimientos funcionales del asistente.
+    \item El análisis de los procesos actuales permitió identificar limitaciones asociadas con la consulta manual de documentos y la ausencia de mecanismos de búsqueda semántica, lo cual permitió establecer los requerimientos funcionales y no funcionales del prototipo.
 
-    \item \textbf{Diseño de la Arquitectura Descentralizada:} El diseño del sistema bajo un modelo cliente-servidor demostró ser factible. La integración de WebSockets facilitó la comunicación asíncrona y la delegación del procesamiento de fotogramas al navegador cliente, previniendo interbloqueos en el flujo principal del servidor durante las pruebas operativas. Adicionalmente, se constató una reducción del consumo de recursos de CPU al aplicar métodos de visión artificial ligeros (análisis de caja delimitadora).
+    \item Se diseñó una arquitectura modular cliente-servidor que integró el motor RAG, los servicios de voz, el módulo de interacción visual y el avatar 3D. El uso de WebSockets permitió implementar comunicación bidireccional y procesamiento asíncrono entre cliente y backend.
 
-    \item \textbf{Implementación del Prototipo RAG y Avatar 3D:} Se logró integrar el motor RAG utilizando el modelo de embeddings \texttt{paraphrase-multilingual-MiniLM-L12-v2}, alcanzando un \textit{Hit Rate} de recuperación del 92.0\% en documentos en español. Además, la sincronización de las mallas faciales del avatar 3D con los servicios de voz (Whisper y ElevenLabs) estableció una comunicación oral y visual que cumplió con los requerimientos del diseño.
+    \item Se implementó el motor RAG utilizando el modelo de embeddings \texttt{paraphrase-multilingual-MiniLM-L12-v2}, obteniendo un \textit{Hit Rate} Top-3 global de 92,0\% y un MRR de 0,84 en el conjunto de consultas empleado para la evaluación. Estos resultados evidencian un desempeño favorable del mecanismo de recuperación dentro de las condiciones evaluadas.
 
-    \item \textbf{Evaluación de Desempeño y Usabilidad:} La evaluación validó la viabilidad técnica de la solución. El sistema registró una latencia de respuesta (TTFB) promedio de 450 ms al utilizar el modelo Nemotron, operando dentro de los estándares de sistemas conversacionales óptimos. Adicionalmente, las pruebas de usabilidad exploratorias aplicadas a una muestra piloto de 13 estudiantes resultaron en valoraciones mayoritariamente positivas en términos de integración, percepción de utilidad y preferencia de uso frente al portal manual tradicional, sugiriendo una alta aceptación tecnológica preliminar.
+    \item La integración del avatar 3D, reconocimiento de voz, síntesis de voz y mecanismos de visión artificial permitió obtener un prototipo multimodal funcional. Las mediciones realizadas evidenciaron tiempos compatibles con una interacción conversacional en el entorno de prueba, aunque el rendimiento final depende de la infraestructura y de los servicios externos empleados.
+
+    \item La evaluación piloto realizada con 13 estudiantes presentó una tendencia favorable en la percepción de integración, utilidad e intención futura de uso del prototipo. Debido al carácter exploratorio y al tamaño de la muestra, estos resultados se interpretan como evidencia inicial de aceptación y no como resultados generalizables a toda la población estudiantil.
 \end{itemize}
 
 \section{Recomendaciones}
@@ -23,7 +25,7 @@ Con base en los retos enfrentados y el análisis técnico del sistema en producc
     
     \item \textbf{Calidad de la Base Documental (Limitación de Recuperación):} El motor RAG demostró mitigar efectivamente las alucinaciones siempre y cuando los documentos indexados sean de alta legibilidad semántica. Se recomienda que la administración del sistema aplique un protocolo estricto de curaduría de archivos PDF antes de cargarlos, rechazando documentos escaneados sin Reconocimiento Óptico de Caracteres (OCR) válido, ya que degradan la capacidad de búsqueda.
     
-    \item \textbf{Control de Costos (OPEX):} La utilización continua de modelos generativos (2500 tokens de contexto promedio por interacción) conlleva un costo operativo que puede escalar con el despliegue a toda la universidad. Se sugiere implementar políticas de \textit{rate limiting} (cuotas máximas de consultas por estudiante al día) y monitorear el consumo real para ajustar el presupuesto operativo de manera sostenible.
+    \item \textbf{Control de costos operativos:} Debido a que los servicios externos de voz pueden incrementar su costo en función del volumen de solicitudes, se recomienda monitorear el consumo real durante una eventual implementación institucional y evaluar alternativas locales o esquemas de control de uso cuando sean necesarios.
 \end{itemize}
 
 \section{Trabajos Futuros}
