@@ -109,7 +109,7 @@ A continuación, la Tabla~\ref{tab:comparativa} expone un contraste analítico e
 \setlength{\LTcapwidth}{18.5cm}
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.18}
-\begin{longtable}{|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.1cm}|>{\raggedright\arraybackslash}p{5.2cm}|}
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{4.5cm}|}
 \caption{Comparativa del Proyecto Propuesto frente al Estado del Arte.}\label{tab:comparativa}\\
 \hline
 \rowcolor[HTML]{EFEFEF}
@@ -161,47 +161,45 @@ Los efectos de esta infraestructura recaen directamente sobre la experiencia del
 La modernización de los canales de comunicación universitaria es un imperativo frente a una generación de estudiantes nativos digitales que demandan respuestas ágiles e interactivas. Este proyecto se justifica por su capacidad para transformar un modelo de consulta obsoleto en una experiencia dinámica, centralizada y tecnológicamente inmersiva mediante la implementación de un Asistente Virtual Inteligente.
 
 \subsection{Utilidad}
-A nivel técnico y operativo, la incorporación de Procesamiento de Lenguaje Natural (PLN), visión artificial no biométrica y un avatar 3D permite crear una interfaz de consulta más natural e intuitiva. En lugar de obligar al estudiante a recorrer documentos extensos o menús institucionales, el sistema interpreta consultas en lenguaje natural y presenta respuestas contextualizadas, mejorando la asimilación de la información gracias al componente visual y conversacional del avatar. La utilidad principal radica en su capacidad de operar de manera continua y estandarizada, asegurando que la información entregada sobre la carrera de TI sea siempre precisa y actualizada.
+La utilidad principal del prototipo radica en proporcionar un mecanismo complementario de acceso a información académica mediante lenguaje natural, reduciendo la necesidad de navegar manualmente por documentos extensos o múltiples secciones institucionales. La arquitectura RAG permite vincular las respuestas del asistente con una base documental previamente seleccionada, mientras que la interfaz multimodal busca ofrecer una interacción más natural mediante texto, voz y avatar 3D.
 
 \subsection{Beneficiarios}
-Los beneficiarios directos de este proyecto son los estudiantes de la carrera, quienes obtendrán una herramienta de orientación intuitiva y resolutiva. Como beneficiarios indirectos, el personal administrativo y académico verá reducida la carga de atención de consultas rutinarias, permitiéndoles enfocar sus esfuerzos en tareas de mayor valor institucional. 
+Los beneficiarios directos son los estudiantes de la carrera de Tecnologías de la Información, quienes dispondrían de un canal adicional para consultar información académica general. De manera indirecta, la disponibilidad de un mecanismo automatizado podría contribuir a reducir determinadas consultas repetitivas dirigidas al personal administrativo; sin embargo, la cuantificación de esta reducción requiere un seguimiento posterior en condiciones reales de operación.
 
-\subsection{Factibilidad e Impacto Cuantificable}
-La ejecución de este proyecto es factible tanto a nivel técnico como operativo. Como estudiante de la carrera de TI, se cuenta con los conocimientos de desarrollo de software necesarios, y actualmente existen frameworks de inteligencia artificial, APIs de síntesis de voz, librerías de visión artificial y plataformas de creación de avatares que son altamente accesibles para integrarse en un prototipo funcional de software. Además, el proyecto posiciona a la Universidad Indoamérica a la vanguardia en la adopción de interfaces humano-computadora avanzadas.
+\subsection{Factibilidad e Impacto Potencial}
+La ejecución de este proyecto es factible tanto a nivel técnico como operativo. Actualmente existen frameworks de inteligencia artificial, APIs de síntesis de voz, librerías de visión artificial y plataformas de creación de avatares que son altamente accesibles para integrarse en un prototipo funcional de software. Además, el proyecto posiciona a la Universidad Indoamérica a la vanguardia en la adopción de interfaces humano-computadora avanzadas.
 
-Para cuantificar de manera rigurosa el impacto operativo, institucional y académico del proyecto en la carrera de Ingeniería en Tecnologías de la Información, se ha diseñado la matriz comparativa de la Tabla~\ref{tab:cuantificacion_impacto}. En ella se contrastan los indicadores críticos de la situación actual frente a la proyección de beneficios técnicos y administrativos con la implementación del prototipo del Asistente Virtual Inteligente.
+Para ilustrar el impacto potencial del proyecto en la carrera de Ingeniería en Tecnologías de la Información, se ha diseñado la matriz comparativa de la Tabla~\ref{tab:cuantificacion_impacto}. En ella se contrastan los indicadores críticos de la situación actual frente a la proyección técnica del Asistente Virtual Inteligente.
 
 \begin{table}[h]
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.25}
-\begin{tabular}{|>{\raggedright\arraybackslash}p{3.1cm}|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.1cm}|}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3.2cm}|}
 \hline
 \rowcolor[HTML]{EFEFEF}
-\textbf{Indicador de Impacto} & \textbf{Situación Actual (Sin Asistente)} & \textbf{Proyectado (Prototipo IA / 3D)} & \textbf{Beneficio / Ahorro Estimado} \\ \hline
-\textbf{Población estudiantil beneficiada} & Atención limitada por ventanilla en horario laboral & Acceso inmediato a mallas y normativas 24/7 & \textbf{[Ej. 450 estudiantes]} matriculados en la carrera de TI \\ \hline
-\textbf{Consultas administrativas repetitivas} & $\sim$300 consultas mensuales en secretaría/coordinación & Automatización del 92.0\% (\textit{Hit Rate} RAG) & Reducción de \textbf{$\sim$276 consultas} presenciales/mes \\ \hline
-\textbf{Tiempo por atención y carga operativa} & $\sim$15 minutos (0.25 h) por consulta tradicional & Respuesta inmediata en 450 ms (TTFB) & Ahorro de \textbf{$\sim$69 horas-hombre/mes} al personal administrativo \\ \hline
-\textbf{Tiempo de espera del estudiante} & 24 a 48 horas (vía correo institucional o ventanilla) & Respuesta en $<1$ segundo (en línea, 24/7) & Reducción del \textbf{99\%} en el tiempo de espera por consulta \\ \hline
-\textbf{Disponibilidad del servicio de consulta} & 40 horas laborables/semana (8 h/día, 5 días) & 168 horas/semana (24 h/día, 7 días) & Incremento de disponibilidad en un \textbf{320\%} \\ \hline
+\textbf{Indicador} & \textbf{Situación Actual} & \textbf{Proyección del Prototipo} & \textbf{Interpretación} \\ \hline
+\textbf{Población potencial beneficiaria} & Aproximadamente 380 estudiantes de TI & Acceso al prototipo para consulta de mallas y normativas & Cobertura potencial de la población objetivo \\ \hline
+\textbf{Consulta de información} & Navegación manual por sistemas y documentos PDF & Consulta mediante lenguaje natural & Simplificación del mecanismo de consulta \\ \hline
+\textbf{Recuperación de información} & Búsqueda manual o por palabras clave & \textit{Hit Rate} Top-3 de 92,0\% & El fragmento relevante se recuperó entre los tres primeros resultados en el 92\% de las pruebas \\ \hline
+\textbf{Tiempo tecnológico de respuesta} & No aplica directamente & Métricas de latencia medidas en el prototipo & Permite evaluar la viabilidad de interacción conversacional \\ \hline
+\textbf{Disponibilidad potencial} & Dependiente del horario de los canales administrativos & El software puede operar fuera del horario administrativo & Capacidad potencial de ampliar el horario de consulta \\ \hline
 \end{tabular}
-\caption{Matriz para la Cuantificación del Impacto Operativo y Académico del Proyecto.}\label{tab:cuantificacion_impacto}
+\caption{Matriz de Indicadores de Impacto Potencial del Proyecto.}\label{tab:cuantificacion_impacto}
 \end{table}
-
-Como se evidencia en la Tabla~\ref{tab:cuantificacion_impacto}, la implementación del prototipo genera un beneficio directo a la población estudiantil de la carrera (estimada en \textbf{450 estudiantes} activos) al democratizar y agilizar el acceso a la normativa e información académica. Asimismo, proporciona un ahorro estimado de \textbf{69 horas-hombre mensuales} a la gestión administrativa, reduciendo drásticamente las interrupciones por consultas repetitivas y optimizando la eficiencia institucional.
 
 \section{Objetivos}
 \subsection{Objetivo General}
-Desarrollar un prototipo de Asistente Virtual Inteligente, provisto de una interfaz de avatar 3D y visión artificial, para optimizar la difusión proactiva y el acceso a la información académica de los estudiantes en la carrera de Ingeniería en Tecnologías de la Información de la Universidad Tecnológica Indoamérica.
+Desarrollar e implementar un prototipo de Asistente Virtual Inteligente, provisto de una interfaz de avatar 3D y visión artificial, para optimizar la difusión proactiva y el acceso a la información académica de los estudiantes en la carrera de Ingeniería en Tecnologías de la Información de la Universidad Tecnológica Indoamérica.
 
 %\textit{[Redactar el propósito principal del proyecto, alineado con la solución propuesta e incluyendo explícitamente su implementación.]}
 \subsection{Objetivos Específicos}
 \begin{itemize}
-    \item \textbf{Analizar} los procesos actuales de gestión y consulta de documentación académica en la institución mediante revisión documental y observación directa, para determinar los requerimientos funcionales, no funcionales y la base de conocimiento conversacional del sistema.
-    \item \textbf{Diseñar} la arquitectura de software del asistente aplicando patrones de diseño de microservicios y sistemas distribuidos, para definir con exactitud la integración del módulo conversacional, el motor RAG, la base de conocimiento académica y el entorno gráfico del avatar 3D.
-    \item \textbf{Implementar} el prototipo del asistente virtual integrando los modelos de inteligencia artificial locales, la interfaz antropomórfica web y los mecanismos de interacción visual no biométrica, para obtener una prueba de concepto interactiva funcional.
-    \item \textbf{Evaluar} el desempeño, precisión y usabilidad del prototipo mediante pruebas de interacción con una muestra de estudiantes y métricas de rendimiento computacional (latencia, uso de recursos), para validar empíricamente la viabilidad técnica de la solución propuesta.
+    \item Analizar los procesos actuales de gestión y consulta de documentación académica en la institución mediante revisión documental y observación directa, para determinar los requerimientos funcionales, no funcionales y la base de conocimiento conversacional del sistema.
+    \item Diseñar la arquitectura de software del asistente mediante un enfoque modular cliente-servidor, definiendo la integración del módulo conversacional, el motor RAG, la base de conocimiento académica, los servicios de voz y el entorno gráfico del avatar 3D.
+    \item Implementar el prototipo del asistente virtual integrando los modelos de inteligencia artificial locales, la interfaz antropomórfica web y los mecanismos de interacción visual no biométrica, para obtener una prueba de concepto interactiva funcional.
+    \item Evaluar el desempeño, rendimiento y usabilidad del prototipo mediante pruebas de interacción con una muestra de estudiantes y métricas computacionales (latencia, uso de recursos), para validar empíricamente la viabilidad técnica de la solución propuesta.
 \end{itemize}
 
 \section{Alcance del Proyecto}

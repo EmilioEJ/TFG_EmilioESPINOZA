@@ -2,7 +2,7 @@
 \label{chap:implementacion}
 
 \section{Descripción de la Solución}
-La solución implementada consiste en un prototipo funcional de un Asistente Virtual Inteligente diseñado para la difusión proactiva de reglamentos y mallas curriculares. Para garantizar la privacidad de los datos y un bajo tiempo de respuesta, la arquitectura enfatiza un despliegue híbrido controlado: el procesamiento de visión artificial y el renderizado 3D ocurren localmente en el dispositivo del estudiante, mientras que el servidor únicamente aloja de manera local los modelos de Inteligencia Artificial (LLM), eliminando la latencia y la dependencia exclusiva de proveedores \textit{cloud}.
+La solución implementada consiste en un prototipo funcional de un Asistente Virtual Inteligente diseñado para la difusión proactiva de reglamentos y mallas curriculares. La arquitectura mantiene localmente el motor de recuperación y los componentes principales de inteligencia artificial, mientras determinados servicios de voz utilizan APIs externas para transcripción y síntesis. La captura de video se realiza desde el dispositivo cliente mediante el navegador. Los fotogramas necesarios para la detección de presencia se transmiten temporalmente al backend mediante WebSockets y son procesados sin almacenamiento persistente. El sistema utiliza exclusivamente la información necesaria para determinar la presencia del usuario y activar la interacción, evitando el almacenamiento persistente de imágenes o plantillas biométricas y limitando el procesamiento visual a la detección temporal necesaria para la interacción.
 
 A continuación, la Tabla~\ref{tab:matriz_comparativa} resume la evolución operativa lograda mediante este prototipo frente a los procesos institucionales tradicionales.
 
@@ -18,7 +18,7 @@ A continuación, la Tabla~\ref{tab:matriz_comparativa} resume la evolución oper
     \textbf{Modo de Interacción} & Navegación manual por menús. & Conversacional (Voz natural). \\ \hline
     \textbf{Formato de Respuesta} & Archivos estáticos (PDF). & Respuestas orales y visuales exactas. \\ \hline
     \textbf{Esfuerzo del Usuario} & Alto (búsqueda y lectura exhaustiva). & Bajo (solo requiere preguntar). \\ \hline
-    \textbf{Soporte a Dudas} & Acudir a secretaría (demorado). & Respuestas inmediatas 24/7. \\ \hline
+    \textbf{Soporte a Dudas} & Acudir a secretaría (demorado). & Capacidad técnica de ofrecer consultas fuera del horario administrativo, condicionada a la disponibilidad de infraestructura. \\ \hline
   \end{tabular}
 \end{table}
 
@@ -45,7 +45,7 @@ La Imagen~\ref{img:seccion_login} muestra la interfaz de acceso inicial al siste
 \subsection{Implementación de Visión Artificial Ligera y WebSockets}
 Dado que los servidores virtuales en la nube carecen de periféricos físicos como cámaras web, se modificó el enfoque tradicional de OpenCV local. La solución delega el acceso al hardware al navegador del cliente mediante JavaScript (\texttt{navigator.mediaDevices.getUserMedia}). El frontend extrae fotogramas en formato \texttt{base64} y los envía a través de una conexión bidireccional en tiempo real (\textit{WebSockets}) hacia FastAPI. 
 
-El uso de WebSockets es de vital importancia arquitectónica no solo por su baja latencia, sino porque evita interbloqueos (\textit{deadlocks}) en el servidor. A diferencia de las peticiones HTTP tradicionales, que mantendrían un hilo bloqueado mientras el modelo genera la respuesta de IA, la arquitectura orientada a eventos de los WebSockets permite al servidor procesar los fotogramas visuales y emitir la respuesta en tiempo real de forma asíncrona, sin congelar el flujo de ejecución principal.
+El uso de WebSockets facilita una comunicación bidireccional y asíncrona entre cliente y servidor, evitando que las operaciones de entrada y salida mantengan bloqueado innecesariamente el flujo principal durante el procesamiento de las solicitudes. A diferencia de las peticiones HTTP tradicionales, que mantendrían un hilo bloqueado mientras el modelo genera la respuesta de IA, la arquitectura orientada a eventos de los WebSockets permite al servidor procesar los fotogramas visuales y emitir la respuesta en tiempo real de forma asíncrona, sin congelar el flujo de ejecución principal.
 
 Para detectar a los usuarios de manera proactiva sin incurrir en altos costos computacionales, el servidor analiza la caja delimitadora (\textit{bounding box}) del rostro.
 
@@ -120,7 +120,7 @@ Además, para manejar el riesgo crítico de las alucinaciones (fenómeno donde l
 \label{fig:coseno_rag}
 \end{figure}
 
-La administración dinámica de estos documentos se gestiona a través de un panel especializado, visible en la Imagen~\ref{img:admin_rag}.
+La administración dinámica de estos documentos se gestiona a través de un panel especializado, visible en la Imagen~\ref{img:admin_rag}. El acceso al panel administrativo destinado a la actualización de la base documental debe mantenerse restringido a usuarios autorizados. Las credenciales y claves de los servicios externos se gestionan mediante variables de entorno y no deben almacenarse directamente en el código fuente. Para una futura implementación institucional se recomienda incorporar control de roles, registro de cambios y mecanismos adicionales de auditoría.
 
 \begin{imagen}[htbp]
   \centering
@@ -210,6 +210,8 @@ Como parte del rediseño UI, se desactivó el seguimiento ocular del ratón para
 \section{Pruebas y Validación}
 
 \subsection{Pruebas Técnicas de los Modelos (IA)}
+Las pruebas técnicas del pipeline de inteligencia artificial se ejecutaron sobre el servidor local equipado con Intel Core i7, 32 GB de RAM y NVIDIA RTX 3060 de 12 GB. De manera complementaria, determinadas pruebas de concurrencia del backend web se realizaron sobre un entorno de DigitalOcean. Ambos escenarios se reportan separadamente para evitar comparar directamente métricas obtenidas sobre infraestructuras diferentes.
+
 Las pruebas individuales de los componentes de inteligencia artificial garantizaron la robustez del pipeline completo:
 \begin{itemize}
     \item \textbf{Prueba del Modelo RAG y LLM:} Se evaluó la asertividad del modelo de comprensión (Qwen) al extraer datos de tablas complejas indexadas por \texttt{paraphrase-multilingual}. Se superó el 90\% de precisión en la coincidencia semántica en español.
@@ -218,7 +220,9 @@ Las pruebas individuales de los componentes de inteligencia artificial garantiza
 \end{itemize}
 
 \subsection{Pruebas de Concurrencia}
-Para validar el rendimiento en el servidor (DigitalOcean), se simularon peticiones simultáneas utilizando herramientas de carga como Apache JMeter. Las pruebas confirmaron que el uso de WebSockets asíncronos y el desacoplamiento del LLM evitan que el servidor principal se bloquee (\textit{deadlock}) cuando múltiples usuarios acceden al avatar simultáneamente, manteniendo los tiempos de cola estables.
+Se realizaron pruebas exploratorias de concurrencia mediante Apache JMeter con el propósito de verificar el comportamiento del backend ante solicitudes simultáneas. Los resultados permitieron comprobar el funcionamiento asíncrono del servicio, aunque no se realizó una caracterización exhaustiva de capacidad máxima, por lo que esta evaluación se plantea como línea de profundización futura.
+
+\textcolor{red}{[ESTUDIANTE: Insertar aquí la tabla con los resultados reales obtenidos de JMeter (Usuarios concurrentes, solicitudes, tiempo promedio, tiempo máximo, errores, resultado), según la observación 21.]}
 
 \subsection{Protocolo de Pruebas con Usuarios}
 El objetivo principal del instrumento fue medir la calidad de la interacción y la usabilidad desde la perspectiva del estudiante de la carrera de TI. Para ello, se diseñó un protocolo riguroso:
@@ -238,13 +242,48 @@ El objetivo principal del instrumento fue medir la calidad de la interacción y 
     \item \textbf{Sección 6 - Diagnóstico Técnico:} Pregunta abierta para obtener \textit{feedback} técnico de arquitectura y base de datos antes del despliegue masivo.
 \end{itemize}
 
+\subsection{Evaluación Funcional de Visión Artificial}
+La evaluación tuvo un carácter funcional y buscó comprobar que el mecanismo de detección de presencia activara correctamente el asistente en condiciones representativas de uso. No se pretendió evaluar reconocimiento facial ni identificación biométrica.
+
+\textcolor{red}{[ESTUDIANTE: Insertar aquí la tabla de pruebas funcionales de visión artificial bajo distintas condiciones (iluminación normal, baja, distancia cercana, media) con detecciones correctas y fallos, según la observación 26.]}
+
+\subsection{Matriz de Validación de Requerimientos}
+Para asegurar la trazabilidad del desarrollo, la Tabla~\ref{tab:matriz_requerimientos} sintetiza la validación de los requerimientos funcionales y no funcionales del prototipo.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Matriz final de validación de requerimientos.}
+  \label{tab:matriz_requerimientos}
+  \resizebox{\textwidth}{!}{
+  \begin{tabular}{|l|p{4cm}|p{4cm}|c|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Requisito} & \textbf{Evidencia} & \textbf{Resultado} & \textbf{Estado} \\ \hline
+    RF-01 Visión no biométrica & Prueba de detección & Operación funcional & Cumple \\ \hline
+    RF-02 STT & Pruebas de transcripción & Transcripción asertiva & Cumple \\ \hline
+    RF-03 RAG & Hit Rate 92.0\% & Recuperación satisfactoria & Cumple \\ \hline
+    RF-04 LLM & Pruebas funcionales & Generación sin alucinaciones & Cumple \\ \hline
+    RF-05 TTS & TTFB aprox. 450 ms & Síntesis de voz natural & Cumple \\ \hline
+    RF-06 Gestión de estados & Prueba funcional & Retorno a reposo correcto & Cumple \\ \hline
+    RNF-01 Privacidad & Sin persistencia de fotogramas & Anonimato protegido & Cumple \\ \hline
+    RNF-02 Latencia & TTFT y TTFB medidos & Interacción conversacional & Cumple \\ \hline
+  \end{tabular}
+  }
+\end{table}
+
 \section{Resultados}
 
 \subsection{Reducción de Latencia}
-Se comparó la arquitectura implementada (RAG multilingüe) contra enfoques anteriores. El uso de RAG y las APIs optimizadas redujo el tiempo de respuesta inicial (\textit{Time To First Token}) a un promedio de 3,2 segundos.
+Durante el proceso iterativo de desarrollo se evaluó inicialmente Qwen 2.5 cuantizado como modelo de generación. Posteriormente, la versión final del prototipo incorporó Nemotron debido a su comportamiento en las pruebas de latencia. En consecuencia, las mediciones correspondientes a cada modelo se identifican expresamente en las tablas de resultados.
 
-\subsection{Precisión de Recuperación}
-La Tabla~\ref{tab:mrr_eval} muestra los resultados de exactitud en la extracción de fragmentos.
+Las pruebas de rendimiento permitieron distinguir diferentes componentes de la latencia. El servicio de síntesis de voz registró un Time to First Byte (TTFB) aproximado de 450 ms desde el envío de la solicitud al servicio TTS hasta el inicio de la recepción del audio. De manera independiente, el pipeline conversacional presentó un tiempo aproximado de 3,2 segundos para iniciar la generación de la respuesta (\textit{Time To First Token}).
+
+Estas métricas representan etapas distintas del proceso y, por tanto, no deben interpretarse como equivalentes. Para evaluar la experiencia completa del usuario, resulta necesario considerar conjuntamente transcripción, recuperación documental, generación de lenguaje, síntesis y reproducción del audio.
+
+\subsection{Evaluación del Rendimiento de Recuperación Semántica}
+Para evaluar el motor de recuperación se utilizó un conjunto de consultas asociadas a reglamentos, sílabos y mallas curriculares. Para cada consulta se identificó previamente el documento o fragmento considerado relevante y posteriormente se verificó su aparición entre los tres primeros resultados recuperados por el sistema. A partir de estos resultados se calcularon las métricas Hit Rate Top-3 y MRR.
+
+La Tabla~\ref{tab:mrr_eval} presenta los resultados del motor de recuperación mediante las métricas Hit Rate Top-3 y Mean Reciprocal Rank (MRR). El Hit Rate indica la proporción de consultas en las que el fragmento relevante apareció entre los tres primeros resultados recuperados, mientras que MRR refleja la posición promedio en la que apareció el primer resultado relevante.
 
 \begin{table}[htbp]
   \centering
@@ -291,16 +330,15 @@ La Tabla~\ref{tab:consumo_recursos} evidencia el uso eficiente de hardware (VRAM
 \elaboradopor{Estudiante}
 \fuente{Monitoreo de recursos del servidor en producción}
 
-\subsection{Análisis de Latencia y Consumo de Tokens}
-Para asegurar una experiencia conversacional fluida, la latencia ideal (\textit{Time To First Byte} - TTFB) debe acercarse a los estándares de sistemas de alta disponibilidad comerciales como ChatGPT, los cuales operan en el rango de 300 a 500 ms. Gracias a la implementación del reciente modelo Nemotron, optimizado para inferencia rápida, el sistema alcanza un TTFB promedio de 450 milisegundos, cumpliendo con el umbral óptimo de fluidez interactiva.
-Adicionalmente, se realizó un estimado de consumo computacional. Por cada sesión típica de un estudiante (aproximadamente 3 interacciones continuas de preguntas y respuestas), el sistema consume un promedio de 2500 tokens de contexto (entrada procesada por el RAG) y 800 tokens de generación (salida del LLM).
+\subsection{Estimado de Consumo Computacional}
+Se realizó un estimado de consumo computacional asociado a la inferencia generativa. Por cada sesión típica de un estudiante (aproximadamente 3 interacciones continuas de preguntas y respuestas), el sistema consume un promedio de 2500 tokens de contexto (entrada procesada por el RAG) y 800 tokens de generación (salida del LLM).
 
 \section{Cronograma y Presupuesto}
 Para la ejecución del proyecto, se elaboró un presupuesto estimado mensualizado (OPEX) y de inversión inicial (CAPEX) considerando los costos de las APIs utilizadas y la infraestructura del servidor local (Tabla~\ref{tab:presupuesto}).
 
 \begin{table}[htbp]
   \centering
-  \caption{Presupuesto estimado de implementación y operación mensual.}
+  \caption{Presupuesto referencial de implementación y operación.}
   \label{tab:presupuesto}
   \begin{tabular}{|l|p{6cm}|r|}
     \hline
@@ -312,6 +350,8 @@ Para la ejecución del proyecto, se elaboró un presupuesto estimado mensualizad
     \textbf{Mantenimiento} & Soporte y actualización de mallas & \$ 50.00 / mes \\ \hline
   \end{tabular}
 \end{table}
+
+Los valores presentados constituyen una estimación de referencia. Los costos asociados a APIs dependen del volumen real de uso, minutos de audio procesado, número de consultas y condiciones comerciales de los proveedores; por tanto, pueden variar durante una implementación institucional.
 
 El desarrollo se planificó y ejecutó a lo largo de un periodo de cinco meses, estructurado según las iteraciones ágiles detalladas en la Tabla~\ref{tab:cronograma}.
 
@@ -348,7 +388,9 @@ Para validar la efectividad de la solución, se aplicó una encuesta de usabilid
 \end{minipage}
 \end{figure}
 
-El perfil de los usuarios indica que la mayoría se encuentra en el 4to y 8vo semestre, y presentan una alta frecuencia de uso previo de herramientas como ChatGPT o Claude, lo que valida su criterio técnico para evaluar el asistente.
+\textcolor{red}{[ESTUDIANTE: Corregir pie de figura para que coincida exactamente con la variable graficada (ej. n=13).]}
+
+El perfil de los usuarios indica que la mayoría se encuentra en el 4to y 8vo semestre, y presentan una alta frecuencia de uso previo de herramientas como ChatGPT o Claude, lo que evidencia familiaridad previa de la mayoría de los participantes con herramientas de IA generativa.
 
 \begin{figure}[htbp]
 \centering
@@ -363,6 +405,8 @@ El perfil de los usuarios indica que la mayoría se encuentra en el 4to y 8vo se
   \caption{Percepción de integración de los módulos del sistema.}
 \end{minipage}
 \end{figure}
+
+\textcolor{red}{[ESTUDIANTE: Corregir pie de figura para que coincida exactamente con la variable graficada (ej. n=13).]}
 
 Respecto a la integración, la mayoría de los usuarios consideraron que la interfaz, el micrófono y el modelo 3D estaban de acuerdo o totalmente de acuerdo en estar bien integrados, demostrando una experiencia fluida.
 
@@ -380,6 +424,8 @@ Respecto a la integración, la mayoría de los usuarios consideraron que la inte
 \end{minipage}
 \end{figure}
 
+\textcolor{red}{[ESTUDIANTE: Corregir pie de figura para que coincida exactamente con la variable graficada (ej. n=13).]}
+
 En la claridad de la información, predominan valoraciones positivas, evidenciando que el motor RAG cumplió su objetivo de reducir la fricción documental.
 
 \begin{figure}[htbp]
@@ -395,6 +441,7 @@ En la claridad de la información, predominan valoraciones positivas, evidencian
   \caption{Comprensión precisa de las intenciones del usuario.}
 \end{minipage}
 \end{figure}
+\textcolor{red}{[ESTUDIANTE: Corregir pie de figura para que coincida exactamente con la variable graficada (ej. n=13).]}
 
 \begin{figure}[htbp]
 \centering
@@ -409,11 +456,13 @@ En la claridad de la información, predominan valoraciones positivas, evidencian
   \caption{Capacidad de reconducción ante malentendidos.}
 \end{minipage}
 \end{figure}
+\textcolor{red}{[ESTUDIANTE: Corregir pie de figura para que coincida exactamente con la variable graficada (ej. n=13).]}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.6\textwidth]{Logos/PREGUNTA11.png}
 \caption{Preferencia futura de uso del asistente virtual.}
 \end{figure}
+\textcolor{red}{[ESTUDIANTE: Corregir pie de figura para que coincida exactamente con la variable graficada (ej. n=13).]}
 
-Finalmente, la intención de uso futuro es abrumadoramente positiva, con la mayoría de los estudiantes indicando estar "De acuerdo" o "Totalmente de acuerdo" en preferir este canal frente a la búsqueda web tradicional, validando el cumplimiento del objetivo principal del proyecto. Entre las sugerencias de mejora emitidas por los estudiantes se destacó optimizar aún más la latencia y ampliar la base de datos documental.
+Finalmente, la mayoría de los participantes seleccionó las categorías 'De acuerdo' o 'Totalmente de acuerdo' respecto a su intención de utilizar nuevamente el asistente frente a la búsqueda web tradicional. Entre las sugerencias de mejora emitidas por los estudiantes se destacó optimizar aún más la latencia y ampliar la base de datos documental.

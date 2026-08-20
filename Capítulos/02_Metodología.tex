@@ -43,7 +43,7 @@ La Tabla~\ref{tab:metricas_diagnostico_metodologia} presenta el contraste cuanti
 
 \section{Área de Estudio}
 
-\begin{table}[htbp]
+\begin{table}[h!]
   \centering
   \caption{Área de estudio.}
   \label{tab:area_estudio}
@@ -71,37 +71,62 @@ La Tabla~\ref{tab:metricas_diagnostico_metodologia} presenta el contraste cuanti
 
 \section{Metodología de Desarrollo o Implementación}
 
-Para abordar la complejidad tecnológica de este proyecto, se adopta un enfoque híbrido. Como metodología de investigación principal se emplea la \textbf{Metodología de Investigación en Ciencia de Diseño (DSRM - Design Science Research Methodology)}, la cual es el estándar para proyectos de tecnologías de la información orientados a la creación de artefactos innovadores que resuelven problemas organizacionales \cite{hevner2004design}. DSRM proporciona el marco riguroso para la conceptualización, el diseño arquitectónico y la validación empírica de la solución propuesta.
+Para el desarrollo del proyecto se adoptó como metodología principal la Metodología de Investigación en Ciencia de Diseño (DSRM), debido a que el trabajo se orienta al diseño, construcción y evaluación de un artefacto tecnológico destinado a resolver una problemática específica \cite{hevner2004design}.
 
-Simultáneamente, para la construcción técnica del artefacto (el prototipo de software), que involucra la integración de múltiples capas tecnológicas avanzadas (Inteligencia Artificial, Visión Computacional y Renderizado 3D), se descartan los modelos tradicionales de desarrollo en cascada (\textit{Waterfall}). En su lugar, el proyecto se fundamenta en una \textbf{Metodología Iterativa e Incremental} sustentada en los principios del marco de trabajo ágil (\textit{Agile}), específicamente el marco Scrum para la creación ágil de prototipos funcionales \cite{humble2011devops}.
+Como apoyo para la construcción técnica del prototipo se utilizó un enfoque iterativo e incremental, permitiendo desarrollar y ajustar progresivamente los módulos de recuperación de información, visión artificial, procesamiento de voz y avatar 3D. Este enfoque resultó pertinente debido a la necesidad de realizar pruebas sucesivas sobre modelos de lenguaje, parámetros de recuperación semántica y tiempos de respuesta.
 
-Se justifica esta metodología empírica debido a que el ajuste de hiperparámetros en los Modelos de Lenguaje (LLMs) y la calibración de la latencia en el procesamiento de video en un servidor local requieren experimentación continua. El desarrollo se estructurará en las siguientes fases iterativas:
+La aplicación de las etapas de la metodología DSRM en el contexto de este trabajo se sintetiza en la Tabla~\ref{tab:dsrm}.
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{6.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|}
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Etapa DSRM} & \textbf{Aplicación en el proyecto} & \textbf{Evidencia} \\ \hline
+Identificación del problema & Análisis del acceso actual a información académica & Diagnóstico, Cap. II \\ \hline
+Definición de objetivos & Requerimientos funcionales y no funcionales & Sección 2.5 \\ \hline
+Diseño y desarrollo & Arquitectura RAG, visión, voz y avatar & Secciones 2.6 y 3.2 \\ \hline
+Demostración & Implementación del prototipo & Capturas y repositorio \\ \hline
+Evaluación & Pruebas técnicas y pruebas con estudiantes & Secciones 3.3 y 3.6 \\ \hline
+Comunicación & Documentación del trabajo y repositorio & Tesis y anexos \\ \hline
+\end{tabular}
+\caption{Aplicación de la metodología DSRM en el proyecto.}\label{tab:dsrm}
+\end{table}
+
+El desarrollo iterativo se estructuró en las siguientes fases:
 
 \begin{itemize}
-    \item \textbf{Fase 1 - Configuración del Entorno Local y Análisis de Datos:} Recopilación, limpieza y segmentación (\textit{chunking}) de los documentos oficiales en formato PDF para su posterior indexación en la base de datos vectorial local.
-    \item \textbf{Fase 2 - Desarrollo del Motor Cognitivo (RAG):} Implementación de la Generación Aumentada por Recuperación. Se probarán modelos de incrustación (\textit{embeddings}) y LLMs optimizados para ejecución en servidor local, iterando hasta reducir las "alucinaciones" del modelo.
-    \item \textbf{Fase 3 - Desarrollo Sensorial (Visión y Voz):} Programación de algoritmos ligeros de visión artificial para la detección de presencia efímera, y acoplamiento de las APIs o modelos locales de Speech-to-Text (STT) y Text-to-Speech (TTS).
-    \item \textbf{Fase 4 - Integración Multimodal (Avatar 3D):} Consolidación del flujo. El audio generado por el TTS se sincronizará (\textit{lip-sync}) con las mallas faciales del avatar renderizado mediante WebGL o un entorno equivalente.
-    \item \textbf{Fase 5 - Pruebas y Ajustes de Rendimiento:} Despliegue en el servidor local destino. Se realizarán pruebas de estrés para medir el uso de GPU/CPU y la latencia end-to-end de las respuestas.
+    \item \textbf{Fase 1 - Configuración del Entorno Local y Análisis de Datos:} Se recopilaron, limpiaron y segmentaron (\textit{chunking}) los documentos oficiales en formato PDF para su indexación en la base de datos vectorial local.
+    \item \textbf{Fase 2 - Desarrollo del Motor Cognitivo (RAG):} Se implementó la Generación Aumentada por Recuperación. Se probaron modelos de incrustación (\textit{embeddings}) y LLMs optimizados para ejecución en servidor local, iterando hasta reducir las alucinaciones del modelo.
+    \item \textbf{Fase 3 - Desarrollo Sensorial (Visión y Voz):} Se programaron algoritmos ligeros de visión artificial para la detección de presencia efímera, y se acoplaron las APIs de Speech-to-Text (STT) y Text-to-Speech (TTS).
+    \item \textbf{Fase 4 - Integración Multimodal (Avatar 3D):} Se consolidó el flujo. El audio generado por el TTS se sincronizó (\textit{lip-sync}) con las mallas faciales del avatar renderizado mediante WebGL.
+    \item \textbf{Fase 5 - Pruebas y Ajustes de Rendimiento:} Se desplegó en el servidor local destino. Se realizaron pruebas de estrés para medir el uso de GPU/CPU y la latencia end-to-end de las respuestas.
 \end{itemize}
 
 %\textit{[Describir y justificar la metodología empleada según la naturaleza del proyecto, indicando las fases y actividades a ejecutar. Por ejemplo, metodologías ágiles o tradicionales para software, o modelos de diseño, implementación o despliegue para hardware o infraestructura.]}
 
 
 \section{Técnicas e Instrumentos de Recolección de Información}
-Para garantizar la validez científica y el correcto desempeño técnico del prototipo, la recolección de información se dividirá en dos etapas metodológicas: la etapa de diagnóstico/desarrollo y la etapa de validación.
+Para garantizar la validez científica y el correcto desempeño técnico del prototipo, la recolección de información se dividió en dos etapas metodológicas: la etapa de diagnóstico/desarrollo y la etapa de validación.
 
 \subsection{Técnicas para la Fase de Diagnóstico y Desarrollo}
 \begin{itemize}
-    \item \textbf{Revisión Documental:} Se empleará para alimentar el núcleo de conocimiento de la IA. El instrumento será una \textit{matriz de extracción de datos}, donde se catalogarán y normalizarán los textos de mallas curriculares, estatutos y sílabos de la carrera de TI antes de inyectarlos en la base de datos vectorial.
-    \item \textbf{Observación Directa No Participante:} Se utilizará para analizar la afluencia y el tipo de interacciones que tienen los estudiantes en las oficinas administrativas, lo que permitirá diseñar \textit{prompts} base (instrucciones de sistema) que preparen al asistente virtual para los escenarios de consulta más comunes.
+    \item \textbf{Revisión Documental:} Se empleó para alimentar el núcleo de conocimiento de la IA. El instrumento fue una \textit{matriz de extracción de datos}, donde se catalogaron y normalizaron los textos de mallas curriculares, estatutos y sílabos de la carrera de TI antes de inyectarlos en la base de datos vectorial.
+    \item \textbf{Observación Directa No Participante:} Se utilizó para analizar la afluencia y el tipo de interacciones que tienen los estudiantes en las oficinas administrativas, lo que permitió diseñar \textit{prompts} base (instrucciones de sistema) que preparen al asistente virtual para los escenarios de consulta más comunes.
 \end{itemize}
 
 \subsection{Técnicas para la Fase de Evaluación y Validación}
 \begin{itemize}
-    \item \textbf{Métricas de Registro Automático (\textit{Logging}):} Para evaluar el rendimiento técnico (Requerimientos No Funcionales), el sistema incluirá \textit{scripts} que registrarán variables cuantitativas como el tiempo de respuesta del sistema (latencia en milisegundos desde que el usuario deja de hablar hasta que el avatar responde) y el porcentaje de uso de la memoria/procesador del servidor local.
-    \item \textbf{Encuesta de Usabilidad (\textit{Survey}):} Tras realizar sesiones de prueba (Focus Group) con una muestra de estudiantes de TI, se aplicará un cuestionario basado en la Escala de Usabilidad del Sistema (SUS, por sus siglas en inglés). El instrumento constará de preguntas en escala de Likert para medir parámetros de interfaz, como la naturalidad de la voz, el nivel de acierto en las respuestas institucionales, la fluidez de la animación del avatar y la comodidad de interactuar con el sistema sin utilizar periféricos tradicionales.
+    \item \textbf{Métricas de Registro Automático (\textit{Logging}):} Para evaluar el rendimiento técnico (Requerimientos No Funcionales), el sistema incluyó \textit{scripts} que registraron variables cuantitativas como el tiempo de respuesta del sistema (latencia en milisegundos desde que el usuario deja de hablar hasta que el avatar responde) y el porcentaje de uso de la memoria/procesador del servidor local.
+    \item \textbf{Cuestionario de Usabilidad y Experiencia de Usuario:} Para evaluar la interacción con el prototipo se diseñó un cuestionario estructurado en escala Likert y diferencial semántico. El instrumento permitió recopilar la percepción de los participantes respecto a integración de componentes, comprensión de las respuestas, apariencia y animacidad del avatar, privacidad percibida, latencia e intención futura de uso.
 \end{itemize}
+
+Para la evaluación de usabilidad se trabajó con una muestra piloto de 13 estudiantes de la carrera de Tecnologías de la Información pertenecientes a diferentes niveles académicos. La evaluación tuvo un carácter exploratorio y estuvo orientada a identificar la percepción inicial de los usuarios y oportunidades de mejora del prototipo, por lo que sus resultados no pretenden generalizarse estadísticamente a la totalidad de estudiantes de la carrera. Se utilizó un muestreo no probabilístico por conveniencia. 
+
+\textcolor{red}{Aunque participaron 13 estudiantes, algunas preguntas no fueron respondidas por la totalidad de participantes; por esta razón, el número válido de respuestas varía entre determinadas variables. En cada gráfico se conserva el número efectivo de respuestas registrado por el formulario (e.g., n=12, n=11).}
 
 %\textit{[Describir las técnicas utilizadas para obtener información durante el diagnóstico y la validación del proyecto, tales como entrevistas, encuestas u observación directa.]}
 
