@@ -127,9 +127,9 @@ La administración dinámica de estos documentos se gestiona a través de un pan
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_AdminRAG.png}
   \caption{Panel de Administración del RAG para actualizar mallas curriculares.}
   \label{img:admin_rag}
+  \elaboradopor{Estudiante}
+  \fuente{Captura de pantalla del sistema}
 \end{imagen}
-\elaboradopor{Estudiante}
-\fuente{Captura de pantalla del sistema}
 
 \subsection{Procesamiento de Voz Asíncrono (Whisper y ElevenLabs)}
 Para solucionar la limitación del \textit{Text-to-Speech} robótico tradicional (\texttt{edge-tts}), se implementó una delegación asíncrona dual para la audición y el habla. El usuario graba su voz, y FastAPI delega la transcripción al modelo \textbf{Whisper-v3} a través de la API ultrarrápida de Groq. Posteriormente, el texto del LLM es convertido a voz natural (Voz ``Valeria'') mediante la API de ElevenLabs con \textit{HTTP Chunking Streaming}.
@@ -194,18 +194,18 @@ Como parte del rediseño UI, se desactivó el seguimiento ocular del ratón para
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_Chatear.png}
   \caption{Modo Chat Tradicional del Asistente Virtual.}
   \label{img:seccion_chat}
+  \elaboradopor{Estudiante}
+  \fuente{Captura de pantalla del sistema}
 \end{imagen}
-\elaboradopor{Estudiante}
-\fuente{Captura de pantalla del sistema}
 
 \begin{imagen}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_Conversacional.png}
   \caption{Modo Conversacional Inmersivo (Avatar en primer plano con controles de voz).}
   \label{img:seccion_conversacional}
+  \elaboradopor{Estudiante}
+  \fuente{Captura de pantalla del sistema}
 \end{imagen}
-\elaboradopor{Estudiante}
-\fuente{Captura de pantalla del sistema}
 
 \section{Pruebas y Validación}
 
@@ -243,8 +243,20 @@ El objetivo principal del instrumento fue medir la calidad de la interacción y 
 \subsection{Evaluación Funcional de Visión Artificial}
 La evaluación tuvo un carácter funcional y buscó comprobar que el mecanismo de detección de presencia activara correctamente el asistente en condiciones representativas de uso. No se pretendió evaluar reconocimiento facial ni identificación biométrica.
 
-\textcolor{red}{[ESTUDIANTE: Insertar aquí la tabla de pruebas funcionales de visión artificial bajo distintas condiciones (iluminación normal, baja, distancia cercana, media) con detecciones correctas y fallos, según la observación 26.]}
-
+\begin{table}[htbp]
+  \centering
+  \caption{Pruebas funcionales del módulo de visión artificial.}
+  \label{tab:vision_artificial}
+  \begin{tabular}{|p{3cm}|p{4cm}|p{6.5cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Condición} & \textbf{Escenario} & \textbf{Resultado Observado} \\ \hline
+    Iluminación & Normal (Luz de día u oficina) & El sistema detecta correctamente la presencia del usuario y activa la interfaz. \\ \hline
+    Iluminación & Baja (Oscuridad o penumbra) & El sistema no logra reconocer la caja delimitadora; no detecta a nadie. \\ \hline
+    Distancia & Muy cercana ($<$ 30 cm) & El rostro o cuerpo ocupan demasiado encuadre; no detecta por proximidad extrema. \\ \hline
+    Distancia & Media (50 cm - 1.5 m) & El sistema funciona correctamente; la detección es continua y estable. \\ \hline
+  \end{tabular}
+\end{table}
 \subsection{Matriz de Validación de Requerimientos}
 Para asegurar la trazabilidad del desarrollo, la Tabla~\ref{tab:matriz_requerimientos} sintetiza la validación de los requerimientos funcionales y no funcionales del prototipo.
 
