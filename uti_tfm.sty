@@ -146,6 +146,7 @@
 }
 
 % Nuevo flotante: Imagen (para separar de Gráficos si lo deseas)
+\RequirePackage{float}
 \RequirePackage{newfloat}
 \DeclareFloatingEnvironment[
   fileext=loi,
@@ -197,8 +198,8 @@
 \providecommand{\listofimagenes}{\listof{imagen}{Índice de Imágenes}}
 
 % --- Utilidades “Elaborado por:” / “Fuente:” como en el PDF ---
-\newcommand{\elaboradopor}[1]{\par\noindent\textbf{Elaborado por:} #1\par}
-\newcommand{\fuente}[1]{\par\noindent\textbf{Fuente:} #1\par}
+\newcommand{\elaboradopor}[1]{{\par\vspace{4pt}\raggedright\noindent\textbf{Elaborado por:} #1\par}}
+\newcommand{\fuente}[1]{{\par\raggedright\noindent\textbf{Fuente:} #1\par}}
 
 \makeatletter
 
