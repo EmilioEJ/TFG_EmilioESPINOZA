@@ -295,7 +295,7 @@ Para evaluar el motor de recuperación se utilizó un conjunto de consultas asoc
 
 La Tabla~\ref{tab:mrr_eval} presenta los resultados del motor de recuperación mediante las métricas Hit Rate Top-3 y Mean Reciprocal Rank (MRR). El Hit Rate indica la proporción de consultas en las que el fragmento relevante apareció entre los tres primeros resultados recuperados, mientras que MRR refleja la posición promedio en la que apareció el primer resultado relevante.
 
-\begin{table}[htbp]
+\begin{table}[ht!]
   \centering
   \caption{Evaluación cuantitativa del motor de recuperación semántica.}
   \label{tab:mrr_eval}
@@ -310,14 +310,13 @@ La Tabla~\ref{tab:mrr_eval} presenta los resultados del motor de recuperación m
     \textbf{Promedio Global} & \textbf{92.0\%} & \textbf{0.84} \\
     \hline
   \end{tabular}
+  \elaboradopor{Estudiante}
+  \fuente{Pruebas de validación del sistema}
 \end{table}
-\elaboradopor{Estudiante}
-\fuente{Pruebas de validación del sistema}
-
 \subsection{Uso de Recursos y Computación de Borde}
 La Tabla~\ref{tab:consumo_recursos} evidencia el uso eficiente de hardware (VRAM), que logró un balance exitoso gracias a las migraciones técnicas recientes.
 
-\begin{table}[htbp]
+\begin{table}[ht!]
   \centering
   \caption{Consumo de memoria en el servidor durante picos de inferencia.}
   \label{tab:consumo_recursos}
@@ -336,9 +335,9 @@ La Tabla~\ref{tab:consumo_recursos} evidencia el uso eficiente de hardware (VRAM
     \hline
   \end{tabular}
   }
+  \elaboradopor{Estudiante}
+  \fuente{Monitoreo de recursos del servidor en producción}
 \end{table}
-\elaboradopor{Estudiante}
-\fuente{Monitoreo de recursos del servidor en producción}
 
 \subsection{Estimado de Consumo Computacional}
 Se realizó un estimado de consumo computacional asociado a la inferencia generativa. Por cada sesión típica de un estudiante (aproximadamente 3 interacciones continuas de preguntas y respuestas), el sistema consume un promedio de 2500 tokens de contexto (entrada procesada por el RAG) y 800 tokens de generación (salida del LLM).
