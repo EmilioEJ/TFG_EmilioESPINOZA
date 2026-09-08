@@ -145,45 +145,67 @@ Para la evaluación de usabilidad se trabajó con una muestra piloto de 13 estud
 
 La definición de los requerimientos establece las directrices técnicas y operativas que el sistema debe cumplir. A continuación se detallan los requerimientos funcionales (RF) y no funcionales (RNF) en formato de tabla para asegurar su trazabilidad.
 
+\begin{landscape}
 \subsection{Requerimientos Funcionales (RF)}
 
-\begin{table}[H]
-  \caption{Requerimientos Funcionales del Sistema.}
-  \label{tab:rf_formal}
-  \centering
-  \small
-  \renewcommand{\arraystretch}{1.2}
-  \begin{tabular}{|p{1.5cm}|p{3.5cm}|p{8.5cm}|}
-    \hline
-    \rowcolor[HTML]{EFEFEF}
-    \textbf{Código} & \textbf{Nombre} & \textbf{Descripción Técnica} \\ \hline
-    \textbf{RF-01} & Interacción Visual no Biométrica & El sistema debe detectar la presencia del usuario frente a la cámara web analizando exclusivamente cajas delimitadoras (bounding boxes), sin aplicar biometría facial ni reconocimiento de identidad. \\ \hline
-    \textbf{RF-02} & Captura y Transcripción de Voz (STT) & El sistema debe capturar el audio del micrófono del usuario de forma asíncrona y transcribirlo a texto mediante un modelo Whisper-v3 vía API externa, manejando jerga académica. \\ \hline
-    \textbf{RF-03} & Motor RAG Multilingüe & El sistema debe procesar la consulta utilizando embeddings en español y recuperar los fragmentos documentales más relevantes de una base de datos vectorial local (ChromaDB). \\ \hline
-    \textbf{RF-04} & Generación de Respuesta (LLM) & El sistema debe enviar la instrucción base (prompt) más el contexto recuperado al LLM para generar una respuesta natural y libre de alucinaciones. \\ \hline
-    \textbf{RF-05} & Síntesis de Texto a Voz (TTS) & El sistema debe convertir el texto de la respuesta en audio mediante un flujo de streaming segmentado (HTTP Chunking), reduciendo el TTFB. \\ \hline
-    \textbf{RF-06} & Renderizado y Lip-Sync 3D & El sistema debe renderizar un modelo 3D (VRM) en WebGL y sincronizar la apertura de boca del avatar con los fonemas extraídos del audio sintetizado. \\ \hline
-  \end{tabular}
-\end{table}
+\begingroup
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{xltabular}{\linewidth}{|>{\centering\arraybackslash}p{1.4cm}|>{\raggedright\arraybackslash\hsize=0.8\hsize}X|>{\raggedright\arraybackslash\hsize=1.0\hsize}X|>{\raggedright\arraybackslash\hsize=1.4\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|}
+\caption{Requerimientos Funcionales del Sistema.}
+\label{tab:rf_formal} \\
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Código} & \textbf{Nombre del Requerimiento} & \textbf{Entradas / Estímulo} & \textbf{Procesamiento y Control} & \textbf{Salida / Respuesta} & \textbf{Métrica de Validación y Prueba} \\ \hline
+\endfirsthead
+\multicolumn{6}{c}%
+{{\bfseries \tablename\ \thetable{} -- continuación de la página anterior}} \\
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Código} & \textbf{Nombre del Requerimiento} & \textbf{Entradas / Estímulo} & \textbf{Procesamiento y Control} & \textbf{Salida / Respuesta} & \textbf{Métrica de Validación y Prueba} \\ \hline
+\endhead
+\hline \multicolumn{6}{|r|}{{Continúa en la siguiente página}} \\ \hline
+\endfoot
+\endlastfoot
+\textbf{RF-01} & Detección No Biométrica de Presencia & Flujo de video continuo en formato Base64 (640x480 a 15 fps) transmitido por el cliente mediante WebSockets. & El backend evalúa la presencia detectando la caja delimitadora (Bounding Box) del rostro. Si el área ($W \times H$) supera el umbral de píxeles tau durante 3 frames consecutivos, se activa la interacción. & Mensaje lógico en formato JSON \{\texttt{'status': 'active'}\} para iniciar el avatar en el frontend. & Aprobación del 100\% en condiciones de luz normal ($>150$ lux) a una distancia de 50 cm a 1.5 m. \\ \hline
+\textbf{RF-02} & Transcripción de Voz a Texto (STT) & Fragmento de audio digital en formato WebM capturado asíncronamente por el micrófono del cliente. & El backend FastAPI extrae el audio y realiza una solicitud API REST HTTPS al modelo Whisper-v3 (en la infraestructura Groq) para transcribir el flujo de audio en español. & String de texto decodificado con la consulta del estudiante en formato UTF-8. & Tasa de error de palabras (WER) $< 5$\% en un entorno controlado con ruido de fondo $< 45$ dB. \\ \hline
+\textbf{RF-03} & Búsqueda Semántica RAG & Consulta textual del estudiante transcrita o ingresada manualmente por teclado. & Generación de vector de consulta (384 dimensiones) usando paraphrase-multilingual-MiniLM-L12-v2 y cálculo de similitud del coseno contra ChromaDB local. & Lista priorizada de los 3 fragmentos documentales con mayor similitud semántica (Top-3). & Hit Rate de recuperación semántica del Top-3 $\ge 90.0$\% evaluado con un banco de 50 preguntas piloto. \\ \hline
+\textbf{RF-04} & Generación de Respuesta por LLM & Contexto académico recuperado (Top-3) insertado dentro de un prompt estructurado de 'Contexto Cerrado'. & Inferencia local en el servidor del LLM Qwen 2.5 / Nemotron a través de Ollama. Si la similitud del coseno de los fragmentos recuperados es inferior a 0.65, el modelo debe rechazar cortésmente la respuesta. & Respuesta de texto precisa y estrictamente verídica basada en los reglamentos oficiales de la UTI. & Tasa de alucinación o invención de datos del 0.0\% (Validación ciega por expertos en reglamentos). \\ \hline
+\textbf{RF-05} & Síntesis de Texto a Voz (TTS) & Respuesta de texto generada por el LLM. & FastAPI segmenta el texto y realiza llamadas asíncronas a la API de ElevenLabs (voz Valeria), devolviendo el audio mediante fragmentos en tiempo real (HTTP Chunking Streaming). & Flujo binario de audio MP3/WAV reproducido asíncronamente en los altavoces del cliente. & Latencia de inicio de reproducción (Time to First Byte - TTFB) $< 500$ milisegundos tras recibir el texto del LLM. \\ \hline
+\textbf{RF-06} & Gestión de Sesión y Retorno a Reposo & Contador lógico de inactividad conversacional activo (timeout timer). & El sistema monitorea la interacción por voz y video. Si no se detectan rostros ni actividad de audio en 45 segundos, se envía señal de despedida. & Mensaje JSON \{\texttt{'status': 'reposo'}\} que activa animación de despedida y apaga la cámara y micrófono del cliente. & Prueba de caja negra: retorno inmediato al estado de reposo al cumplirse el timeout (desviación $< 1.0$s). \\ \hline
+\end{xltabular}
+\endgroup
 
 \subsection{Requerimientos No Funcionales (RNF)}
 
-\begin{table}[H]
-  \caption{Requerimientos No Funcionales del Sistema.}
-  \label{tab:rnf_formal}
-  \centering
-  \small
-  \renewcommand{\arraystretch}{1.2}
-  \begin{tabular}{|p{1.5cm}|p{2.5cm}|p{6cm}|p{3cm}|}
-    \hline
-    \rowcolor[HTML]{EFEFEF}
-    \textbf{Código} & \textbf{Atributo} & \textbf{Descripción} & \textbf{Métrica / KPI} \\ \hline
-    \textbf{RNF-01} & Seguridad y Privacidad & El procesamiento visual debe ser efímero. Prohibido el almacenamiento en disco de las imágenes capturadas. & 0 fotogramas almacenados en persistencia. \\ \hline
-    \textbf{RNF-02} & Baja Latencia & El tiempo de respuesta de la síntesis de voz (TTFB) debe permitir una interacción conversacional natural. & TTFB $\le$ 800 milisegundos. \\ \hline
-    \textbf{RNF-03} & Precisión Documental & El motor de búsqueda semántica debe garantizar la recuperación asertiva de reglamentos complejos. & \textit{Hit Rate} (Top-3) $\ge$ 90,0\%. \\ \hline
-    \textbf{RNF-04} & Aislamiento & La arquitectura debe operar de forma agnóstica sin requerir conexión a bases de datos transaccionales. & 100\% desacoplado del SGA institucional. \\ \hline
-  \end{tabular}
-\end{table}
+\begingroup
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{xltabular}{\linewidth}{|>{\centering\arraybackslash}p{1.4cm}|>{\raggedright\arraybackslash\hsize=0.8\hsize}X|>{\raggedright\arraybackslash\hsize=1.0\hsize}X|>{\raggedright\arraybackslash\hsize=1.4\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|}
+\caption{Requerimientos No Funcionales del Sistema.}
+\label{tab:rnf_formal} \\
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Código} & \textbf{Nombre del Requerimiento} & \textbf{Entradas / Estímulo} & \textbf{Procesamiento y Control} & \textbf{Salida / Respuesta} & \textbf{Métrica de Validación y Prueba} \\ \hline
+\endfirsthead
+\multicolumn{6}{c}%
+{{\bfseries \tablename\ \thetable{} -- continuación de la página anterior}} \\
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Código} & \textbf{Nombre del Requerimiento} & \textbf{Entradas / Estímulo} & \textbf{Procesamiento y Control} & \textbf{Salida / Respuesta} & \textbf{Métrica de Validación y Prueba} \\ \hline
+\endhead
+\hline \multicolumn{6}{|r|}{{Continúa en la siguiente página}} \\ \hline
+\endfoot
+\endlastfoot
+\textbf{RNF-01} & Privacidad por Diseño (Seguridad) & Fotogramas e imágenes de cámara web procesados en la memoria RAM del servidor. & Se prohíbe explícitamente guardar imágenes, videos o mallas biométricas en discos locales o bases de datos persistentes. Los frames se destruyen inmediatamente de la memoria tras calcular el bounding box. & Garantía de anonimato absoluto en el uso de la cámara por parte del estudiante. & Verificación mediante auditoría de código del backend y monitoreo de almacenamiento en disco local (0 bytes creados por OpenCV). \\ \hline
+\textbf{RNF-02} & Rendimiento y Latencia Conversacional & Consulta completa por voz del estudiante. & El pipeline total (STT + RAG + LLM + TTS) debe estar optimizado asíncronamente mediante WebSockets y programación concurrente con asyncio. & Interacción fluida con un tiempo de respuesta total controlado. & Latencia extremo a extremo P95 $< 4.0$ segundos en la red local universitaria bajo una carga de 1 usuario activo. \\ \hline
+\textbf{RNF-03} & Restricción de Dominio Académico & Consultas del usuario con intenciones no académicas o externas. & Evaluación mediante el prompt del sistema. Si la consulta está fuera del ámbito de mallas, reglamentos y titulación de TI, el LLM activa una salida controlada. & Mensaje estándar de denegación cortés: 'Disculpa, solo puedo ayudarte con temas académicos de la carrera de TI.' & Aprobación del 100\% de rechazo sistemático ante un set de 20 preguntas capciosas de prueba. \\ \hline
+\textbf{RNF-04} & Aislamiento y Seguridad de Datos & Arquitectura de base de datos relacional externa de la UTI (SGA). & El sistema de asistente opera en un servidor independiente con ChromaDB, sin credenciales de escritura ni lectura directa a la base transaccional SQL del SGA. & Imposibilidad física de realizar cambios transaccionales en expedientes de alumnos. & Comprobación de que la red del asistente no contiene puertos abiertos ni credenciales de conexión al SGA. \\ \hline
+\textbf{RNF-05} & Mantenibilidad y Escalabilidad & Nuevos documentos reglamentarios o actualizaciones de mallas en formato PDF. & El sistema utiliza un portal administrativo protegido por contraseña para procesar nuevos PDF, generar embeddings e insertarlos dinámicamente en ChromaDB. & Actualización del conocimiento del asistente de forma inmediata sin necesidad de fine-tuning. & Tiempo de actualización de un nuevo documento $< 60$ segundos por parte del administrador de TI. \\ \hline
+\textbf{RNF-06} & Usabilidad Manos Libres (Hands-Free) & Interfaz de usuario en un tótem físico o pantalla institucional. & Toda la navegación e interacción se diseña para operar exclusivamente a través de la cámara de presencia y el micrófono por reconocimiento de voz. & Uso interactivo autónomo sin teclado, ratón o toques físicos de pantalla. & Cumplimiento verificado mediante pruebas con estudiantes: tasa de éxito de consulta completa sin intervención de hardware físico = 100\%. \\ \hline
+\end{xltabular}
+\endgroup
+\end{landscape}
 
 \section{Diseño de la Solución}
 El diseño de la solución propuesta se articula sobre una arquitectura modular y desacoplada, operando bajo un entorno de despliegue en un servidor local para garantizar el rendimiento, la seguridad y el procesamiento en tiempo real. El sistema se desglosa en tres capas lógicas fundamentales:

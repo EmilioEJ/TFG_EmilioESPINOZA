@@ -280,36 +280,46 @@ s = \sqrt{\frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2}
 \end{equation}
 \addeqtolist{Desviación estándar de los tiempos de respuesta}
 
-A continuación, la Tabla~\ref{tab:registro_telemetria} muestra un extracto del registro de telemetría piloto de 13 interacciones para fundamentar los cálculos:
+\begin{equation}
+IC_{95} = 1.96 \times \left( \frac{s}{\sqrt{n}} \right)
+\end{equation}
+\addeqtolist{Intervalo de Confianza al 95\%}
+
+A continuación, la Tabla~\ref{tab:registro_telemetria} muestra el registro piloto de prueba de campo con 10 interacciones para fundamentar los cálculos y validar empíricamente la efectividad del RAG:
 
 \begin{table}[H]
-  \caption{Extracto de Telemetría: Registro Piloto de Latencia (TTFB).}
+  \caption{Registro Piloto de Prueba de Campo y Latencia Extremo a Extremo.}
   \label{tab:registro_telemetria}
   \centering
   \small
-  \renewcommand{\arraystretch}{1.2}
-  \begin{tabular}{|c|c|c|}
+  \renewcommand{\arraystretch}{1.25}
+  \resizebox{\textwidth}{!}{
+  \begin{tabular}{|c|p{4cm}|c|c|p{6.5cm}|}
     \hline
     \rowcolor[HTML]{EFEFEF}
-    \textbf{ID Sesión} & \textbf{Tipo de Consulta} & \textbf{TTFB (ms)} \\ \hline
-    001 & Malla Curricular & 452 \\ \hline
-    002 & Prácticas Preprofesionales & 448 \\ \hline
-    003 & Titulación & 455 \\ \hline
-    \dots & \dots & \dots \\ \hline
-    013 & Homologación & 460 \\ \hline
-    \multicolumn{2}{|r|}{\textbf{Media ($\bar{x}$)}} & \textbf{453.8 ms} \\ \hline
-    \multicolumn{2}{|r|}{\textbf{Desv. Estándar ($s$)}} & \textbf{4.2 ms} \\ \hline
+    \textbf{ID de Prueba} & \textbf{Usuario (Estudiante)} & \textbf{Latencia (ms)} & \textbf{RAG Top-3} & \textbf{Observación / Contexto} \\ \hline
+    \textbf{PR-01} & Estudiante 1 - 4to Sem & 3120 & SÍ & Consulta sobre prerrequisitos de Redes I. Luz normal, voz clara. \\ \hline
+    \textbf{PR-02} & Estudiante 2 - 4to Sem & 3450 & SÍ & Consulta sobre reglamento de prácticas. Voz baja, detectado con éxito. \\ \hline
+    \textbf{PR-03} & Estudiante 3 - 8vo Sem & 4100 & SÍ & Consulta de modalidades de titulación. Latencia alta en red local. \\ \hline
+    \textbf{PR-04} & Estudiante 4 - 8vo Sem & 2980 & SÍ & Consulta sobre malla curricular. Respuesta semántica directa. \\ \hline
+    \textbf{PR-05} & Estudiante 5 - 3er Sem & 3200 & SÍ & Consulta de horarios. Similitud coseno alta (0.85). \\ \hline
+    \textbf{PR-06} & Estudiante 6 - 3er Sem & 3310 & SÍ & Consulta de reglamentos de homologación. Respuesta contextualizada. \\ \hline
+    \textbf{PR-07} & Estudiante 7 - 4to Sem & 5200 & NO & Consulta capciosa sobre deportes. Se activó restricción de dominio. \\ \hline
+    \textbf{PR-08} & Estudiante 8 - 4to Sem & 3050 & SÍ & Consulta sobre syllabus de Programación. Audio claro. \\ \hline
+    \textbf{PR-09} & Estudiante 9 - 1er Sem & 3500 & SÍ & Consulta sobre ubicación de laboratorios. Detección por cámara normal. \\ \hline
+    \textbf{PR-10} & Estudiante 10 - 8vo Sem & 3800 & SÍ & Consulta sobre carpeta de titulación. Ruido de fondo moderado. \\ \hline
   \end{tabular}
+  }
 \end{table}
 
-Estas métricas representan etapas distintas del proceso y confirman que el sistema responde de forma estable dentro de los intervalos de confianza (IC 95\%).
-
-Para evaluar el motor de recuperación se utilizó un conjunto de consultas asociadas a reglamentos, sílabos y mallas curriculares. La métrica principal utilizada fue el \textit{Hit Rate} Top-3, el cual determina empíricamente la efectividad del RAG para extraer el contexto correcto sin necesidad de reentrenar (\textit{fine-tuning}) el LLM.
+Para evaluar rigurosamente el motor de recuperación semántica sin necesidad de reentrenar (\textit{fine-tuning}) el LLM, se utilizó la siguiente fórmula matemática:
 
 \begin{equation}
-\text{Hit Rate} = \frac{\text{Consultas con documento relevante en Top-N}}{\text{Total de consultas}} \times 100
+\text{Hit Rate} = \left( \frac{\text{Consultas Correctas}}{N_{total}} \right) \times 100
 \end{equation}
-\addeqtolist{Fórmula para el cálculo de Hit Rate}
+\addeqtolist{Tasa de Acierto de Recuperación Semántica (Hit Rate)}
+
+Los resultados globales de la muestra estadística arrojaron una Media de Latencia ($\bar{x}$) de 3571 ms y una precisión semántica (\textit{Hit Rate}) del 90,0\%, validando formalmente el Requerimiento No Funcional de Rendimiento establecido.
 
 La Tabla~\ref{tab:mrr_eval} presenta los resultados del motor de recuperación.
 
