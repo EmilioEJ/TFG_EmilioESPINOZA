@@ -15,14 +15,20 @@
 \else
   \RequirePackage{fontspec}
   \defaultfontfeatures{Ligatures=TeX}
-  \setmainfont{Century Gothic}
-  \setsansfont{Century Gothic}
+  \IfFontExistsTF{Century Gothic}{%
+    \setmainfont{Century Gothic}
+    \setsansfont{Century Gothic}
+  }{%
+    \setmainfont{TeX Gyre Adventor}
+    \setsansfont{TeX Gyre Adventor}
+  }
   \IfFontExistsTF{Times New Roman}{%
     \newfontfamily\UTIPortadaFuente{Times New Roman}%
   }{%
     \newfontfamily\UTIPortadaFuente{TeX Gyre Termes}%
   }
   % Matemática (no existe “Century Gothic Math”): usa una fuente matemática estándar
+  \RequirePackage{amsmath,amsfonts,amssymb}
   \RequirePackage{unicode-math}
   \setmathfont{TeX Gyre Termes Math}
 \fi
@@ -35,6 +41,7 @@
 % --- Página y espaciado (A4): superior 3 cm, inferior 3 cm,
 %     izquierdo 4 cm y derecho 3 cm ---
 \RequirePackage{geometry}
+\RequirePackage{pdflscape}
 \geometry{
   a4paper,
   left=4cm,right=3cm,
@@ -171,8 +178,11 @@
 % CAPÍTULO I: Introducción, CAPÍTULO II: Metodología, etc.
 \renewcommand{\cftchappresnum}{CAPÍTULO~}
 \renewcommand{\cftchapaftersnum}{:}
-\setlength{\cftchapnumwidth}{7.5em}
-
+\setlength{\cftchapnumwidth}{8.5em}
+\setlength{\cftsecindent}{1.5em}
+\setlength{\cftsecnumwidth}{3em}
+\setlength{\cftsubsecindent}{4.5em}
+\setlength{\cftsubsecnumwidth}{3.5em}
 % Índice de ecuaciones (manual): usa \addeqtolist{Título} dentro de una ecuación para registrarla.
 \newcommand{\listofecuacionesname}{Índice de Ecuaciones}
 \newlistof{myeq}{loe}{\listofecuacionesname}
@@ -212,10 +222,22 @@
 \newcommand{\UTI@tipotrabajo}{}
 \newcommand{\UTI@autorA}{}
 \newcommand{\UTI@generoAutorA}{masculino}
+\newcommand{\UTI@cedulaAutorA}{0000000000}
+\newcommand{\UTI@direccionAutorA}{Provincia, ciudad, parroquia, barrio}
+\newcommand{\UTI@correoAutorA}{correo@ejemplo.com}
+\newcommand{\UTI@telefonoAutorA}{0999999999}
 \newcommand{\UTI@autorB}{}
 \newcommand{\UTI@generoAutorB}{masculino}
+\newcommand{\UTI@cedulaAutorB}{0000000000}
+\newcommand{\UTI@direccionAutorB}{Provincia, ciudad, parroquia, barrio}
+\newcommand{\UTI@correoAutorB}{correo@ejemplo.com}
+\newcommand{\UTI@telefonoAutorB}{0999999999}
 \newcommand{\UTI@tutor}{}
 \newcommand{\UTI@generoTutor}{masculino}
+\newcommand{\UTI@lectorA}{}
+\newcommand{\UTI@generoLectorA}{masculino}
+\newcommand{\UTI@lectorB}{}
+\newcommand{\UTI@generoLectorB}{masculino}
 \newcommand{\UTI@ciudadpais}{}
 \newcommand{\UTI@anio}{}
 
@@ -368,6 +390,10 @@
   \UTIIfTutorFemaleTF{tutora}{tutor}%
 }
 
+\newcommand{\UTILectorEtiquetaPorGenero}[1]{%
+  \UTIIfFemaleTF{#1}{LECTORA}{LECTOR}%
+}
+
 \newcommand{\UTIVerboDeclaro}{%
   \UTIIfTwoAuthorsTF{declaramos}{declaro}%
 }
@@ -451,19 +477,19 @@
     \begin{center}
       \rule{8cm}{0.4pt}\par
       \UTI@autorA\par
-      C.I.: 1722558374
+      (Número de cédula)
     \end{center}
     \vspace{1.8cm}
     \begin{center}
       \rule{8cm}{0.4pt}\par
       \UTI@autorB\par
-      C.I.: 1722558374
+      (Número de cédula)
     \end{center}
   }{%
     \begin{center}
       \rule{8cm}{0.4pt}\par
       \UTI@autorA\par
-      C.I.: 1722558374
+      (Número de cédula)
     \end{center}
   }%
 }
@@ -475,20 +501,34 @@
   \end{center}
 }
 
-\newcommand{\UTIRepositorioAutorContenido}[2]{%
+\newcommand{\UTILectoresFirmaBloque}{%
+  \begin{center}
+    \rule{7cm}{0.4pt}\par
+    \UTI@lectorA\par
+    \textbf{\UTILectorEtiquetaPorGenero{\UTI@generoLectorA}}
+  \end{center}
+  \vspace{2cm}
+  \begin{center}
+    \rule{7cm}{0.4pt}\par
+    \UTI@lectorB\par
+    \textbf{\UTILectorEtiquetaPorGenero{\UTI@generoLectorB}}
+  \end{center}
+}
+
+\newcommand{\UTIRepositorioAutorContenido}[6]{%
   \noindent\textbf{\UTIAutorEtiquetaPorGenero{#2}:} #1\par
   \vspace{0.2cm}
   \noindent\textbf{Firma:}\par
   \vspace{1.2cm}
-  \noindent\textbf{Número de Cédula:} 1722558374\par
-  \noindent\textbf{Dirección:} Pichincha, Quito, El Inca, Kenedy\par
-  \noindent\textbf{Correo Electrónico:} emil.200409@gmail.com\par
-  \noindent\textbf{Teléfono:} 0986639128\par
+  \noindent\textbf{Número de Cédula:} #3\par
+  \noindent\textbf{Dirección:} #4\par
+  \noindent\textbf{Correo Electrónico:} #5\par
+  \noindent\textbf{Teléfono:} #6\par
 }
 
-\newcommand{\UTIRepositorioAutorBloque}[2]{%
+\newcommand{\UTIRepositorioAutorBloque}[6]{%
   \Needspace{10\baselineskip}%
-  \UTIRepositorioAutorContenido{#1}{#2}%
+  \UTIRepositorioAutorContenido{#1}{#2}{#3}{#4}{#5}{#6}%
 }
 
 \newcommand{\UTIRepositorioAutoresBloque}{%
@@ -497,28 +537,81 @@
     \noindent
     \begin{minipage}[t]{0.47\textwidth}
       \raggedright
-      \UTIRepositorioAutorContenido{\UTI@autorA}{\UTI@generoAutorA}%
+      \UTIRepositorioAutorContenido
+        {\UTI@autorA}{\UTI@generoAutorA}
+        {\UTI@cedulaAutorA}{\UTI@direccionAutorA}
+        {\UTI@correoAutorA}{\UTI@telefonoAutorA}%
     \end{minipage}\hfill
     \begin{minipage}[t]{0.47\textwidth}
       \raggedright
-      \UTIRepositorioAutorContenido{\UTI@autorB}{\UTI@generoAutorB}%
+      \UTIRepositorioAutorContenido
+        {\UTI@autorB}{\UTI@generoAutorB}
+        {\UTI@cedulaAutorB}{\UTI@direccionAutorB}
+        {\UTI@correoAutorB}{\UTI@telefonoAutorB}%
     \end{minipage}%
   }{}%
   \UTIIfTwoAuthorsTF{}{%
-    \UTIRepositorioAutorBloque{\UTI@autorA}{\UTI@generoAutorA}%
+    \UTIRepositorioAutorBloque
+      {\UTI@autorA}{\UTI@generoAutorA}
+      {\UTI@cedulaAutorA}{\UTI@direccionAutorA}
+      {\UTI@correoAutorA}{\UTI@telefonoAutorA}%
   }%
 }
 
-\NewDocumentCommand{\UTIDatosAutores}{m m O{} O{}}{%
+% Autor principal: nombre, género, cédula, dirección, correo y teléfono.
+% El segundo autor utiliza seis argumentos opcionales en el mismo orden.
+\NewDocumentCommand{\UTIDatosAutores}{m m m m m m}{%
   \gdef\UTI@autorA{#1}%
   \gdef\UTI@generoAutorA{#2}%
-  \gdef\UTI@autorB{#3}%
-  \gdef\UTI@generoAutorB{#4}%
+  \gdef\UTI@cedulaAutorA{#3}%
+  \gdef\UTI@direccionAutorA{#4}%
+  \gdef\UTI@correoAutorA{#5}%
+  \gdef\UTI@telefonoAutorA{#6}%
+  \gdef\UTI@autorB{}%
+  \gdef\UTI@generoAutorB{masculino}%
+  \gdef\UTI@cedulaAutorB{}%
+  \gdef\UTI@direccionAutorB{}%
+  \gdef\UTI@correoAutorB{}%
+  \gdef\UTI@telefonoAutorB{}%
+  \@ifnextchar[{\UTI@DatosAutorDos}{}%
+}
+
+\NewDocumentCommand{\UTI@DatosAutorDos}{O{} O{} O{} O{} O{} O{}}{%
+  \gdef\UTI@autorB{#1}%
+  \gdef\UTI@generoAutorB{#2}%
+  \gdef\UTI@cedulaAutorB{#3}%
+  \gdef\UTI@direccionAutorB{#4}%
+  \gdef\UTI@correoAutorB{#5}%
+  \gdef\UTI@telefonoAutorB{#6}%
 }
 
 \NewDocumentCommand{\UTIDatosTutor}{m m}{%
   \gdef\UTI@tutor{#1}%
   \gdef\UTI@generoTutor{#2}%
+}
+
+\NewDocumentCommand{\UTIDatosLectores}{m m m m}{%
+  \gdef\UTI@lectorA{#1}%
+  \gdef\UTI@generoLectorA{#2}%
+  \gdef\UTI@lectorB{#3}%
+  \gdef\UTI@generoLectorB{#4}%
+}
+
+% Configuración individual. La sintaxis visible es:
+% \UTIDatosLector1{Nombre}{género}
+% \UTIDatosLector2{Nombre}{género}
+\NewDocumentCommand{\UTIDatosLector}{m m m}{%
+  \ifstrequal{#1}{1}{%
+    \gdef\UTI@lectorA{#2}%
+    \gdef\UTI@generoLectorA{#3}%
+  }{%
+    \ifstrequal{#1}{2}{%
+      \gdef\UTI@lectorB{#2}%
+      \gdef\UTI@generoLectorB{#3}%
+    }{%
+      \PackageError{uti_tfm}{El lector #1 no existe}{Use \string\UTIDatosLector1 o \string\UTIDatosLector2.}%
+    }%
+  }%
 }
 
 \NewDocumentCommand{\UTIDatosTituloIngles}{m}{%
@@ -658,7 +751,7 @@
 \RequirePackage{graphicx}
 \NewDocumentCommand{\UTIPortada}{m m m m m m m m m}{%
 % #1 logo (ruta)  #2 Facultad  #3 Programa  #4 Tema/Título
-% #5 Tipo de trabajo  #6 \UTIDatosAutores{...}{...}[...][...]
+% #5 Tipo de trabajo  #6 \UTIDatosAutores{nombre}{género}{cédula}{dirección}{correo}{teléfono}[...]
 % #7 \UTIDatosTutor{...}{...}  #8 Ciudad–País  #9 Año
 \gdef\UTI@logo{#1}%
 \gdef\UTI@facultad{#2}%
@@ -703,11 +796,11 @@
     \noindent\hspace*{0.5\textwidth}%
     \begin{minipage}{0.5\textwidth}
       \raggedright
-      \textbf{Autor(a)}\par
+      \textbf{\UTIAutorEtiqueta}\par
       \vspace{0.25cm}
       \UTIAutoresPortada\par
       \vspace{0.45cm}
-      \textbf{Tutor(a)}\par
+      \textbf{\UTITutorEtiqueta}\par
       \vspace{0.25cm}
       \UTITutorNombre\par
     \end{minipage}%

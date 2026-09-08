@@ -14,6 +14,8 @@ En el \textbf{contexto Micro (Universidad Tecnológica Indoamérica - UTI)}, la 
 La Tabla~\ref{tab:contexto_macro_meso_micro} sintetiza esta estructura analítica y los indicadores críticos de adopción tecnológica en cada dimensión.
 
 \begin{table}[h]
+  \caption{Estructura Analítica del Contexto Macro, Meso y Micro de Adopción de IA.}
+  \label{tab:contexto_macro_meso_micro}
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
@@ -26,7 +28,7 @@ La Tabla~\ref{tab:contexto_macro_meso_micro} sintetiza esta estructura analític
 \textbf{Meso} (Metropolitano) & Universidades de Quito (PUCE, USFQ, UCE) & Proyectos locales: \textit{Aurel\_AI}, \textit{LegalBot-EC} \cite{puce2024aurel} & Modelos locales, privacidad de datos y automatización de soporte \\ \hline
 \textbf{Micro} (Institucional) & Universidad Tecnológica Indoamérica (UTI - Sede Quito/Ambato) & Matrícula de $>$8.358 alumnos ($\sim$380 en carrera TI) \cite{uti2025rc} & Evolucionar el portal SGA estático hacia un Asistente Virtual 3D proactivo \\ \hline
 \end{tabular}
-\caption{Estructura Analítica del Contexto Macro, Meso y Micro de Adopción de IA.}\label{tab:contexto_macro_meso_micro}
+
 \end{table}
 
  El área de aplicación específica para este proyecto es la carrera de Ingeniería en Tecnologías de la Información, donde se ha identificado que la gestión de la información académica para los estudiantes es predominantemente estática. Actualmente, el acceso a datos críticos sobre mallas curriculares, requisitos de graduación o perfiles profesionales depende de la navegación manual por el sitio web institucional o de la lectura de extensos archivos PDF, lo que deriva en una experiencia de usuario pasiva y demorada.
@@ -62,6 +64,8 @@ El desarrollo del presente Asistente Virtual Multimodal no constituye un esfuerz
 La Tabla~\ref{tab:proyectos_internos_uti} sistematiza los proyectos internos previos que sirven como cimiento metodológico y computacional para la integración del avatar 3D y el motor RAG conversacional en la carrera de TI.
 
 \begin{table}[h]
+  \caption{Antecedentes Institucionales de Investigación en IA y Sistemas Multimodales (UTI).}
+  \label{tab:proyectos_internos_uti}
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
@@ -75,7 +79,7 @@ La Tabla~\ref{tab:proyectos_internos_uti} sistematiza los proyectos internos pre
 \textbf{Análisis Sentimientos PNL} \cite{uti2024pln} & Facultad TI / ESTec & Procesamiento de Lenguaje Natural y Big Data & Comprensión semántica del lenguaje y consultas informales \\ \hline
 \textbf{Evaluación Formativa IA} \cite{uti2025rc} & Posgrados / Docencia & IA generativa en aulas virtuales & Integración curricular sin sesgos y estandarización del servicio \\ \hline
 \end{tabular}
-\caption{Antecedentes Institucionales de Investigación en IA y Sistemas Multimodales (UTI).}\label{tab:proyectos_internos_uti}
+
 \end{table}
 
 \subsection{Evolución Tecnológica: Asistentes Virtuales, Avatares 3D y Visión Artificial}
@@ -172,6 +176,8 @@ La ejecución de este proyecto es factible tanto a nivel técnico como operativo
 Para ilustrar el impacto potencial del proyecto en la carrera de Ingeniería en Tecnologías de la Información, se ha diseñado la matriz comparativa de la Tabla~\ref{tab:cuantificacion_impacto}. En ella se contrastan los indicadores críticos de la situación actual frente a la proyección técnica del Asistente Virtual Inteligente.
 
 \begin{table}[h]
+  \caption{Matriz de Indicadores de Impacto Potencial del Proyecto.}
+  \label{tab:cuantificacion_impacto}
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
@@ -186,9 +192,10 @@ Para ilustrar el impacto potencial del proyecto en la carrera de Ingeniería en 
 \textbf{Tiempo tecnológico de respuesta} & No aplica directamente & Métricas de latencia medidas en el prototipo & Permite evaluar la viabilidad de interacción conversacional \\ \hline
 \textbf{Disponibilidad potencial} & Dependiente del horario de los canales administrativos & El software puede operar fuera del horario administrativo & Capacidad potencial de ampliar el horario de consulta \\ \hline
 \end{tabular}
-\caption{Matriz de Indicadores de Impacto Potencial del Proyecto.}\label{tab:cuantificacion_impacto}
+
 \end{table}
 
+\clearpage
 \section{Objetivos}
 \subsection{Objetivo General}
 Desarrollar e implementar un prototipo de Asistente Virtual Inteligente, provisto de una interfaz de avatar 3D y visión artificial, para optimizar la difusión proactiva y el acceso a la información académica de los estudiantes en la carrera de Ingeniería en Tecnologías de la Información de la Universidad Tecnológica Indoamérica.
@@ -228,6 +235,34 @@ Para respaldar el desarrollo de la arquitectura del Asistente Virtual Inteligent
 
 \subsection{Inteligencia Artificial y Procesamiento de Lenguaje Natural (PLN)}
 El PLN es la rama de la IA que permite a las computadoras entender, interpretar y manipular el lenguaje humano. Para que el asistente pueda brindar información académica precisa, se requiere el uso de Modelos de Lenguaje Grandes (LLMs). En este proyecto se fundamentará el uso de técnicas como la Generación Aumentada por Recuperación (RAG, por sus siglas en inglés), que permite al modelo consultar una base de datos de conocimiento específico (los reglamentos y mallas de la UTI) antes de generar una respuesta, evitando así las alucinaciones del modelo.
+
+En el paradigma RAG, los documentos son fragmentados (\textit{chunking}) y transformados a vectores multidimensionales (\textit{embeddings}). Durante la búsqueda, la precisión semántica de la consulta del usuario se evalúa matemáticamente mediante la \textbf{Similitud del Coseno} (Figura~\ref{fig:coseno_rag}), que mide el ángulo entre el vector de la consulta ($\vec{q}$) y el vector del documento ($\vec{d_i}$) en el espacio latente. Una mayor similitud semántica se traduce en un menor ángulo $\theta$.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+    % Ejes
+    \draw[->, thick] (0,0) -- (5,0) node[right] {$Dim_1$};
+    \draw[->, thick] (0,0) -- (0,4) node[above] {$Dim_2$};
+    
+    % Vector Documento
+    \draw[->, thick, blue] (0,0) -- (4,1.5) node[right] {Vector Documento ($\vec{d_i}$)};
+    
+    % Vector Consulta
+    \draw[->, thick, red] (0,0) -- (3,3) node[above] {Vector Consulta ($\vec{q}$)};
+    
+    % Arco del ángulo
+    \draw[bend right, <->, thick, green!60!black] (1.5,1.5) to node[right=2pt] {$\theta$ (Similitud Coseno)} (2.5, 0.95);
+    
+    % Texto explicativo
+    \node[align=left, anchor=west] at (4.5, 3.5) {
+        \small Similitud Coseno ($\theta$) = $\frac{q \cdot d_i}{||q|| \cdot ||d_i||}$ \\[1.5ex]
+        \small Mayor similitud = Menor $\theta$
+    };
+\end{tikzpicture}
+\caption{Ilustración geométrica de la Similitud del Coseno en el espacio vectorial RAG.}
+\label{fig:coseno_rag}
+\end{figure}
 
 \subsection{Visión Artificial e Interacción Visual no Biométrica}
 La visión artificial permite a las máquinas extraer información significativa de imágenes o videos. En este proyecto, su uso se delimita al apoyo de la interacción visual del avatar, sin realizar identificación personal ni almacenamiento de datos biométricos. Se abordarán modelos ligeros capaces de interpretar señales visuales generales para mejorar la naturalidad de la interfaz, manteniendo el principio de privacidad por diseño.

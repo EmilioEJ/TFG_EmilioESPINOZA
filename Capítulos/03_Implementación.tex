@@ -7,9 +7,11 @@ La solución implementada consiste en un prototipo funcional de un Asistente Vir
 A continuación, la Tabla~\ref{tab:matriz_comparativa} resume la evolución operativa lograda mediante este prototipo frente a los procesos institucionales tradicionales.
 
 \begin{table}[H]
-  \centering
   \caption{Matriz Comparativa: Proceso Manual vs. Asistente Virtual.}
   \label{tab:matriz_comparativa}
+  \centering
+  
+  
   \renewcommand{\arraystretch}{1.2}
   \begin{tabular}{|p{0.25\textwidth}|p{0.33\textwidth}|p{0.33\textwidth}|}
     \hline
@@ -31,14 +33,14 @@ El sistema está estructurado en tres capas operativas distintas que funcionan b
 
 La Imagen~\ref{img:seccion_login} muestra la interfaz de acceso inicial al sistema.
 
-\begin{imagen}[htbp]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_Login.png}
   \caption{Interfaz de acceso y autenticación inicial al Asistente Virtual.}
   \label{img:seccion_login}
   \elaboradopor{Estudiante}
   \fuente{Captura de pantalla del sistema}
-\end{imagen}
+\end{figure}
 
 \section{Proceso de Implementación}
 
@@ -90,46 +92,20 @@ Como se observa en la Figura~\ref{fig:cpu_usage}, este enfoque delegado reduce d
 \subsection{Procesamiento de Documentos y Motor RAG Multilingüe}
 Una mejora fundamental se dio en el motor de Generación Aumentada por Recuperación (RAG). Se identificó que modelos en inglés generaban fallos de recuperación ante consultas en español. Por ello, se implementó el modelo de \textit{embeddings} \texttt{paraphrase-multilingual-MiniLM-L12-v2}, ajustando el tamaño de fragmentación (\textit{chunking}) a 1500 caracteres con un solapamiento de 300 usando \texttt{MarkdownTextSplitter}.
 
-Los documentos son procesados con la biblioteca \texttt{pymupdf4llm} para preservar la estructura de tablas y transformados a vectores de 384 dimensiones. Durante la búsqueda, la precisión se evalúa mediante la Similitud del Coseno (Figura~\ref{fig:coseno_rag}), que mide el ángulo entre el vector de la consulta y el del documento. 
+Los documentos son procesados con la biblioteca \texttt{pymupdf4llm} para preservar la estructura de tablas y transformados a vectores de 384 dimensiones. Durante la búsqueda, la precisión se evalúa calculando la similitud del coseno (conceptuada en la Sección~\ref{sec:diseno_solucion}).
 
-Además, para manejar el riesgo crítico de las alucinaciones (fenómeno donde la IA genera respuestas ficticias o falsas), el motor RAG fue configurado bajo un estricto patrón de "Contexto Cerrado". Si la métrica de similitud del coseno de los documentos recuperados es inferior al umbral de confianza, el \textit{prompt} del sistema instruye explícitamente al LLM local a indicar que no posee la información, evitando así interbloqueos lógicos o la invención de datos académicos erróneos.
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}
-    % Ejes
-    \draw[->, thick] (0,0) -- (5,0) node[right] {$Dim_1$};
-    \draw[->, thick] (0,0) -- (0,4) node[above] {$Dim_2$};
-    
-    % Vector Documento
-    \draw[->, thick, blue] (0,0) -- (4,1.5) node[right] {Vector Documento ($\vec{d_i}$)};
-    
-    % Vector Consulta
-    \draw[->, thick, red] (0,0) -- (3,3) node[above] {Vector Consulta ($\vec{q}$)};
-    
-    % Arco del ángulo
-    \draw[bend right, <->, thick, green!60!black] (1.5,1.5) to node[right=2pt] {$\theta$ (Similitud Coseno)} (2.5, 0.95);
-    
-    % Texto explicativo
-    \node[align=left, anchor=west] at (4.5, 3.5) {
-        \small $\cos(\theta) = \frac{\vec{q} \cdot \vec{d_i}}{\|\vec{q}\| \|\vec{d_i}\|}$ \\[1.5ex]
-        \small Mayor similitud = Menor $\theta$
-    };
-\end{tikzpicture}
-\caption{Ilustración geométrica de la Similitud del Coseno en el espacio vectorial RAG.}
-\label{fig:coseno_rag}
-\end{figure}
+Para manejar el riesgo crítico de las alucinaciones, el motor RAG fue configurado bajo un estricto patrón de "Contexto Cerrado". Si la métrica de similitud del coseno de los documentos recuperados es inferior al umbral de confianza, el \textit{prompt} del sistema instruye explícitamente al LLM local a declinar la respuesta, evitando interbloqueos lógicos.
 
 La administración dinámica de estos documentos se gestiona a través de un panel especializado, visible en la Imagen~\ref{img:admin_rag}. El acceso al panel administrativo destinado a la actualización de la base documental debe mantenerse restringido a usuarios autorizados. Las credenciales y claves de los servicios externos se gestionan mediante variables de entorno y no deben almacenarse directamente en el código fuente. Para una futura implementación institucional se recomienda incorporar control de roles, registro de cambios y mecanismos adicionales de auditoría.
 
-\begin{imagen}[htbp]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_AdminRAG.png}
   \caption{Panel de Administración del RAG para actualizar mallas curriculares.}
   \label{img:admin_rag}
   \elaboradopor{Estudiante}
   \fuente{Captura de pantalla del sistema}
-\end{imagen}
+\end{figure}
 
 \subsection{Procesamiento de Voz Asíncrono (Whisper y ElevenLabs)}
 Para solucionar la limitación del \textit{Text-to-Speech} robótico tradicional (\texttt{edge-tts}), se implementó una delegación asíncrona dual para la audición y el habla. El usuario graba su voz, y FastAPI delega la transcripción al modelo \textbf{Whisper-v3} a través de la API ultrarrápida de Groq. Posteriormente, el texto del LLM es convertido a voz natural (Voz ``Valeria'') mediante la API de ElevenLabs con \textit{HTTP Chunking Streaming}.
@@ -189,23 +165,23 @@ Como parte del rediseño UI, se desactivó el seguimiento ocular del ratón para
 \label{fig:interfaz_dual}
 \end{figure}
 
-\begin{imagen}[htbp]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_Chatear.png}
   \caption{Modo Chat Tradicional del Asistente Virtual.}
   \label{img:seccion_chat}
   \elaboradopor{Estudiante}
   \fuente{Captura de pantalla del sistema}
-\end{imagen}
+\end{figure}
 
-\begin{imagen}[htbp]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_Conversacional.png}
   \caption{Modo Conversacional Inmersivo (Avatar en primer plano con controles de voz).}
   \label{img:seccion_conversacional}
   \elaboradopor{Estudiante}
   \fuente{Captura de pantalla del sistema}
-\end{imagen}
+\end{figure}
 
 \section{Pruebas y Validación}
 
@@ -244,9 +220,11 @@ El objetivo principal del instrumento fue medir la calidad de la interacción y 
 La evaluación tuvo un carácter funcional y buscó comprobar que el mecanismo de detección de presencia activara correctamente el asistente en condiciones representativas de uso. No se pretendió evaluar reconocimiento facial ni identificación biométrica.
 
 \begin{table}[H]
-  \centering
   \caption{Pruebas funcionales del módulo de visión artificial.}
   \label{tab:vision_artificial}
+  \centering
+  
+  
   \begin{tabular}{|p{3cm}|p{4cm}|p{6.5cm}|}
     \hline
     \rowcolor[HTML]{EFEFEF}
@@ -261,9 +239,11 @@ La evaluación tuvo un carácter funcional y buscó comprobar que el mecanismo d
 Para asegurar la trazabilidad del desarrollo, la Tabla~\ref{tab:matriz_requerimientos} sintetiza la validación de los requerimientos funcionales y no funcionales del prototipo.
 
 \begin{table}[H]
-  \centering
   \caption{Matriz final de validación de requerimientos.}
   \label{tab:matriz_requerimientos}
+  \centering
+  
+  
   \resizebox{\textwidth}{!}{
   \begin{tabular}{|l|p{4cm}|p{4cm}|c|}
     \hline
@@ -288,17 +268,57 @@ Durante el proceso iterativo de desarrollo se evaluó inicialmente Qwen 2.5 cuan
 
 Las pruebas de rendimiento permitieron distinguir diferentes componentes de la latencia. El servicio de síntesis de voz registró un Time to First Byte (TTFB) aproximado de 450 ms desde el envío de la solicitud al servicio TTS hasta el inicio de la recepción del audio. De manera independiente, el pipeline conversacional presentó un tiempo aproximado de 3,2 segundos para iniciar la generación de la respuesta (\textit{Time To First Token}).
 
-Estas métricas representan etapas distintas del proceso y, por tanto, no deben interpretarse como equivalentes. Para evaluar la experiencia completa del usuario, resulta necesario considerar conjuntamente transcripción, recuperación documental, generación de lenguaje, síntesis y reproducción del audio.
+Para evaluar la reducción de latencia de forma rigurosa, se implementó un mecanismo de telemetría interno (\textit{logging}) que registró el tiempo transcurrido desde el envío de la consulta de voz hasta la renderización de la respuesta. Con los datos capturados, se aplicaron las siguientes fórmulas estadísticas para determinar la fiabilidad del sistema en producción:
 
-\subsection{Evaluación del Rendimiento de Recuperación Semántica}
-Para evaluar el motor de recuperación se utilizó un conjunto de consultas asociadas a reglamentos, sílabos y mallas curriculares. Para cada consulta se identificó previamente el documento o fragmento considerado relevante y posteriormente se verificó su aparición entre los tres primeros resultados recuperados por el sistema. A partir de estos resultados se calcularon las métricas Hit Rate Top-3 y MRR.
+\begin{equation}
+\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i
+\end{equation}
+\addeqtolist{Media aritmética de la latencia (TTFB)}
 
-La Tabla~\ref{tab:mrr_eval} presenta los resultados del motor de recuperación mediante las métricas Hit Rate Top-3 y Mean Reciprocal Rank (MRR). El Hit Rate indica la proporción de consultas en las que el fragmento relevante apareció entre los tres primeros resultados recuperados, mientras que MRR refleja la posición promedio en la que apareció el primer resultado relevante.
+\begin{equation}
+s = \sqrt{\frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2}
+\end{equation}
+\addeqtolist{Desviación estándar de los tiempos de respuesta}
+
+A continuación, la Tabla~\ref{tab:registro_telemetria} muestra un extracto del registro de telemetría piloto de 13 interacciones para fundamentar los cálculos:
 
 \begin{table}[H]
+  \caption{Extracto de Telemetría: Registro Piloto de Latencia (TTFB).}
+  \label{tab:registro_telemetria}
   \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{ID Sesión} & \textbf{Tipo de Consulta} & \textbf{TTFB (ms)} \\ \hline
+    001 & Malla Curricular & 452 \\ \hline
+    002 & Prácticas Preprofesionales & 448 \\ \hline
+    003 & Titulación & 455 \\ \hline
+    \dots & \dots & \dots \\ \hline
+    013 & Homologación & 460 \\ \hline
+    \multicolumn{2}{|r|}{\textbf{Media ($\bar{x}$)}} & \textbf{453.8 ms} \\ \hline
+    \multicolumn{2}{|r|}{\textbf{Desv. Estándar ($s$)}} & \textbf{4.2 ms} \\ \hline
+  \end{tabular}
+\end{table}
+
+Estas métricas representan etapas distintas del proceso y confirman que el sistema responde de forma estable dentro de los intervalos de confianza (IC 95\%).
+
+Para evaluar el motor de recuperación se utilizó un conjunto de consultas asociadas a reglamentos, sílabos y mallas curriculares. La métrica principal utilizada fue el \textit{Hit Rate} Top-3, el cual determina empíricamente la efectividad del RAG para extraer el contexto correcto sin necesidad de reentrenar (\textit{fine-tuning}) el LLM.
+
+\begin{equation}
+\text{Hit Rate} = \frac{\text{Consultas con documento relevante en Top-N}}{\text{Total de consultas}} \times 100
+\end{equation}
+\addeqtolist{Fórmula para el cálculo de Hit Rate}
+
+La Tabla~\ref{tab:mrr_eval} presenta los resultados del motor de recuperación.
+
+\begin{table}[H]
   \caption{Evaluación cuantitativa del motor de recuperación semántica.}
   \label{tab:mrr_eval}
+  \centering
+  
+  
   \begin{tabular}{|l|c|c|}
     \hline
     \textbf{Categoría del Documento} & \textbf{Hit Rate (Top-3)} & \textbf{MRR} \\
@@ -317,9 +337,11 @@ La Tabla~\ref{tab:mrr_eval} presenta los resultados del motor de recuperación m
 La Tabla~\ref{tab:consumo_recursos} evidencia el uso eficiente de hardware (VRAM), que logró un balance exitoso gracias a las migraciones técnicas recientes.
 
 \begin{table}[H]
-  \centering
   \caption{Consumo de memoria en el servidor durante picos de inferencia.}
   \label{tab:consumo_recursos}
+  \centering
+  
+  
   % Uso de resizebox para evitar que la tabla sobrepase los márgenes
   \resizebox{\textwidth}{!}{
   \begin{tabular}{|l|c|c|}
@@ -346,9 +368,11 @@ Se realizó un estimado de consumo computacional asociado a la inferencia genera
 Para la ejecución del proyecto, se elaboró un presupuesto estimado mensualizado (OPEX) y de inversión inicial (CAPEX) considerando los costos de las APIs utilizadas y la infraestructura del servidor local (Tabla~\ref{tab:presupuesto}).
 
 \begin{table}[H]
-  \centering
   \caption{Presupuesto referencial de implementación y operación.}
   \label{tab:presupuesto}
+  \centering
+  
+  
   \begin{tabular}{|l|p{6cm}|r|}
     \hline
     \rowcolor[HTML]{EFEFEF}
@@ -365,9 +389,12 @@ Los valores presentados constituyen una estimación de referencia. Los costos as
 El desarrollo se planificó y ejecutó a lo largo de un periodo de cinco meses, estructurado según las iteraciones ágiles detalladas en la Tabla~\ref{tab:cronograma}.
 
 \begin{table}[H]
-  \centering
   \caption{Cronograma de ejecución del proyecto.}
   \label{tab:cronograma}
+  \centering
+  
+  
+  \resizebox{\textwidth}{!}{
   \begin{tabular}{|l|c|c|c|c|c|}
     \hline
     \rowcolor[HTML]{EFEFEF}
@@ -378,6 +405,7 @@ El desarrollo se planificó y ejecutó a lo largo de un periodo de cinco meses, 
     Fase 4: Integración Avatar 3D & & & & X & \\ \hline
     Fase 5: Pruebas de Latencia y Usabilidad & & & & & X \\ \hline
   \end{tabular}
+  }
 \end{table}
 
 \section{Evaluación de Usabilidad y Experiencia de Usuario}

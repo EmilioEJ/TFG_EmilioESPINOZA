@@ -6,7 +6,13 @@ La gestión actual de la información académica en la carrera de Tecnologías d
 
 Actualmente, cuando un estudiante necesita resolver inquietudes operativas —como la secuenciación de prerrequisitos en su malla curricular, modalidades de titulación o reglamentos de prácticas preprofesionales— el flujo de interacción es puramente estático y asíncrono. El estudiante debe autenticarse en el portal, navegar a través de una arquitectura de información basada en menús jerárquicos y, finalmente, descargar archivos en formato PDF. 
 
-Las principales limitaciones técnicas de este enfoque son:
+La relevancia de mejorar este proceso de difusión se sustenta en la rigurosidad de las normativas internas. Por ejemplo, el Reglamento de Régimen Académico Interno de la Universidad Tecnológica Indoamérica establece directrices críticas que el estudiante debe interpretar correctamente para no retrasar su progreso académico:
+
+\begin{quote}
+``Las prácticas preprofesionales se realizarán en entornos organizacionales, institucionales, empresariales, comunitarios u otros relacionados al ámbito profesional de la carrera o programa, públicos o privados, nacionales o internacionales, que garanticen el desarrollo de competencias para el ejercicio profesional'' (UTI, 2024, Art. 45).
+\end{quote}
+
+Esta dispersión y complejidad documental exige una interfaz más inteligente. Las principales limitaciones técnicas de este enfoque estático son:
 \begin{itemize}
     \item \textbf{Carencia de búsqueda semántica:} Los repositorios actuales dependen de búsquedas por palabras clave exactas o navegación manual. El sistema no "comprende" la intención del usuario ni puede extraer párrafos específicos de un documento extenso (por ejemplo, un reglamento de 50 páginas) para responder una duda puntual.
     \item \textbf{Ausencia de proactividad en la interfaz:} El sistema requiere que el usuario inicie la interacción mediante el uso de un periférico tradicional (teclado/ratón), sin aprovechar las capacidades del entorno físico, como la detección de presencia.
@@ -25,6 +31,8 @@ Para fundamentar cuantitativamente el diagnóstico de la situación actual y eva
 La Tabla~\ref{tab:metricas_diagnostico_metodologia} presenta el contraste cuantitativo entre las métricas del sistema actual y la proyección de rendimiento con el Asistente Virtual Multimodal.
 
 \begin{table}[H]
+  \caption{Contraste Cuantitativo del Diagnóstico Operativo vs. Asistente Virtual Multimodal.}
+  \label{tab:metricas_diagnostico_metodologia}
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
@@ -38,15 +46,17 @@ La Tabla~\ref{tab:metricas_diagnostico_metodologia} presenta el contraste cuanti
 \textbf{Carga operativa de secretaría (mes)} & 75 a 100 h-hombre/mes (~300 consultas) & Automatización del \textbf{92,0\%} de dudas recurrentes & Ahorro de \textbf{69 a 85 h-hombre/mes} \\ \hline
 \textbf{Precisión de recuperación semántica} & Baja (búsqueda literal por palabras clave) & \textbf{92,0\%} (\textit{Hit Rate} RAG en normativas UTI) & Eliminación de errores de interpretación \\ \hline
 \end{tabular}
-\caption{Contraste Cuantitativo del Diagnóstico Operativo vs. Asistente Virtual Multimodal.}\label{tab:metricas_diagnostico_metodologia}
+
 \end{table}
 
 \section{Área de Estudio}
 
 \begin{table}[H]
-  \centering
   \caption{Área de estudio.}
   \label{tab:area_estudio}
+  \centering
+  
+  
   \renewcommand{\arraystretch}{1.35}
   \begin{tabular}{|p{0.39\textwidth}|p{0.53\textwidth}|}
     \hline
@@ -78,6 +88,8 @@ Como apoyo para la construcción técnica del prototipo se utilizó un enfoque i
 La aplicación de las etapas de la metodología DSRM en el contexto de este trabajo se sintetiza en la Tabla~\ref{tab:dsrm}.
 
 \begin{table}[H]
+  \caption{Aplicación de la metodología DSRM en el proyecto.}
+  \label{tab:dsrm}
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
@@ -93,7 +105,7 @@ Demostración & Implementación del prototipo & Capturas y repositorio \\ \hline
 Evaluación & Pruebas técnicas y pruebas con estudiantes & Secciones 3.3 y 3.6 \\ \hline
 Comunicación & Documentación del trabajo y repositorio & Tesis y anexos \\ \hline
 \end{tabular}
-\caption{Aplicación de la metodología DSRM en el proyecto.}\label{tab:dsrm}
+
 \end{table}
 
 El desarrollo iterativo se estructuró en las siguientes fases:
@@ -131,37 +143,80 @@ Para la evaluación de usabilidad se trabajó con una muestra piloto de 13 estud
 
 \section{Requerimientos del Proyecto}
 
-La definición de los requerimientos establece las directrices técnicas y operativas que el sistema debe cumplir para satisfacer las necesidades identificadas en el planteamiento del problema. Estos se dividen en requerimientos funcionales, que describen el comportamiento del sistema, y requerimientos no funcionales, que definen los atributos de calidad de la arquitectura.
+La definición de los requerimientos establece las directrices técnicas y operativas que el sistema debe cumplir. A continuación se detallan los requerimientos funcionales (RF) y no funcionales (RNF) en formato de tabla para asegurar su trazabilidad.
 
+\subsection{Requerimientos Funcionales (RF)}
 
-\subsection{Requerimientos Funcionales}
-Los requerimientos funcionales (RF) detallan las tareas específicas, interacciones y procesos de datos que el prototipo del asistente virtual debe ser capaz de ejecutar:
+\begin{table}[H]
+  \caption{Requerimientos Funcionales del Sistema.}
+  \label{tab:rf_formal}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|p{1.5cm}|p{3.5cm}|p{8.5cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Código} & \textbf{Nombre} & \textbf{Descripción Técnica} \\ \hline
+    \textbf{RF-01} & Interacción Visual no Biométrica & El sistema debe detectar la presencia del usuario frente a la cámara web analizando exclusivamente cajas delimitadoras (bounding boxes), sin aplicar biometría facial ni reconocimiento de identidad. \\ \hline
+    \textbf{RF-02} & Captura y Transcripción de Voz (STT) & El sistema debe capturar el audio del micrófono del usuario de forma asíncrona y transcribirlo a texto mediante un modelo Whisper-v3 vía API externa, manejando jerga académica. \\ \hline
+    \textbf{RF-03} & Motor RAG Multilingüe & El sistema debe procesar la consulta utilizando embeddings en español y recuperar los fragmentos documentales más relevantes de una base de datos vectorial local (ChromaDB). \\ \hline
+    \textbf{RF-04} & Generación de Respuesta (LLM) & El sistema debe enviar la instrucción base (prompt) más el contexto recuperado al LLM para generar una respuesta natural y libre de alucinaciones. \\ \hline
+    \textbf{RF-05} & Síntesis de Texto a Voz (TTS) & El sistema debe convertir el texto de la respuesta en audio mediante un flujo de streaming segmentado (HTTP Chunking), reduciendo el TTFB. \\ \hline
+    \textbf{RF-06} & Renderizado y Lip-Sync 3D & El sistema debe renderizar un modelo 3D (VRM) en WebGL y sincronizar la apertura de boca del avatar con los fonemas extraídos del audio sintetizado. \\ \hline
+  \end{tabular}
+\end{table}
 
-\begin{itemize}
-    \item \textbf{RF-01: Interacción Visual no Biométrica.} El sistema debe incorporar mecanismos de visión artificial orientados a apoyar la interacción del avatar, sin identificar personalmente al estudiante ni depender de una instalación física específica.
-    \item \textbf{RF-02: Transcripción de Voz a Texto (STT).} Una vez activo, el sistema debe ser capaz de capturar el audio del usuario a través de un micrófono y transcribir de forma precisa la pregunta hablada a formato de texto natural en idioma español.
-    \item \textbf{RF-03: Generación Aumentada por Recuperación (RAG).} El sistema debe procesar la consulta de texto y buscar similitudes semánticas dentro de una base de datos vectorial local que contenga los documentos oficiales de la Universidad Indoamérica (mallas curriculares, reglamentos).
-    \item \textbf{RF-04: Generación de Respuesta Contextualizada (LLM).} El sistema debe enviar el contexto recuperado (RF-03) al Modelo de Lenguaje de Gran Escala (LLM) para que este genere una respuesta coherente, precisa y basada \textit{exclusivamente} en la información institucional proporcionada, evitando alucinaciones.
-    \item \textbf{RF-05: Síntesis de Texto a Voz (TTS).} El sistema debe tomar la respuesta generada por el LLM y convertirla a un formato de audio hablado natural en español.
-    \item \textbf{RF-06: Gestión de Estados y Retorno a Reposo.} El sistema debe controlar los estados de conversación y, al detectar un tiempo de inactividad (\textit{timeout}) o la finalización de la consulta, el avatar debe despedirse y regresar al estado de reposo para ahorrar recursos de procesamiento.
-\end{itemize}
-%\textit{[Enumerar y describir los requerimientos funcionales que la solución debe cumplir.]}
+\subsection{Requerimientos No Funcionales (RNF)}
 
-\subsection{Requerimientos No Funcionales}
-Los requerimientos no funcionales (RNF) especifican los criterios de rendimiento, seguridad, usabilidad y restricciones técnicas bajo las cuales operará el sistema en el servidor local:
-
-\begin{itemize}
-    \item \textbf{RNF-01: Privacidad y Ética de Datos (Security \& Privacy).} El módulo de visión artificial debe operar bajo el principio de ``Privacidad por Diseño''. No debe registrar, capturar ni almacenar en ninguna base de datos imágenes, videos ni plantillas biométricas faciales de los estudiantes. El procesamiento visual debe ser efímero, anónimo y limitado al soporte de la interacción.
-    \item \textbf{RNF-02: Rendimiento y Baja Latencia (Performance).} Al ser un sistema conversacional interactivo, el tiempo de respuesta (desde que el estudiante termina de hablar hasta que el avatar comienza a responder) debe estar optimizado para ejecutarse en el servidor local, buscando una latencia ideal no mayor a 3 a 5 segundos para mantener la naturalidad del diálogo.
-    \item \textbf{RNF-03: Restricción de Dominio (Accuracy).} El sistema debe estar programado con \textit{prompts} de sistema estrictos que limiten sus respuestas al ámbito académico de la carrera de TI. Si un usuario realiza consultas fuera de este alcance (ej. temas externos o preguntas capciosas), el sistema debe declinar la respuesta cortésmente.
-    \item \textbf{RNF-04: Independencia Transaccional (Isolation).} La arquitectura del asistente debe estar completamente aislada de la base de datos transaccional del Sistema de Gestión Académica (SGA). El sistema no tendrá permisos para matricular, modificar calificaciones ni consultar datos personales protegidos mediante autenticación.
-    \item \textbf{RNF-05: Escalabilidad del Conocimiento (Maintainability).} La arquitectura RAG debe permitir la actualización, adición o eliminación de normativas y documentos PDF de la base de conocimiento vectorial de manera sencilla, sin necesidad de reentrenar (\textit{fine-tuning}) el modelo de lenguaje base.
-    \item \textbf{RNF-06: Usabilidad "Hands-Free" (Usability).} La interacción con el asistente debe ser fluida y natural, priorizando el control por voz y visión artificial para que el estudiante no necesite utilizar teclados, ratones ni tocar pantallas interactivas de forma obligatoria.
-\end{itemize}
-%\textit{[Describir requerimientos relacionados con seguridad, rendimiento, disponibilidad, escalabilidad u otros aplicables.]}
+\begin{table}[H]
+  \caption{Requerimientos No Funcionales del Sistema.}
+  \label{tab:rnf_formal}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|p{1.5cm}|p{2.5cm}|p{6cm}|p{3cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Código} & \textbf{Atributo} & \textbf{Descripción} & \textbf{Métrica / KPI} \\ \hline
+    \textbf{RNF-01} & Seguridad y Privacidad & El procesamiento visual debe ser efímero. Prohibido el almacenamiento en disco de las imágenes capturadas. & 0 fotogramas almacenados en persistencia. \\ \hline
+    \textbf{RNF-02} & Baja Latencia & El tiempo de respuesta de la síntesis de voz (TTFB) debe permitir una interacción conversacional natural. & TTFB $\le$ 800 milisegundos. \\ \hline
+    \textbf{RNF-03} & Precisión Documental & El motor de búsqueda semántica debe garantizar la recuperación asertiva de reglamentos complejos. & \textit{Hit Rate} (Top-3) $\ge$ 90,0\%. \\ \hline
+    \textbf{RNF-04} & Aislamiento & La arquitectura debe operar de forma agnóstica sin requerir conexión a bases de datos transaccionales. & 100\% desacoplado del SGA institucional. \\ \hline
+  \end{tabular}
+\end{table}
 
 \section{Diseño de la Solución}
 El diseño de la solución propuesta se articula sobre una arquitectura modular y desacoplada, operando bajo un entorno de despliegue en un servidor local para garantizar el rendimiento, la seguridad y el procesamiento en tiempo real. El sistema se desglosa en tres capas lógicas fundamentales:
+
+\begin{figure}[htbp]
+  \centering
+  \makebox[\textwidth][c]{\includegraphics[width=1.15\textwidth]{Logos/diagrama_contexto.pdf}}
+  \caption{Diagrama de Contexto (Nivel 0).}
+  \label{fig:diag_contexto}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \makebox[\textwidth][c]{\includegraphics[width=1.15\textwidth]{Logos/diagrama_clases.pdf}}
+  \caption{Diagrama de Clases del Backend.}
+  \label{fig:diag_clases}
+\end{figure}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth,height=0.95\textheight,keepaspectratio]{Logos/diagrama_secuencia.pdf}
+  \caption{Diagrama de Secuencia de Interacción.}
+  \label{fig:diag_secuencia}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth,height=0.95\textheight,keepaspectratio]{Logos/diagrama_estados.pdf}
+  \caption{Diagrama de Estados del Avatar.}
+  \label{fig:diag_estados}
+\end{figure}
+\end{landscape}
 
 \subsection{Capa de Percepción y Captura (Frontend Físico)}
 Esta capa actúa como el sensor del sistema. A través de una cámara web, un modelo ligero de visión artificial procesa el flujo de video en tiempo real. El diseño estipula que el sistema no guardará fotogramas; únicamente extraerá las coordenadas de la caja delimitadora (\textit{bounding box}) del rostro. Cuando el área del rostro supera un umbral específico de píxeles (indicando que el estudiante se ha acercado a la pantalla), el sistema envía un disparador (\textit{trigger}) lógico para "despertar" al asistente. Simultáneamente, un micrófono direccional se activa para capturar la solicitud del usuario.
