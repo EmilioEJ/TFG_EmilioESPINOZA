@@ -24,6 +24,35 @@ Para fundamentar cuantitativamente el diagnóstico de la situación actual y eva
 \begin{itemize}
     \item \textbf{Tiempos promedio de consulta manual:} En la actualidad, una consulta tradicional ---que involucra la autenticación obligatoria en el SGA, navegación por menús jerárquicos, descarga e interpretación de archivos PDF estáticos (mallas, sílabos o reglamentos institucionales) y, en muchos casos, el desplazamiento físico a la secretaría por dudas de interpretación--- consume un tiempo promedio de \textbf{45 a 60 minutos por estudiante} \cite{uti2025rc}. La medición de esta métrica operativa se estructuró a través de un estudio de tiempos, empleando cronometría digital y el análisis de bitácoras de atención. Para el cálculo del tiempo promedio se aplicó la fórmula estadística de la media aritmética ($\bar{X} = \frac{\sum t_i}{n}$), donde $t_i$ representa el tiempo individual de resolución de la consulta y $n$ el tamaño total de la muestra observada. Cuando la orientación se realiza en ventanilla de secretaría académica, el personal de coordinación invierte entre \textbf{15 y 20 minutos (0.25 h) por caso}. Asimismo, para consultas canalizadas vía correo electrónico institucional, el tiempo de respuesta varía entre \textbf{24 y 48 horas en días laborables}, extendiéndose hasta 12 o 20 días hábiles en revisiones documentales complejas de homologación \cite{unescoin2024}.
     \item \textbf{Volumen de solicitudes y carga laboral administrativa:} En la carrera de Ingeniería en Tecnologías de la Información, con un universo poblacional activo de aproximadamente \textbf{380 estudiantes cursando la malla curricular} en las sedes Quito y Ambato \cite{uti2025rc}, un 25\% de los estudiantes realiza de manera recurrente al menos una consulta reglamentaria o curricular al mes. Ello genera alrededor de \textbf{300 consultas mensuales} de carácter repetitivo en secretaría académica, demandando aproximadamente \textbf{75 a 100 horas-hombre al mes} dedicadas exclusivamente a tareas repetitivas y de baja complejidad cognitiva.
+
+    \begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        ybar,
+        bar width=30pt,
+        enlargelimits=0.15,
+        ylabel={Volumen / Horas},
+        symbolic x coords={Universo Estudiantil, Estudiantes Consultantes, Consultas Mensuales, Horas-Hombre (Promedio)},
+        xtick=data,
+        nodes near coords,
+        nodes near coords align={vertical},
+        x tick label style={text width=3cm, align=center},
+        width=0.95\textwidth,
+        height=7.5cm,
+        ymin=0, ymax=450
+        ]
+    \addplot[fill=cyan!40, draw=black!70] coordinates {
+        (Universo Estudiantil,380) 
+        (Estudiantes Consultantes,95) 
+        (Consultas Mensuales,300) 
+        (Horas-Hombre (Promedio),88)
+    };
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Estadísticas del volumen mensual de consultas y carga laboral asociada.}
+    \label{fig:estadisticas_consultas}
+    \end{figure}
     \item \textbf{Nivel de satisfacción, errores de interpretación e ``Ilusión de aprendizaje'':} La dependencia de repositorios estáticos y la carencia de indexación semántica propician un índice recurrente de errores en la interpretación de prerrequisitos y normativas de titulación. Además, el estudio latinoamericano de adopción tecnológica muestra que un 74\% de la comunidad académica acepta y demanda interfaces interactivas de asistencia digital \cite{ilia2024ecuador}, confirmando la insatisfacción con los portales estáticos tradicionales.
     \item \textbf{Contraste operativo con el Asistente Virtual Multimodal:} Frente a este diagnóstico, el motor de Generación Aumentada por Recuperación (RAG) multilingüe desarrollado en esta tesis ha demostrado empíricamente una precisión de recuperación semántica del \textbf{92,0\%} en mallas y normativas institucionales. El sistema resuelve la consulta de manera instantánea, con un tiempo hasta el primer byte (\textit{Time-to-First-Byte} - TTFB) de \textbf{450 milisegundos} y un tiempo total de generación conversacional de \textbf{3,2 segundos}, reduciendo el tiempo de consulta estudiantil de 60 minutos a pocos segundos y generando un ahorro operativo estimado de \textbf{69 a 85 horas-hombre mensuales} para la administración académica \cite{uti2025rc}.
 \end{itemize}
