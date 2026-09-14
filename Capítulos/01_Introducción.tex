@@ -175,7 +175,7 @@ La ejecución de este proyecto es factible tanto a nivel técnico como operativo
 
 Para ilustrar el impacto potencial del proyecto en la carrera de Ingeniería en Tecnologías de la Información, se ha diseñado la matriz comparativa de la Tabla~\ref{tab:cuantificacion_impacto}. En ella se contrastan los indicadores críticos de la situación actual frente a la proyección técnica del Asistente Virtual Inteligente.
 
-\begin{table}[h]
+\begin{table}[htbp]
   \caption{Matriz de Indicadores de Impacto Potencial del Proyecto.}
   \label{tab:cuantificacion_impacto}
 \centering
@@ -198,7 +198,7 @@ Para ilustrar el impacto potencial del proyecto en la carrera de Ingeniería en 
 \clearpage
 \section{Objetivos}
 \subsection{Objetivo General}
-Desarrollar e implementar un prototipo de Asistente Virtual Inteligente, provisto de una interfaz de avatar 3D y visión artificial, para optimizar la difusión proactiva y el acceso a la información académica de los estudiantes en la carrera de Ingeniería en Tecnologías de la Información de la Universidad Tecnológica Indoamérica.
+Desarrollar un prototipo de Asistente Virtual Inteligente, provisto de una interfaz de avatar 3D y visión artificial, para optimizar la difusión proactiva y el acceso a la información académica de los estudiantes en la carrera de Ingeniería en Tecnologías de la Información de la Universidad Tecnológica Indoamérica.
 
 %\textit{[Redactar el propósito principal del proyecto, alineado con la solución propuesta e incluyendo explícitamente su implementación.]}
 \subsection{Objetivos Específicos}
@@ -242,20 +242,23 @@ En el paradigma RAG, los documentos son fragmentados (\textit{chunking}) y trans
 \centering
 \begin{tikzpicture}
     % Ejes
-    \draw[->, thick] (0,0) -- (5,0) node[right] {$Dim_1$};
-    \draw[->, thick] (0,0) -- (0,4) node[above] {$Dim_2$};
+    \draw[->, thick] (0,0) -- (8,0) node[right] {$Dim_1$};
+    \draw[->, thick] (0,0) -- (0,6) node[above] {$Dim_2$};
     
     % Vector Documento
-    \draw[->, thick, blue] (0,0) -- (4,1.5) node[right] {Vector Documento ($\vec{d_i}$)};
+    \draw[->, thick, blue] (0,0) -- (6,1.5) node[right, yshift=-5pt] {Vector Documento ($\vec{d_i}$)};
     
     % Vector Consulta
-    \draw[->, thick, red] (0,0) -- (3,3) node[above] {Vector Consulta ($\vec{q}$)};
+    \draw[->, thick, red] (0,0) -- (3,5) node[above left] {Vector Consulta ($\vec{q}$)};
     
     % Arco del ángulo
-    \draw[bend right, <->, thick, green!60!black] (1.5,1.5) to node[right=2pt] {$\theta$ (Similitud Coseno)} (2.5, 0.95);
+    \draw[bend right, <->, thick, green!60!black] (1.5,2.5) to (2.8, 0.7);
+    
+    % Etiqueta del ángulo manual para evitar solapamiento
+    \node[green!60!black, below] at (2.5, 0.5) {$\theta$ (Similitud Coseno)};
     
     % Texto explicativo
-    \node[align=left, anchor=west] at (4.5, 3.5) {
+    \node[align=left, anchor=west] at (4.5, 5.0) {
         \small Similitud Coseno ($\theta$) = $\frac{q \cdot d_i}{||q|| \cdot ||d_i||}$ \\[1.5ex]
         \small Mayor similitud = Menor $\theta$
     };
@@ -271,7 +274,10 @@ La visión artificial permite a las máquinas extraer información significativa
 Los ECAs (Embodied Conversational Agents) son entidades generadas por computadora que poseen una representación visual y habilidades conversacionales. Se investigarán los principios de la Interacción Humano-Computadora (HCI) relacionados con el efecto \textit{Uncanny Valley} y la carga cognitiva. A nivel de software, se explorarán estándares de la industria como WebGL, Three.js y plataformas como Ready Player Me, que proporcionan mallas 3D (\textit{meshes}) estandarizadas y \textit{blendshapes} (morph targets) necesarios para lograr una sincronización labial precisa basada en los fonemas del audio generado.
 
 \subsection{Arquitectura de Software para Asistentes Virtuales Multimodales}
+
+La arquitectura de los asistentes virtuales modernos sigue un patrón modular y distribuido que separa la interacción con el usuario (cliente) del procesamiento cognitivo intensivo (servidor). En la capa de cliente o \textit{frontend}, se gestiona la captura en tiempo real de los flujos de audio y la detección visual ligera de presencia a través de tecnologías web estándar. Esta capa es también la responsable de renderizar gráficamente el avatar 3D para proveer retroalimentación visual al usuario. 
+
+Por su parte, la capa de servidor o \textit{backend} agrupa los servicios cognitivos: motores de transcripción (\textit{Speech-to-Text}), la orquestación del procesamiento de lenguaje natural integrado con Generación Aumentada por Recuperación (RAG), la consulta a la base de datos vectorial y la síntesis de voz (\textit{Text-to-Speech}) \cite{pabon2025naia}. Esta división estratégica asegura que la latencia en la comunicación sea mínima, delegando las cargas computacionales pesadas a servidores especializados o contenedores aislados. De esta forma, se mantiene una experiencia de usuario conversacional fluida e ininterrumpida en el punto de interacción, consolidando la funcionalidad de soporte institucional continuo y automatizado.
+
+\subsection{Aceptación Tecnológica en la Educación Superior}
 El proyecto requiere una comprensión arquitectónica que integre el motor conversacional, la base de conocimiento, los servicios de voz, el módulo visual no biométrico y la interfaz gráfica del avatar 3D. Se definirán los conceptos de computación local y computación en la nube, justificando qué procesos pueden ejecutarse en el equipo del prototipo para minimizar la latencia y qué procesos, como la generación de respuestas mediante LLM, pueden depender de peticiones a servicios externos mediante APIs RESTful.
-
-
-

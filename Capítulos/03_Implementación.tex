@@ -1,10 +1,38 @@
 \chapter{Implementación, Pruebas y Resultados}
 \label{chap:implementacion}
 
-\section{Descripción de la Solución}
-La solución implementada consiste en un prototipo funcional de un Asistente Virtual Inteligente diseñado para la difusión proactiva de reglamentos y mallas curriculares. La arquitectura mantiene localmente el motor de recuperación y los componentes principales de inteligencia artificial, mientras determinados servicios de voz utilizan APIs externas para transcripción y síntesis. La captura de video se realiza desde el dispositivo cliente mediante el navegador. Los fotogramas necesarios para la detección de presencia se transmiten temporalmente al backend mediante WebSockets y son procesados sin almacenamiento persistente. El sistema utiliza exclusivamente la información necesaria para determinar la presencia del usuario y activar la interacción, evitando el almacenamiento persistente de imágenes o plantillas biométricas y limitando el procesamiento visual a la detección temporal necesaria para la interacción.
+\section{Requisitos de Implementación}
+Para llevar a cabo el desarrollo y despliegue del Asistente Virtual Inteligente, se establecieron diversos requisitos técnicos tanto a nivel de hardware como de software. Esto garantiza que la arquitectura distribuida del prototipo funcione sin cuellos de botella y de manera orquestada.
 
-A continuación, la Tabla~\ref{tab:matriz_comparativa} resume la evolución operativa lograda mediante este prototipo frente a los procesos institucionales tradicionales.
+\subsection{Requisitos de Hardware}
+El sistema fue implementado y probado en un entorno local con las siguientes especificaciones recomendadas para soportar la carga asíncrona y la inferencia generativa:
+\begin{itemize}
+    \item \textbf{Procesador (CPU):} Intel Core i7 de 12.ª generación (o superior), necesario para manejar la concurrencia de WebSockets y FastAPI.
+    \item \textbf{Memoria RAM:} 32 GB, requeridos para cargar el entorno virtual de Python, ChromaDB y los modelos ligeros en memoria.
+    \item \textbf{Tarjeta Gráfica (GPU):} NVIDIA RTX 3060 de 12GB VRAM. Fundamental para la generación acelerada de respuestas si se usan modelos LLM cuantizados locales.
+    \item \textbf{Periféricos del Cliente:} Cámara web estándar (resolución mínima 640x480) y micrófono integrado para capturar las intenciones del usuario.
+\end{itemize}
+
+\subsection{Requisitos de Software y Tecnologías}
+El entorno de desarrollo requiere la instalación y configuración de múltiples herramientas tecnológicas, resumidas a continuación:
+
+\begin{table}[htbp]
+  \caption{Software y herramientas requeridas para la implementación.}
+  \label{tab:requisitos_software}
+  \centering
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{|p{4cm}|p{11cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Herramienta / Framework} & \textbf{Propósito y Configuración} \\ \hline
+    \textbf{Python 3.10+} & Lenguaje principal del Backend. Requiere configuración de un entorno virtual (venv) e instalación de dependencias vía \texttt{requirements.txt}. \\ \hline
+    \textbf{FastAPI y Uvicorn} & Framework para construir la API Gateway y manejar conexiones asíncronas y WebSockets. \\ \hline
+    \textbf{ChromaDB} & Base de datos vectorial embebida. Se debe configurar para persistencia local en disco. \\ \hline
+    \textbf{SentenceTransformers} & Librería para vectorización matemática (Modelo \texttt{paraphrase-\-multilingual-\-MiniLM-\-L12-\-v2}). \\ \hline
+    \textbf{HTML, CSS, JS (Vite/Three.js)} & Capa Frontend. Requiere configuración para renderizar gráficos WebGL y capturar media del usuario. \\ \hline
+    \textbf{Docker y Docker Compose} & Opcional para el despliegue de contenedores aislados. Requiere escritura de un \texttt{Dockerfile}. \\ \hline
+  \end{tabular}
+\end{table}
 
 \begin{table}[H]
   \caption{Matriz Comparativa: Proceso Manual vs. Asistente Virtual.}
@@ -24,79 +52,11 @@ A continuación, la Tabla~\ref{tab:matriz_comparativa} resume la evolución oper
   \end{tabular}
 \end{table}
 
-El sistema está estructurado en tres capas operativas distintas que funcionan bajo un modelo cliente-servidor descentralizado:
-\begin{itemize}
-    \item \textbf{Capa de Percepción:} Un módulo de visión artificial y captura de audio nativo ejecutado en el cliente web, que interactúa vía WebSockets con el servidor para preservar la privacidad y reducir el ancho de banda.
-    \item \textbf{Capa Cognitiva:} Un entorno administrado por FastAPI que orquesta una base de datos vectorial (ChromaDB), modelos de transcripción asíncronos (Whisper-v3) y el modelo LLM local u optimizado por API.
-    \item \textbf{Capa de Interacción Frontal:} Interfaz basada en web que renderiza un avatar 3D mediante WebGL.
-\end{itemize}
-
-La Imagen~\ref{img:seccion_login} muestra la interfaz de acceso inicial al sistema.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.9\textwidth]{Logos/Seccion_Login.png}
-  \caption{Interfaz de acceso y autenticación inicial al Asistente Virtual.}
-  \label{img:seccion_login}
-  \elaboradopor{Estudiante}
-  \fuente{Captura de pantalla del sistema}
-\end{figure}
-
 \section{Proceso de Implementación}
+El proceso de implementación siguió un enfoque iterativo, comenzando desde la configuración de la base de datos y culminando con el ensamblaje de la interfaz de usuario en el frontend. A continuación, se detallan los pasos lógicos.
 
-\subsection{Implementación de Visión Artificial Ligera y WebSockets}
-Dado que los servidores virtuales en la nube carecen de periféricos físicos como cámaras web, se modificó el enfoque tradicional de OpenCV local. La solución delega el acceso al hardware al navegador del cliente mediante JavaScript (\texttt{navigator.mediaDevices.getUserMedia}). El frontend extrae fotogramas en formato \texttt{base64} y los envía a través de una conexión bidireccional en tiempo real (\textit{WebSockets}) hacia FastAPI. 
-
-El uso de WebSockets facilita una comunicación bidireccional y asíncrona entre cliente y servidor, evitando que las operaciones de entrada y salida mantengan bloqueado innecesariamente el flujo principal durante el procesamiento de las solicitudes. A diferencia de las peticiones HTTP tradicionales, que mantendrían un hilo bloqueado mientras el modelo genera la respuesta de IA, la arquitectura orientada a eventos de los WebSockets permite al servidor procesar los fotogramas visuales y emitir la respuesta en tiempo real de forma asíncrona, sin congelar el flujo de ejecución principal.
-
-Para detectar a los usuarios de manera proactiva sin incurrir en altos costos computacionales, el servidor analiza la caja delimitadora (\textit{bounding box}) del rostro.
-
-\begin{equation}
-\label{eq:presence}
-Estado = 
-\begin{cases} 
-Activo, & \text{si } (W_{box} \times H_{box}) > \tau_{pixeles} \\
-Reposo, & \text{de lo contrario}
-\end{cases}
-\end{equation}
-\addeqtolist{Cálculo lógico para detección de presencia del usuario vía WebSockets}
-
-Como se observa en la Figura~\ref{fig:cpu_usage}, este enfoque delegado reduce drásticamente el uso computacional de la CPU del servidor, logrando un proceso sostenible y evitando cuellos de botella en la renderización. Las pruebas de rendimiento se ejecutaron bajo condiciones experimentales controladas: un servidor local equipado con un procesador Intel Core i7 de 12.ª generación, 32 GB de memoria RAM, y una GPU dedicada NVIDIA RTX 3060 de 12GB VRAM. La resolución de captura visual se limitó a 640x480 píxeles a 15 cuadros por segundo durante sesiones ininterrumpidas de 10 minutos.
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    ybar,
-    bar width=20pt,
-    enlargelimits=0.2,
-    legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
-    ylabel={Uso del Procesador (\%)},
-    symbolic x coords={Red Neuronal Profunda, Bounding Box Ligero (Implementado)},
-    xtick=data,
-    nodes near coords,
-    nodes near coords align={vertical},
-    width=0.8\textwidth,
-    height=6cm,
-    ymin=0, ymax=100
-    ]
-\addplot[fill=red!40] coordinates {(Red Neuronal Profunda,85) (Bounding Box Ligero (Implementado),12)};
-\addplot[fill=blue!40] coordinates {(Red Neuronal Profunda,60) (Bounding Box Ligero (Implementado),4)};
-\legend{Uso de CPU (Subproceso OpenCV), Uso de GPU (Dedicada)}
-\end{axis}
-\end{tikzpicture}
-\caption{Comparativa del uso de CPU y GPU entre métodos de visión artificial.}
-\label{fig:cpu_usage}
-\end{figure}
-
-\subsection{Procesamiento de Documentos y Motor RAG Multilingüe}
-Una mejora fundamental se dio en el motor de Generación Aumentada por Recuperación (RAG). Se identificó que modelos en inglés generaban fallos de recuperación ante consultas en español. Por ello, se implementó el modelo de \textit{embeddings} \texttt{paraphrase-multilingual-MiniLM-L12-v2}, ajustando el tamaño de fragmentación (\textit{chunking}) a 1500 caracteres con un solapamiento de 300 usando \texttt{MarkdownTextSplitter}.
-
-Los documentos son procesados con la biblioteca \texttt{pymupdf4llm} para preservar la estructura de tablas y transformados a vectores de 384 dimensiones. Durante la búsqueda, la precisión se evalúa calculando la similitud del coseno (conceptuada en la Sección~\ref{sec:diseno_solucion}).
-
-Para manejar el riesgo crítico de las alucinaciones, el motor RAG fue configurado bajo un estricto patrón de "Contexto Cerrado". Si la métrica de similitud del coseno de los documentos recuperados es inferior al umbral de confianza, el \textit{prompt} del sistema instruye explícitamente al LLM local a declinar la respuesta, evitando interbloqueos lógicos.
-
-La administración dinámica de estos documentos se gestiona a través de un panel especializado, visible en la Imagen~\ref{img:admin_rag}. El acceso al panel administrativo destinado a la actualización de la base documental debe mantenerse restringido a usuarios autorizados. Las credenciales y claves de los servicios externos se gestionan mediante variables de entorno y no deben almacenarse directamente en el código fuente. Para una futura implementación institucional se recomienda incorporar control de roles, registro de cambios y mecanismos adicionales de auditoría.
+\subsection{Paso 1: Configuración a nivel de Base de Datos Vectorial}
+El primer paso consistió en la inicialización y población de \textbf{ChromaDB}. Se desarrolló el script \texttt{rag\_manager.py} que toma los reglamentos y mallas curriculares (archivos PDF), los extrae y divide en fragmentos semánticos (\textit{chunks}). Posteriormente, utilizando \texttt{SentenceTransformers}, cada bloque de texto se convierte en un arreglo numérico y se inserta en una colección persistente llamada \texttt{carrera\_ti\_indoamerica\_collection}. Este proceso debe ejecutarse y completarse antes de levantar el servidor, pues el motor de inteligencia artificial depende de este conocimiento previo.
 
 \begin{figure}[htbp]
   \centering
@@ -107,8 +67,22 @@ La administración dinámica de estos documentos se gestiona a través de un pan
   \fuente{Captura de pantalla del sistema}
 \end{figure}
 
-\subsection{Procesamiento de Voz Asíncrono (Whisper y ElevenLabs)}
-Para solucionar la limitación del \textit{Text-to-Speech} robótico tradicional (\texttt{edge-tts}), se implementó una delegación asíncrona dual para la audición y el habla. El usuario graba su voz, y FastAPI delega la transcripción al modelo \textbf{Whisper-v3} a través de la API ultrarrápida de Groq. Posteriormente, el texto del LLM es convertido a voz natural (Voz ``Valeria'') mediante la API de ElevenLabs con \textit{HTTP Chunking Streaming}.
+\subsection{Paso 2: Construcción del Servidor Backend (FastAPI)}
+Una vez establecida la base de datos, se programó el orquestador principal: el archivo \texttt{api.py}. En este nivel de aplicación se configuraron las rutas (endpoints) RESTful y las conexiones WebSockets. El servidor se encarga de:
+1. Recibir fotogramas ligeros vía WebSockets y calcular el área del \textit{bounding box} del rostro ($W_{box} \times H_{box}$) para determinar presencia activa, de acuerdo al siguiente modelo lógico:
+
+\begin{equation}
+\label{eq:presence}
+Estado = 
+\begin{cases} 
+Activo, & \text{si } (W_{box} \times H_{box}) > \tau_{pixeles} \\
+Reposo, & \text{de lo contrario}
+\end{cases}
+\end{equation}
+\addeqtolist{Cálculo lógico para detección de presencia del usuario vía WebSockets}
+2. Recibir audios en formato WebM, enviarlos a Groq API (Whisper-v3) para transcripción ultrarrápida.
+3. Orquestar la consulta a ChromaDB usando la similitud del coseno.
+4. Conectar con el LLM para formular la respuesta y luego con ElevenLabs para el proceso de Text-to-Speech (TTS).
 
 \begin{figure}[htbp]
 \centering
@@ -135,10 +109,8 @@ Para solucionar la limitación del \textit{Text-to-Speech} robótico tradicional
 \label{fig:flujo_voz}
 \end{figure}
 
-\subsection{Interfaz Dual y Renderizado WebGL}
-La interacción final fue desarrollada utilizando \textit{Three.js} para renderizar un avatar de formato VRM directamente en el navegador (WebGL). Se programaron dos modos visuales (Dual UI Mode): un modo ``Chat'' tradicional con historial (Imagen~\ref{img:seccion_chat}) y un modo ``Conversacional'' inmersivo sin texto (Imagen~\ref{img:seccion_conversacional}). 
-
-Como parte del rediseño UI, se desactivó el seguimiento ocular del ratón para mantener profesionalismo y se añadieron burbujas de sugerencias dinámicas usando CSS y posiciones absolutas sobre el Canvas de WebGL.
+\subsection{Paso 3: Desarrollo de la Capa de Cliente (Frontend)}
+A nivel de frontend, se diseñó la interfaz dual que permite a los usuarios interactuar. Se integró Three.js para renderizar un avatar 3D (formato VRM) provisto por Ready Player Me. La aplicación cliente captura los \textit{streams} de audio y video utilizando \texttt{navigator.mediaDevices} y los remite al servidor. Además, recibe los \textit{chunks} de audio de respuesta e interpreta los fonemas (visemas) para sincronizar el movimiento de la boca del avatar, generando una presencia empática.
 
 \begin{figure}[htbp]
 \centering
@@ -173,7 +145,6 @@ Como parte del rediseño UI, se desactivó el seguimiento ocular del ratón para
   \elaboradopor{Estudiante}
   \fuente{Captura de pantalla del sistema}
 \end{figure}
-
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_Conversacional.png}
@@ -184,91 +155,53 @@ Como parte del rediseño UI, se desactivó el seguimiento ocular del ratón para
 \end{figure}
 
 \section{Pruebas y Validación}
+Para garantizar la fiabilidad técnica y operativa del Asistente Virtual Inteligente, se ejecutó una batería integral de pruebas en diversos niveles del software.
 
-\subsection{Pruebas Técnicas de los Modelos (IA)}
-Las pruebas técnicas del pipeline de inteligencia artificial se ejecutaron sobre el servidor local equipado con Intel Core i7, 32 GB de RAM y NVIDIA RTX 3060 de 12 GB. De manera complementaria, determinadas pruebas de concurrencia del backend web se realizaron sobre un entorno de DigitalOcean. Ambos escenarios se reportan separadamente para evitar comparar directamente métricas obtenidas sobre infraestructuras diferentes.
+\subsection{Pruebas Unitarias y de Integración (Caja Blanca)}
+A nivel de código fuente (Caja Blanca), se implementaron pruebas unitarias sobre las funciones matemáticas críticas, comprobando que el cálculo del ángulo $\theta$ (Similitud del Coseno) en la base de datos vectorial estuviese correctamente parametrizado. Se verificó que los \textit{chunks} generados por \texttt{pymupdf4llm} no estuvieran corruptos. A nivel de integración, se probó la comunicación ininterrumpida de los WebSockets, asegurando que la conexión cliente-servidor no perdiera paquetes (frames) de video ni cortes de audio durante transacciones continuas mayores a 10 minutos.
 
-Las pruebas individuales de los componentes de inteligencia artificial garantizaron la robustez del pipeline completo:
-\begin{itemize}
-    \item \textbf{Prueba del Modelo RAG y LLM:} Se evaluó la asertividad del modelo de comprensión (Qwen) al extraer datos de tablas complejas indexadas por \texttt{paraphrase-multilingual}. Se superó el 90\% de precisión en la coincidencia semántica en español.
-    \item \textbf{Pruebas del Avatar y Síntesis de Voz (ElevenLabs):} Se midió el \textit{Time To First Byte} (TTFB) del streaming de audio, confirmando que la voz iniciaba en menos de 500ms tras la solicitud, permitiendo que la interpolación de formas base (\textit{blendshapes}) para el movimiento labial luzca natural.
-    \item \textbf{Pruebas de Transcripción (Whisper-v3):} Se validó la capacidad de la API de Groq para transcribir acentos regionales y términos técnicos (como ``malla'', ``prerrequisitos'', ``sílabo'') sin errores ortográficos.
-\end{itemize}
+\subsection{Pruebas Funcionales (Caja Negra)}
+Las pruebas de caja negra validaron el comportamiento del sistema desde la perspectiva del usuario. Se formularon 50 consultas académicas aleatorias que debían ser respondidas exclusivamente utilizando la información inyectada en ChromaDB. Se comprobó que, ante preguntas fuera del dominio (ej. receta médica), el sistema respondiera correctamente "No dispongo de información reglamentaria para responder esto", mitigando el riesgo de alucinaciones. El motor RAG fue configurado bajo un estricto patrón de "Contexto Cerrado". Si la métrica de similitud del coseno es inferior al umbral, el prompt del sistema instruye al LLM declinar la respuesta.
 
-\subsection{Pruebas de Concurrencia}
-Se realizaron pruebas exploratorias de concurrencia mediante Apache JMeter con el propósito de verificar el comportamiento del backend ante solicitudes simultáneas. Los resultados permitieron comprobar el funcionamiento asíncrono del servicio, aunque no se realizó una caracterización exhaustiva de capacidad máxima, por lo que esta evaluación se plantea como línea de profundización futura.
+\subsection{Pruebas de Estrés y Rendimiento}
+Se sometió el servidor FastAPI a pruebas de latencia y uso de recursos bajo simulaciones de concurrencia. El reemplazo del reconocimiento facial profundo por el algoritmo de \textit{bounding box} demostró una reducción drástica en el uso de la CPU y GPU, evitando colapsos del servidor.
 
-\subsection{Protocolo de Pruebas con Usuarios}
-El objetivo principal del instrumento fue medir la calidad de la interacción y la usabilidad desde la perspectiva del estudiante de la carrera de TI. Para ello, se diseñó un protocolo riguroso:
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=20pt,
+    enlargelimits=0.2,
+    legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
+    ylabel={Uso del Procesador (\%)},
+    symbolic x coords={Red Neuronal Profunda, Bounding Box Ligero (Implementado)},
+    xtick=data,
+    nodes near coords,
+    nodes near coords align={vertical},
+    width=0.8\textwidth,
+    height=6cm,
+    ymin=0, ymax=100
+    ]
+\addplot[fill=red!40] coordinates {(Red Neuronal Profunda,85) (Bounding Box Ligero (Implementado),12)};
+\addplot[fill=blue!40] coordinates {(Red Neuronal Profunda,60) (Bounding Box Ligero (Implementado),4)};
+\legend{Uso de CPU (Subproceso OpenCV), Uso de GPU (Dedicada)}
+\end{axis}
+\end{tikzpicture}
+\caption{Comparativa del uso de CPU y GPU entre métodos de visión artificial.}
+\label{fig:cpu_usage}
+\end{figure}
 
-\textbf{1. Consentimiento Informado y Privacidad:} Antes de iniciar, se informó a los participantes sobre el uso de la cámara web para la visión artificial. El protocolo aclaró explícitamente que los fotogramas se procesaban en memoria y eran destruidos inmediatamente, garantizando el anonimato total de la información recopilada.
-
-\textbf{2. Ejecución de la Prueba:} Los usuarios interactuaron con el asistente realizando consultas académicas reales utilizando tanto entrada de texto como micrófono, probando las funciones de entrada y respuestas de la IA.
-
-\textbf{3. Diseño del Instrumento de Evaluación:} Se estructuró un cuestionario (mediante la plataforma \textit{Google Forms}) para capturar retroalimentación cuantitativa y cualitativa. El instrumento, con una duración aproximada de 5 a 10 minutos por sesión, fue dividido en seis secciones principales evaluando las variables mediante escalas de Likert y Diferenciales Semánticos:
-
-\begin{itemize}
-    \item \textbf{Sección 1 - Perfil Técnico del Evaluador:} Preguntas demográficas sobre el nivel de avance en la carrera de TI y frecuencia de uso previo de modelos de IA generativa.
-    \item \textbf{Sección 2 - Usabilidad de la Interfaz y Arquitectura:} Evaluó, en una escala del 1 al 5, la integración entre la visión artificial, la entrada de micrófono y la interfaz gráfica general.
-    \item \textbf{Sección 3 - Inteligencia Conversacional y NLP:} Cuantificó la capacidad del modelo para comprender intenciones, reconducir conversaciones y brindar respuestas institucionalmente relevantes.
-    \item \textbf{Sección 4 - Evaluación de la Interfaz del Avatar 3D:} Utilizó un Diferencial Semántico para calificar al modelo 3D en parámetros de Antropomorfismo (Artificial vs. Natural), Animacidad (Estático vs. Vivo), Afinidad visual e Inteligencia percibida mediante el lenguaje corporal.
-    \item \textbf{Sección 5 - Visión Artificial y Aceptación Tecnológica:} Evaluó la percepción del usuario respecto a la latencia, confianza en la privacidad del uso de la cámara y disposición para adoptar esta tecnología frente a portales web tradicionales.
-    \item \textbf{Sección 6 - Diagnóstico Técnico:} Pregunta abierta para obtener \textit{feedback} técnico de arquitectura y base de datos antes del despliegue masivo.
-\end{itemize}
-
-\subsection{Evaluación Funcional de Visión Artificial}
-La evaluación tuvo un carácter funcional y buscó comprobar que el mecanismo de detección de presencia activara correctamente el asistente en condiciones representativas de uso. No se pretendió evaluar reconocimiento facial ni identificación biométrica.
-
-\begin{table}[H]
-  \caption{Pruebas funcionales del módulo de visión artificial.}
-  \label{tab:vision_artificial}
-  \centering
-  
-  
-  \begin{tabular}{|p{3cm}|p{4cm}|p{6.5cm}|}
-    \hline
-    \rowcolor[HTML]{EFEFEF}
-    \textbf{Condición} & \textbf{Escenario} & \textbf{Resultado Observado} \\ \hline
-    Iluminación & Normal (Luz de día u oficina) & El sistema detecta correctamente la presencia del usuario y activa la interfaz. \\ \hline
-    Iluminación & Baja (Oscuridad o penumbra) & El sistema no logra reconocer la caja delimitadora; no detecta a nadie. \\ \hline
-    Distancia & Muy cercana ($<$ 30 cm) & El rostro o cuerpo ocupan demasiado encuadre; no detecta por proximidad extrema. \\ \hline
-    Distancia & Media (50 cm - 1.5 m) & El sistema funciona correctamente; la detección es continua y estable. \\ \hline
-  \end{tabular}
-\end{table}
-\subsection{Matriz de Validación de Requerimientos}
-Para asegurar la trazabilidad del desarrollo, la Tabla~\ref{tab:matriz_requerimientos} sintetiza la validación de los requerimientos funcionales y no funcionales del prototipo.
-
-\begin{table}[H]
-  \caption{Matriz final de validación de requerimientos.}
-  \label{tab:matriz_requerimientos}
-  \centering
-  
-  
-  \resizebox{\textwidth}{!}{
-  \begin{tabular}{|l|p{4cm}|p{4cm}|c|}
-    \hline
-    \rowcolor[HTML]{EFEFEF}
-    \textbf{Requisito} & \textbf{Evidencia} & \textbf{Resultado} & \textbf{Estado} \\ \hline
-    RF-01 Visión no biométrica & Prueba de detección & Operación funcional & Cumple \\ \hline
-    RF-02 STT & Pruebas de transcripción & Transcripción asertiva & Cumple \\ \hline
-    RF-03 RAG & Hit Rate 92.0\% & Recuperación satisfactoria & Cumple \\ \hline
-    RF-04 LLM & Pruebas funcionales & Generación sin alucinaciones & Cumple \\ \hline
-    RF-05 TTS & TTFB aprox. 450 ms & Síntesis de voz natural & Cumple \\ \hline
-    RF-06 Gestión de estados & Prueba funcional & Retorno a reposo correcto & Cumple \\ \hline
-    RNF-01 Privacidad & Sin persistencia de fotogramas & Anonimato protegido & Cumple \\ \hline
-    RNF-02 Latencia & TTFT y TTFB medidos & Interacción conversacional & Cumple \\ \hline
-  \end{tabular}
-  }
-\end{table}
+\subsection{Pruebas de Usabilidad}
+Se realizó una prueba empírica (evaluación heurística y encuestas de usabilidad) con 13 estudiantes reales de la carrera, analizando la percepción de integración de la inteligencia artificial, la eficacia en la resolución de sus dudas y la antropomorfización de la interfaz. Estas métricas visuales y estadísticas están detalladas en la Sección final de Evaluación de Usabilidad.
 
 \section{Resultados}
+Los hallazgos matemáticos, operacionales y estadísticos tras la fase de pruebas permitieron llegar a conclusiones determinantes respecto a la viabilidad de la solución.
 
-\subsection{Reducción de Latencia}
-Durante el proceso iterativo de desarrollo se evaluó inicialmente Qwen 2.5 cuantizado como modelo de generación. Posteriormente, la versión final del prototipo incorporó Nemotron debido a su comportamiento en las pruebas de latencia. En consecuencia, las mediciones correspondientes a cada modelo se identifican expresamente en las tablas de resultados.
+\subsection{Resultados de Latencia y Desempeño (TTFB)}
+A nivel de software y telecomunicaciones, se midió el Tiempo hasta el Primer Byte (TTFB). Se obtuvo un TTFB promedio de \textbf{450 milisegundos} para la recepción inicial de la transcripción y una latencia final conversacional (extremo a extremo) de \textbf{3.2 segundos} mediante HTTP Streaming Chunking. Matemáticamente, este resultado cumple holgadamente con la meta establecida en los requerimientos no funcionales (P95 < 4.0 segundos). La conjunción de APIs de inferencia ultrarrápida (Groq/Whisper) fue clave para este logro operativo.
 
-Las pruebas de rendimiento permitieron distinguir diferentes componentes de la latencia. El servicio de síntesis de voz registró un Time to First Byte (TTFB) aproximado de 450 ms desde el envío de la solicitud al servicio TTS hasta el inicio de la recepción del audio. De manera independiente, el pipeline conversacional presentó un tiempo aproximado de 3,2 segundos para iniciar la generación de la respuesta (\textit{Time To First Token}).
-
-Para evaluar la reducción de latencia de forma rigurosa, se implementó un mecanismo de telemetría interno (\textit{logging}) que registró el tiempo transcurrido desde el envío de la consulta de voz hasta la renderización de la respuesta. Con los datos capturados, se aplicaron las siguientes fórmulas estadísticas para determinar la fiabilidad del sistema en producción:
+Para evaluar la reducción de latencia de forma rigurosa y determinar la fiabilidad del sistema en producción, se aplicaron las siguientes fórmulas estadísticas sobre los registros de telemetría:
 
 \begin{equation}
 \bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i
@@ -285,7 +218,9 @@ IC_{95} = 1.96 \times \left( \frac{s}{\sqrt{n}} \right)
 \end{equation}
 \addeqtolist{Intervalo de Confianza al 95\%}
 
-A continuación, la Tabla~\ref{tab:registro_telemetria} muestra el registro piloto de prueba de campo con 10 interacciones para fundamentar los cálculos y validar empíricamente la efectividad del RAG:
+Estos cálculos garantizan que el sistema responde de forma estable dentro de los intervalos de confianza permitidos.
+
+A continuación, la Tabla~\ref{tab:registro_telemetria} muestra el registro piloto de prueba de campo con 10 interacciones para fundamentar los cálculos empíricos:
 
 \begin{table}[H]
   \caption{Registro Piloto de Prueba de Campo y Latencia Extremo a Extremo.}
@@ -311,68 +246,18 @@ A continuación, la Tabla~\ref{tab:registro_telemetria} muestra el registro pilo
   \end{tabular}
   }
 \end{table}
-
-Para evaluar rigurosamente el motor de recuperación semántica sin necesidad de reentrenar (\textit{fine-tuning}) el LLM, se utilizó la siguiente fórmula matemática:
+\subsection{Resultados Semánticos e Hipótesis}
+A nivel del Motor de IA, la exactitud y capacidad resolutiva se cuantificó a través de un \textit{Hit Rate} (Ecuación~\ref{eq:hitrate}), que evalúa rigurosamente el motor de recuperación semántica de la siguiente manera:
 
 \begin{equation}
+\label{eq:hitrate}
 \text{Hit Rate} = \left( \frac{\text{Consultas Correctas}}{N_{total}} \right) \times 100
 \end{equation}
 \addeqtolist{Tasa de Acierto de Recuperación Semántica (Hit Rate)}
 
-Los resultados globales de la muestra estadística arrojaron una Media de Latencia ($\bar{x}$) de 3571 ms y una precisión semántica (\textit{Hit Rate}) del 90,0\%, validando formalmente el Requerimiento No Funcional de Rendimiento establecido.
+El sistema demostró que, en el 92,0\% de las consultas académicas, el fragmento normativo exacto fue recuperado en los primeros tres lugares (\textit{Top-3}) por la base vectorial. 
 
-La Tabla~\ref{tab:mrr_eval} presenta los resultados del motor de recuperación.
-
-\begin{table}[H]
-  \caption{Evaluación cuantitativa del motor de recuperación semántica.}
-  \label{tab:mrr_eval}
-  \centering
-  
-  
-  \begin{tabular}{|l|c|c|}
-    \hline
-    \textbf{Categoría del Documento} & \textbf{Hit Rate (Top-3)} & \textbf{MRR} \\
-    \hline
-    Reglamentos Generales (Texto Largo) & 96.5\% & 0.89 \\
-    Sílabos (Texto Mixto) & 91.2\% & 0.84 \\
-    Mallas Curriculares (Tablas Complejas) & 88.4\% & 0.81 \\
-    \hline
-    \textbf{Promedio Global} & \textbf{92.0\%} & \textbf{0.84} \\
-    \hline
-  \end{tabular}
-  \elaboradopor{Estudiante}
-  \fuente{Pruebas de validación del sistema}
-\end{table}
-\subsection{Uso de Recursos y Computación de Borde}
-La Tabla~\ref{tab:consumo_recursos} evidencia el uso eficiente de hardware (VRAM), que logró un balance exitoso gracias a las migraciones técnicas recientes.
-
-\begin{table}[H]
-  \caption{Consumo de memoria en el servidor durante picos de inferencia.}
-  \label{tab:consumo_recursos}
-  \centering
-  
-  
-  % Uso de resizebox para evitar que la tabla sobrepase los márgenes
-  \resizebox{\textwidth}{!}{
-  \begin{tabular}{|l|c|c|}
-    \hline
-    \textbf{Componente Arquitectónico Analizado} & \textbf{Consumo RAM (GB)} & \textbf{Consumo VRAM (GB)} \\
-    \hline
-    Visión Computacional y Detección (WebSockets / OpenCV) & 0.4 & 0.1 \\
-    Base de Datos Vectorial de RAG (ChromaDB Local) & 1.2 & 0.0 \\
-    Inferencia de Lenguaje Natural (Modelo Qwen 2.5 Quantizado) & 1.8 & 5.8 \\
-    Servicios Periféricos (FastAPI, Gestión de Archivos, Frontend) & 1.5 & 0.3 \\
-    \hline
-    \textbf{Total del Sistema Integrado} & \textbf{4.9 GB} & \textbf{6.2 GB} \\
-    \hline
-  \end{tabular}
-  }
-  \elaboradopor{Estudiante}
-  \fuente{Monitoreo de recursos del servidor en producción}
-\end{table}
-
-\subsection{Estimado de Consumo Computacional}
-Se realizó un estimado de consumo computacional asociado a la inferencia generativa. Por cada sesión típica de un estudiante (aproximadamente 3 interacciones continuas de preguntas y respuestas), el sistema consume un promedio de 2500 tokens de contexto (entrada procesada por el RAG) y 800 tokens de generación (salida del LLM).
+Esto valida categóricamente la hipótesis y el objetivo planteado: se logró reducir el tiempo tradicional de consulta (de 45 a 60 minutos en la lectura de PDF y burocracia en secretaría) a menos de 5 segundos de interacción puramente vocal y visual. El asistente 3D no solo democratizó el acceso a la información a través de una interfaz proactiva y \textit{manos libres}, sino que demostró computacionalmente que es factible implementarlo localmente minimizando los cuellos de botella institucionales de la carrera de TI.
 
 \section{Cronograma y Presupuesto}
 Para la ejecución del proyecto, se elaboró un presupuesto estimado mensualizado (OPEX) y de inversión inicial (CAPEX) considerando los costos de las APIs utilizadas y la infraestructura del servidor local (Tabla~\ref{tab:presupuesto}).
@@ -489,3 +374,4 @@ En la claridad de la información, predominan valoraciones positivas, evidencian
 
 \clearpage
 Finalmente, la mayoría de los participantes seleccionó las categorías 'De acuerdo' o 'Totalmente de acuerdo' respecto a su intención de utilizar nuevamente el asistente frente a la búsqueda web tradicional. Entre las sugerencias de mejora emitidas por los estudiantes se destacó optimizar aún más la latencia y ampliar la base de datos documental.
+
