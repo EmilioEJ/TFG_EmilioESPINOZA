@@ -279,5 +279,12 @@ La arquitectura de los asistentes virtuales modernos sigue un patrón modular y 
 
 Por su parte, la capa de servidor o \textit{backend} agrupa los servicios cognitivos: motores de transcripción (\textit{Speech-to-Text}), la orquestación del procesamiento de lenguaje natural integrado con Generación Aumentada por Recuperación (RAG), la consulta a la base de datos vectorial y la síntesis de voz (\textit{Text-to-Speech}) \cite{pabon2025naia}. Esta división estratégica asegura que la latencia en la comunicación sea mínima, delegando las cargas computacionales pesadas a servidores especializados o contenedores aislados. De esta forma, se mantiene una experiencia de usuario conversacional fluida e ininterrumpida en el punto de interacción, consolidando la funcionalidad de soporte institucional continuo y automatizado.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Logos/diagrama_arquitectura_software.jpeg}
+  \caption{Arquitectura general de software para el Asistente Virtual Multimodal.}
+  \label{fig:arquitectura_software}
+\end{figure}
+
 \subsection{Aceptación Tecnológica en la Educación Superior}
 El proyecto requiere una comprensión arquitectónica que integre el motor conversacional, la base de conocimiento, los servicios de voz, el módulo visual no biométrico y la interfaz gráfica del avatar 3D. Se definirán los conceptos de computación local y computación en la nube, justificando qué procesos pueden ejecutarse en el equipo del prototipo para minimizar la latencia y qué procesos, como la generación de respuestas mediante LLM, pueden depender de peticiones a servicios externos mediante APIs RESTful.
