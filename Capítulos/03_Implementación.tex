@@ -58,6 +58,23 @@ El proceso de implementación siguió un enfoque iterativo, comenzando desde la 
 \subsection{Paso 1: Configuración a nivel de Base de Datos Vectorial}
 El primer paso consistió en la inicialización y población de \textbf{ChromaDB}. Se desarrolló el script \texttt{rag\_manager.py} que toma los reglamentos y mallas curriculares (archivos PDF), los extrae y divide en fragmentos semánticos (\textit{chunks}). Posteriormente, utilizando \texttt{SentenceTransformers}, cada bloque de texto se convierte en un arreglo numérico y se inserta en una colección persistente llamada \texttt{carrera\_ti\_indoamerica\_collection}. Este proceso debe ejecutarse y completarse antes de levantar el servidor, pues el motor de inteligencia artificial depende de este conocimiento previo.
 
+Para ilustrar la estructuración de la base de datos vectorial, a continuación se presenta un ejemplo representativo de cómo se almacena un registro en ChromaDB (formato JSON):
+
+\begin{verbatim}
+{
+  "id": "Reglamento_Academico_chunk_42",
+  "document": "Art. 15.- Las modalidades de titulacion incluyen...",
+  "embedding": [0.0124, -0.0453, 0.8921, ...],
+  "metadata": {
+    "source": "Reglamento_Titulacion_2024.pdf",
+    "page": 12,
+    "tipo_documento": "Normativa Institucional"
+  }
+}
+\end{verbatim}
+
+Esta estructura de almacenamiento separada se diseñó estratégicamente por dos razones. Primero, el modelo de \textit{embedding} procesa exclusivamente el campo \texttt{document} (contenido puro) para calcular la similitud semántica con la consulta del usuario, evitando que palabras de control o datos referenciales modifiquen la pureza del vector matemático. Segundo, el diccionario \texttt{metadata} permite aislar los datos de origen; esto habilita al sistema para aplicar filtros cruzados preventivos antes de buscar (\textit{metadata filtering}) y permite que el Asistente Virtual cite de forma transparente al usuario la página exacta y el nombre del documento oficial de donde extrajo la respuesta.
+
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_AdminRAG.png}
