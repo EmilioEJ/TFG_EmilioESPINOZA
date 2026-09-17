@@ -14,7 +14,7 @@ La relevancia de mejorar este proceso de difusión se sustenta en la rigurosidad
 
 Esta dispersión y complejidad documental exige una interfaz más inteligente. Las principales limitaciones técnicas de este enfoque estático son:
 \begin{itemize}
-    \item \textbf{Carencia de búsqueda semántica:} Los repositorios actuales dependen de búsquedas por palabras clave exactas o navegación manual. El sistema no "comprende" la intención del usuario ni puede extraer párrafos específicos de un documento extenso (por ejemplo, un reglamento de 50 páginas) para responder una duda puntual.
+    \item \textbf{Carencia de búsqueda semántica:} Los repositorios actuales dependen de búsquedas por palabras clave exactas o navegación manual. El sistema no comprende la intención del usuario ni puede extraer párrafos específicos de un documento extenso (por ejemplo, un reglamento de 50 páginas) para responder una duda puntual.
     \item \textbf{Ausencia de proactividad en la interfaz:} El sistema requiere que el usuario inicie la interacción mediante el uso de un periférico tradicional (teclado/ratón), sin aprovechar las capacidades del entorno físico, como la detección de presencia.
     \item \textbf{Sobrecarga administrativa:} Al no existir un primer nivel de soporte interactivo capaz de interpretar las mallas curriculares, los estudiantes que no logran comprender los documentos estáticos acuden presencialmente a las secretarías, generando cuellos de botella para tareas inherentemente automatizables.
 \end{itemize}
@@ -205,6 +205,7 @@ La definición de los requerimientos establece las directrices técnicas y opera
 \end{xltabular}
 \endgroup
 
+\newpage
 \subsection{Requerimientos No Funcionales (RNF)}
 
 \begingroup
@@ -269,7 +270,7 @@ El diseño de la solución propuesta se articula sobre una arquitectura modular 
 \end{landscape}
 
 \subsection{Capa de Percepción y Captura (Frontend Físico)}
-Esta capa actúa como el sensor del sistema. A través de una cámara web, un modelo ligero de visión artificial procesa el flujo de video en tiempo real. El diseño estipula que el sistema no guardará fotogramas; únicamente extraerá las coordenadas de la caja delimitadora (\textit{bounding box}) del rostro. Cuando el área del rostro supera un umbral específico de píxeles (indicando que el estudiante se ha acercado a la pantalla), el sistema envía un disparador (\textit{trigger}) lógico para "despertar" al asistente. Simultáneamente, un micrófono direccional se activa para capturar la solicitud del usuario.
+Esta capa actúa como el sensor del sistema. A través de una cámara web, un modelo ligero de visión artificial procesa el flujo de video en tiempo real. El diseño estipula que el sistema no guardará fotogramas; únicamente extraerá las coordenadas de la caja delimitadora (\textit{bounding box}) del rostro. Cuando el área del rostro supera un umbral específico de píxeles (indicando que el estudiante se ha acercado a la pantalla), el sistema envía un disparador (\textit{trigger}) lógico para despertar al asistente. Simultáneamente, un micrófono direccional se activa para capturar la solicitud del usuario.
 
 \subsection{Capa de Procesamiento Cognitivo (Motor de IA)}
 \label{sec:diseno_solucion}
