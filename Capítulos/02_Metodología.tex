@@ -276,7 +276,7 @@ Esta capa actúa como el sensor del sistema. A través de una cámara web, un mo
 \label{sec:diseno_solucion}
 Es el núcleo lógico de la solución, estructurado mediante un flujo de datos secuencial:
 \begin{itemize}
-    \item \textbf{Speech-to-Text (STT):} Transcribe el audio del usuario a texto natural en español utilizando un procesamiento en *backend* (Whisper-v3 vía API), desacoplado del navegador para asegurar compatibilidad y baja latencia.
+    \item \textbf{Speech-to-Text (STT):} Transcribe el audio del usuario a texto natural en español utilizando un procesamiento en \textit{backend} (Whisper-v3 vía API), desacoplado del navegador para asegurar compatibilidad y baja latencia.
     \item \textbf{Generación Aumentada por Recuperación (RAG):} El texto ingresa a un motor de búsqueda semántica. Utilizando incrustaciones (\textit{embeddings}), el sistema compara la consulta del estudiante con una base de datos vectorial pre-indexada que contiene las mallas curriculares y reglamentos de la carrera de TI.
     \item \textbf{Modelo de Lenguaje (LLM):} Un modelo de ejecución local recibe la consulta del usuario junto con el contexto extraído por el RAG, generando una respuesta coherente, precisa y libre de alucinaciones.
     \item \textbf{Text-to-Speech (TTS):} El texto generado por el LLM se sintetiza nuevamente a un archivo de audio.
