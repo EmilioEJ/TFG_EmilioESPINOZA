@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* 
+  Estilos base del motor de flujos
+  (Mantenemos los colores y propiedades CSS del motor original para preservar su comportamiento interno)
+*/
+@import "./flows/flow_styles.css";
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Core University Palette */
+  --uti-orange: #F97316;
+  --uti-orange-dark: #C2410C;
+  --uti-orange-bg: #FFF7ED;
+  --uti-cyan: #06B6D4; /* Retained for some generic flows */
+  --uti-green: #22C55E;
+  
+  --uti-purple: #9333EA;
+  --uti-purple-dark: #6B21A8;
+  --uti-purple-bg: #FAF5FF;
+  
+  /* Backgrounds & Surfaces (Light Theme) */
+  --bg-white: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #F3F4F6;
+  
+  /* Text */
+  --text-main: #111827;
+  --text-muted: #4B5563;
+  --text-dim: #6B7280;
+  
+  /* Borders */
+  --border-subtle: #E5E7EB;
+  --border-medium: #D1D5DB;
+  --border-purple: #D8B4FE;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  color: #111827; /* Tailwind gray-900 */
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

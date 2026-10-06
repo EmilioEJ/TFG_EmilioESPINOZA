@@ -1,0 +1,548 @@
+/* Estilos CSS del motor de diagramas animados interactivos (FlowGraph y SequenceDiagram) */
+
+   Diagramas de flujo animados (src/flows)
+   El lienzo es un contenedor de tamaño: los textos de los nodos escalan con él
+   en unidades cqw, así el diagrama se lee igual en un portátil que proyectado.
+   ========================================================================== */
+/* Las diapositivas de flujo se salen del ancho de lectura de 1320px: el diagrama gana
+   todo el espacio que el proyector permita, que es lo que lo hace legible desde el fondo. */
+.slide-wrapper.is-flow { max-width: 1560px; }
+
+.flow-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+  /* padding y no margin: en un hijo flex con flex:1 el margen superior desborda el wrapper */
+  padding-top: 10px;
+}
+
+.flow-canvas-wrap {
+  container-type: size;
+  min-width: 0;
+  min-height: 0;
+}
+
+.flow-canvas {
+  position: relative;
+  container-type: size;
+  margin: 0 auto;
+  width: 100%;
+  /* min() elige la restricción que toca (ancho o alto) sin deformar el viewBox */
+  width: min(100cqw, calc(100cqh * var(--flow-ar, 1.79)));
+  aspect-ratio: var(--flow-ar, 1.79);
+}
+
+.flow-edges,
+.flow-labels {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Capa de rótulos: se dibuja después de los nodos, por lo que queda encima de ellos. */
+.flow-labels { pointer-events: none; }
+
+/* --- Zonas (subgrafos del diagrama C4) --- */
+.flow-zone rect {
+  fill: var(--zone-fill);
+  stroke: var(--zone-stroke);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
+.flow-zone text {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 800;
+  fill: var(--zone-stroke);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.flow-zone.tone-green  { --zone-fill: #F0FDF4; --zone-stroke: #16A34A; }
+.flow-zone.tone-blue   { --zone-fill: #EFF6FF; --zone-stroke: #2563EB; }
+.flow-zone.tone-slate  { --zone-fill: #F8FAFC; --zone-stroke: #94A3B8; }
+.flow-zone.tone-red    { --zone-fill: #FEF2F2; --zone-stroke: #EF4444; }
+.flow-zone.tone-amber  { --zone-fill: #FFFBEB; --zone-stroke: #D97706; }
+.flow-zone.tone-purple { --zone-fill: #FAF5FF; --zone-stroke: #7E22CE; }
+
+/* --- Aristas --- */
+.flow-edge path {
+  fill: none;
+  stroke: var(--border-medium);
+  stroke-width: 2;
+  opacity: 0.5;
+  transition: stroke 0.35s ease, stroke-width 0.35s ease, opacity 0.35s ease;
+}
+
+.flow-edge.is-on path {
+  stroke: var(--uti-orange);
+  stroke-width: 3.5;
+  opacity: 1;
+}
+
+.flow-edge.is-blocked path {
+  stroke: #DC2626;
+  stroke-dasharray: 9 7;
+  marker-end: none;
+  opacity: 0.9;
+}
+
+.arrow-off { fill: var(--border-medium); }
+.arrow-on  { fill: var(--uti-orange); }
+
+/* Tirante: une el chip con el punto exacto de la arista de la que cuelga. Solo aparece
+   cuando el rótulo no cupo pegado a su línea, que es justo el caso en que, sin él, no se
+   sabría a qué flecha se refiere. */
+.flow-edge-leader {
+  stroke: var(--uti-orange);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+  opacity: 0.85;
+}
+
+/* Chip opaco detrás del rótulo. Es lo que permite posarlo sobre su propia flecha sin que
+   la línea lo tache: la interrumpe con un corte limpio, que es la convención habitual en
+   diagramas técnicos y deja claro a qué arista pertenece el texto. */
+.flow-edge-chip {
+  fill: var(--bg-white);
+  stroke: var(--uti-orange);
+  stroke-width: 1;
+  opacity: 0.97;
+}
+
+.flow-edge-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--uti-orange-dark);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* Solo se rotulan las aristas de la etapa activa: el resto del diagrama queda limpio. */
+.flow-labels .flow-edge {
+  opacity: 0;
+  animation: flow-label-in 0.3s ease forwards;
+}
+
+@keyframes flow-label-in {
+  to { opacity: 1; }
+}
+
+.flow-edge .flow-edge-break circle {
+  fill: #FEE2E2;
+  stroke: #DC2626;
+  stroke-width: 2;
+}
+
+.flow-edge .flow-edge-break path {
+  stroke: #DC2626;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 1;
+}
+
+.flow-particle {
+  fill: var(--uti-orange);
+  filter: drop-shadow(0 0 4px rgba(242, 101, 34, 0.55));
+}
+
+/* --- Nodos (HTML sobre el SVG, para tener texto real y wrapping) --- */
+.flow-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25cqw;
+  padding: 0.4cqw;
+  text-align: center;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--uti-orange);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(242, 101, 34, 0.2);
+  transition: opacity 0.35s ease, filter 0.35s ease, border-color 0.35s ease,
+              box-shadow 0.35s ease, transform 0.35s ease;
+}
+
+.flow-node.is-dim {
+  opacity: 0.32;
+  filter: grayscale(0.7);
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-sm);
+  transform: translate(-50%, -50%) scale(0.97);
+}
+
+.flow-node.is-down {
+  opacity: 1;
+  filter: none;
+  border-color: #DC2626;
+  background: #FEF2F2;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.18);
+}
+
+.flow-node.is-off { opacity: 0.15; }
+
+.flow-node-icon {
+  display: flex;
+  color: var(--uti-orange);
+  transition: color 0.35s ease;
+}
+
+.flow-node-icon svg { width: 1.8cqw; height: 1.8cqw; }
+.flow-node.is-dim .flow-node-icon { color: var(--uti-purple); }
+.flow-node.is-down .flow-node-icon { color: #DC2626; }
+
+.flow-node-title {
+  font-family: var(--font-heading);
+  font-size: 1.4cqw;
+  font-weight: 800;
+  line-height: 1.12;
+  color: var(--text-main);
+}
+
+.flow-node-tech {
+  font-family: var(--font-mono);
+  font-size: 1.1cqw;
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--uti-orange-dark);
+}
+
+.flow-node-detail {
+  font-size: 1.05cqw;
+  line-height: 1.15;
+  color: var(--text-dim);
+}
+
+/* --- Diagrama de secuencia --- */
+.flow-lifeline {
+  stroke: var(--border-medium);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
+}
+
+.flow-msg { transition: opacity 0.35s ease; }
+.flow-msg.is-hidden { opacity: 0; }
+
+.flow-msg line,
+.flow-msg path {
+  fill: none;
+  stroke: var(--border-medium);
+  stroke-width: 2;
+  transition: stroke 0.35s ease, stroke-width 0.35s ease;
+}
+
+.flow-msg.is-return line,
+.flow-msg.is-return path { stroke-dasharray: 7 5; }
+
+.flow-msg.is-on line,
+.flow-msg.is-on path { stroke: var(--uti-orange); stroke-width: 3; }
+
+.flow-msg-label,
+.flow-msg-sub {
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--bg-white);
+  stroke-linejoin: round;
+  transition: fill 0.3s ease;
+}
+
+.flow-msg-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  fill: var(--text-muted);
+  stroke-width: 5px;
+}
+
+.flow-msg-sub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  fill: var(--text-dim);
+  stroke-width: 4px;
+}
+
+.flow-msg.is-on .flow-msg-label { fill: var(--uti-orange-dark); font-weight: 700; }
+
+.flow-msg.is-note rect {
+  fill: var(--uti-purple-bg);
+  stroke: var(--border-purple);
+  stroke-width: 1.5;
+}
+
+.flow-msg.is-note text {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  fill: var(--uti-purple);
+  text-anchor: middle;
+}
+
+.flow-msg.is-note.is-on rect { fill: var(--uti-orange-bg); stroke: var(--uti-orange); }
+.flow-msg.is-note.is-on text { fill: var(--uti-orange-dark); }
+
+.flow-actor {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3cqw;
+  padding: 0.5cqw;
+  text-align: center;
+  overflow: hidden;
+  background: var(--uti-orange-bg);
+  border: 1px solid var(--uti-orange);
+  border-radius: 10px;
+  transition: opacity 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+.flow-actor.is-dim {
+  opacity: 0.45;
+  background: var(--uti-purple-bg);
+  border-color: var(--border-purple);
+}
+
+.flow-actor-icon { display: flex; color: var(--uti-orange-dark); }
+.flow-actor-icon svg { width: 2.2cqw; height: 2.2cqw; }
+.flow-actor.is-dim .flow-actor-icon { color: var(--uti-purple); }
+
+.flow-actor-label {
+  font-family: var(--font-heading);
+  font-size: 1.5cqw;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text-main);
+}
+
+.flow-actor-sub {
+  font-family: var(--font-mono);
+  font-size: 1.15cqw;
+  line-height: 1.15;
+  color: var(--text-dim);
+}
+
+/* --- Panel lateral: etapas, detalle y ayuda de teclado --- */
+.flow-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.flow-stepper {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  flex: none;
+}
+
+.flow-step-chip {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  padding: 6px 9px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flow-step-chip.is-done { color: var(--text-muted); border-color: var(--border-medium); }
+
+.flow-step-chip.is-current {
+  background: var(--uti-orange-bg);
+  border-color: var(--uti-orange);
+  color: var(--uti-orange-dark);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.flow-step-num {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.flow-step-chip.is-done .flow-step-num { background: var(--uti-purple-bg); color: var(--uti-purple); }
+.flow-step-chip.is-current .flow-step-num { background: var(--uti-orange); color: var(--bg-white); }
+.flow-step-label { line-height: 1.2; }
+
+.flow-detail {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 11px 13px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-top: 3px solid var(--uti-purple);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.35s ease both;
+}
+
+.flow-detail-count {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--uti-orange);
+}
+
+.flow-detail-title {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--uti-purple);
+  margin: 2px 0 8px;
+}
+
+.flow-detail-bullets {
+  margin: 0;
+  padding-left: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.flow-detail-bullets li {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.flow-detail-code {
+  display: block;
+  margin-top: 9px;
+  padding: 6px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--uti-purple);
+  background: var(--uti-purple-bg);
+  border: 1px solid var(--border-purple);
+  border-radius: 6px;
+  word-break: break-word;
+}
+
+.flow-detail-note {
+  margin-top: 9px;
+  padding: 6px 9px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--uti-orange-dark);
+  background: var(--uti-orange-bg);
+  border-left: 3px solid var(--uti-orange);
+  border-radius: 0 6px 6px 0;
+}
+
+.flow-metric {
+  margin-bottom: 9px;
+  padding: 8px 10px;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.flow-metric-value {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-metric-label {
+  margin-top: 3px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.flow-metric.tone-orange { background: var(--uti-orange-bg); border-color: var(--uti-orange); color: var(--uti-orange-dark); }
+.flow-metric.tone-green  { background: #F0FDF4; border-color: #16A34A; color: #15803D; }
+.flow-metric.tone-purple { background: var(--uti-purple-bg); border-color: var(--border-purple); color: var(--uti-purple); }
+
+.flow-hint {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px;
+  background: transparent;
+  border: 1px dashed var(--border-medium);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flow-hint:hover { border-color: var(--uti-orange); color: var(--uti-orange-dark); }
+
+.flow-hint kbd {
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-medium);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}
+
+/* Responsive Scaling */
+@media (max-width: 1280px) {
+  .flow-shell { grid-template-columns: minmax(0, 1fr) 250px; }
+  .flow-detail-bullets li { font-size: 0.72rem; }
+}
+
+@media (max-width: 1024px) {
+  .title-slide-layout { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .slide-title { font-size: 1.7rem; }
+  .main-title-heading { font-size: 1.9rem; }
+  .nav-overlay { right: 16px; bottom: 12px; }
+  .flow-shell { grid-template-columns: minmax(0, 1fr) 220px; gap: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-particle { display: none; }
+  .flow-node,
+  .flow-actor,
+  .flow-edge path,
+  .flow-msg,
+  .flow-msg line,
+  .flow-msg path { transition: none; }
+  .flow-detail { animation: none; }
+}

@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Aria — Asistente Virtual Inteligente basado en LLMs y RAG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340..900;1,9..144,340..900&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+============================================================ */
+:root{
+  --purple-950:#1B0B30;
+  --purple-800:#341066;
+  --purple-700:#4B1791;
+  --purple-600:#6224B8;
+  --purple-500:#7C3FCE;
+  --purple-300:#B79AE8;
+  --purple-100:#EEE5FA;
+  --orange-700:#B83E14;
+  --orange-600:#E4581F;
+  --orange-500:#F0783D;
+  --orange-300:#FBB98C;
+  --orange-100:#FDE7D6;
+
+  --black:#0B0A10;
+  --paper:#FFFFFF;
+  --paper-soft:#FAF7FD;
+  --paper-alt:#F5EFFB;
+  --ink:#1A1424;
+  --ink-soft:#5C5468;
+  --ink-faint:#8E86A0;
+  --line:#E7E0F2;
+  --line-strong:#D6C9EC;
+
+  --rail-bg:var(--black);
+  --rail-fg:rgba(255,255,255,.62);
+  --rail-fg-strong:#ffffff;
+
+  --shadow-soft: 0 1px 2px rgba(27,11,48,.04), 0 12px 32px -12px rgba(27,11,48,.18);
+  --radius-s: 6px;
+  --radius-m: 14px;
+  --radius-l: 26px;
+
+  --font-display:'Fraunces', ui-serif, Georgia, serif;
+  --font-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, monospace;
+
+  --rail-w: 76px;
+  --ease: cubic-bezier(.22,.68,.18,1);
+}
+
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --paper:#170D26;
+    --paper-soft:#1E1230;
+    --paper-alt:#241539;
+    --ink:#F3EEFA;
+    --ink-soft:#C6BBDA;
+    --ink-faint:#9384AE;
+    --line:#3A2955;
+    --line-strong:#4B3670;
+    --black:#F3EEFA;
+    --shadow-soft: 0 1px 2px rgba(0,0,0,.3), 0 16px 40px -16px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#170D26;
+  --paper-soft:#1E1230;
+  --paper-alt:#241539;
+  --ink:#F3EEFA;
+  --ink-soft:#C6BBDA;
+  --ink-faint:#9384AE;
+  --line:#3A2955;
+  --line-strong:#4B3670;
+  --black:#F3EEFA;
+  --shadow-soft: 0 1px 2px rgba(0,0,0,.3), 0 16px 40px -16px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--font-display); margin:0; font-weight:600; color:var(--ink); letter-spacing:-.01em;}
+p{margin:0;}
+::selection{background:var(--purple-300); color:var(--purple-950);}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+}
+
+/* ============================================================
+   LAYOUT SHELL
+============================================================ */
+.app{position:relative; height:100vh; height:100dvh; width:100vw; overflow:hidden;}
+
+.rail{
+  position:fixed; left:0; top:0; bottom:0; width:var(--rail-w);
+  background:var(--rail-bg);
+  display:flex; flex-direction:column; align-items:center;
+  padding:22px 0 16px;
+  z-index:40;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.rail-mark{
+  width:38px; height:38px; border-radius:11px;
+  background:linear-gradient(150deg, var(--orange-500), var(--purple-500) 70%);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:700; font-size:17px; color:#fff;
+  flex:none;
+  box-shadow:0 6px 16px -4px rgba(228,88,31,.5);
+}
+.rail-chapters{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:15px; margin:26px 0;
+}
+.rail-dot{
+  position:relative; width:9px; height:9px; border-radius:50%;
+  background:rgba(255,255,255,.22);
+  border:none; padding:0; cursor:pointer;
+  transition:all .35s var(--ease);
+}
+.rail-dot::after{
+  content:attr(data-label);
+  position:absolute; left:20px; top:50%; transform:translateY(-50%);
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.02em;
+  color:var(--rail-fg-strong); background:var(--purple-950);
+  padding:6px 10px; border-radius:7px; white-space:nowrap;
+  opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
+  transform:translateY(-50%) translateX(-4px);
+  border:1px solid rgba(255,255,255,.1);
+}
+.rail-dot:hover::after{opacity:1; transform:translateY(-50%) translateX(0);}
+.rail-dot.active{background:var(--orange-500); width:9px; height:26px; border-radius:5px;}
+.rail-dot.done{background:rgba(255,255,255,.55);}
+
+.rail-foot{display:flex; flex-direction:column; align-items:center; gap:10px;}
+.rail-count{font-family:var(--font-mono); font-size:11px; color:var(--rail-fg); letter-spacing:.03em;}
+.rail-count b{color:var(--rail-fg-strong); font-weight:600;}
+.rail-btn{
+  width:34px; height:34px; border-radius:9px; border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04); color:var(--rail-fg-strong);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:background .2s ease, transform .2s ease;
+}
+.rail-btn:hover{background:rgba(255,255,255,.12);}
+.rail-btn:active{transform:scale(.92);}
+.rail-btn svg{width:15px; height:15px;}
+
+.progress-line{position:fixed; left:var(--rail-w); top:0; height:3px; width:calc(100% - var(--rail-w)); background:var(--line); z-index:41;}
+.progress-fill{height:100%; width:0%; background:linear-gradient(90deg, var(--purple-600), var(--orange-500)); transition:width .5s var(--ease);}
+
+.deck{position:absolute; left:var(--rail-w); top:0; right:0; bottom:0; overflow:hidden;}
+
+.slide{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:var(--paper);
+  transform:translateX(6%); opacity:0; visibility:hidden;
+  transition:transform .68s var(--ease), opacity .5s var(--ease), visibility 0s linear .68s;
+  padding:0;
+}
+.slide.active{transform:translateX(0); opacity:1; visibility:visible; transition:transform .68s var(--ease), opacity .5s var(--ease);}
+.slide.exit-left{transform:translateX(-6%); opacity:0;}
+
+.slide-inner{
+  flex:1; display:flex; flex-direction:column; justify-content:center;
+  padding: 6.4vh 7vw 8vh;
+  max-width:1400px; margin:0 auto; width:100%;
+  position:relative;
+}
+.slide-chrome{
+  position:absolute; top:26px; left:7vw; right:7vw;
+  display:flex; justify-content:space-between; align-items:baseline;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint); letter-spacing:.02em;
+}
+.slide-chrome .num{font-variant-numeric:tabular-nums;}
+
+.kicker{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.03em; color:var(--purple-600);
+  margin-bottom:18px;
+}
+.kicker::before{content:''; width:16px; height:1.5px; background:var(--orange-500); display:inline-block;}
+
+.headline{font-size:clamp(30px, 3.6vw, 52px); line-height:1.06; max-width:16ch;}
+.headline em{font-style:italic; color:var(--purple-600);}
+.headline .accent{color:var(--orange-600);}
+.subhead{font-family:var(--font-body); font-weight:400; font-size:clamp(15px,1.15vw,19px); color:var(--ink-soft); max-width:56ch; margin-top:16px; line-height:1.55;}
+
+.deck-footer-hint{position:absolute; bottom:26px; left:7vw; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint);}
+
+/* ============================================================
+   REUSABLE CONTENT PATTERNS
+============================================================ */
+.grid-2{display:grid; grid-template-columns:1.05fr 1fr; gap:56px; align-items:center;}
+.grid-2.tight{gap:36px;}
+.stack{display:flex; flex-direction:column; gap:14px;}
+
+.point-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0;}
+.point-list li{
+  display:flex; gap:16px; padding:15px 0; border-top:1px solid var(--line);
+  opacity:0; transform:translateY(10px);
+}
+.point-list li:last-child{border-bottom:1px solid var(--line);}
+.slide.active .point-list li{animation:pointIn .6s var(--ease) forwards;}
+.slide.active .point-list li:nth-child(1){animation-delay:.05s;}
+.slide.active .point-list li:nth-child(2){animation-delay:.14s;}
+.slide.active .point-list li:nth-child(3){animation-delay:.23s;}
+.slide.active .point-list li:nth-child(4){animation-delay:.32s;}
+.slide.active .point-list li:nth-child(5){animation-delay:.41s;}
+@keyframes pointIn{to{opacity:1; transform:translateY(0);}}
+
+.point-mark{
+  flex:none; width:26px; height:26px; border-radius:50%;
+  border:1.5px solid var(--line-strong); color:var(--purple-600);
+  font-family:var(--font-mono); font-size:11px; display:flex; align-items:center; justify-content:center;
+  margin-top:2px;
+}
+.point-body b{font-weight:600; color:var(--ink);}
+.point-body p{color:var(--ink-soft); font-size:14.5px; line-height:1.5; margin-top:3px;}
+
+.tag{
+  display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11px;
+  padding:5px 11px; border-radius:100px; border:1px solid var(--line-strong); color:var(--ink-soft);
+  background:var(--paper-soft);
+}
+.tag.no{color:var(--orange-700); border-color:var(--orange-300); background:var(--orange-100);}
+.tag.yes{color:var(--purple-700); border-color:var(--purple-300); background:var(--purple-100);}
+
+.card{
+  background:var(--paper-soft); border:1px solid var(--line); border-radius:var(--radius-m);
+  padding:22px 24px;
+}
+.card-purple{background:linear-gradient(155deg, var(--purple-700), var(--purple-950)); color:#fff; border:none;}
+.card-purple .card-eyebrow{color:var(--orange-300);}
+.card-eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.03em; color:var(--purple-500); margin-bottom:8px;}
+
+.card-accent{background:var(--paper-soft); border:1px solid var(--line); border-left:5px solid var(--purple-600); border-radius:var(--radius-m); padding:22px 24px;}
+.card-accent.acc-black{border-left-color:var(--black);}
+.card-accent.acc-purple{border-left-color:var(--purple-600);}
+.card-accent.acc-orange{border-left-color:var(--orange-600); background:var(--orange-100);}
+
+.pill-grid{display:flex; flex-wrap:wrap; gap:10px;}
+
+.big-quote{
+  font-family:var(--font-display); font-style:italic; font-size:clamp(20px,2vw,27px);
+  color:var(--ink); line-height:1.4; border-left:3px solid var(--orange-500); padding-left:22px;
+}
+
+/* cover */
+.slide.cover .slide-inner{justify-content:space-between; padding-top:9vh; padding-bottom:7vh;}
+.cover-blob{
+  position:absolute; inset:0; overflow:hidden; z-index:0; pointer-events:none;
+}
+.cover-blob svg{position:absolute; width:130%; height:130%; top:-15%; left:-10%; opacity:.09;}
+.cover-top{display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:1;}
+.cover-uni{font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); line-height:1.6; max-width:24ch;}
+.cover-logo{
+  width:52px; height:52px; border-radius:14px; flex:none;
+  background:linear-gradient(150deg, var(--orange-500), var(--purple-600) 75%);
+  display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-display); font-weight:700; font-size:22px;
+}
+.cover-main{position:relative; z-index:1;}
+.cover-eyebrow{font-family:var(--font-mono); font-size:13px; color:var(--orange-600); letter-spacing:.03em; margin-bottom:20px;}
+.cover-title{font-size:clamp(38px,5.6vw,84px); line-height:.98; max-width:20ch;}
+.cover-title .line2{color:var(--purple-600);}
+.cover-sub{font-size:clamp(15px,1.2vw,19px); color:var(--ink-soft); max-width:52ch; margin-top:26px; line-height:1.6;}
+.cover-bottom{display:flex; justify-content:space-between; align-items:flex-end; position:relative; z-index:1;}
+.cover-people{display:flex; gap:48px; font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft);}
+.cover-people b{display:block; color:var(--ink); font-family:var(--font-body); font-size:14.5px; font-weight:600; margin-bottom:3px;}
+.cover-cta{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint); display:flex; align-items:center; gap:8px;}
+
+/* agenda */
+.agenda-list{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:0 48px;}
+.agenda-list li{
+  display:flex; align-items:baseline; gap:16px; padding:16px 0; border-top:1px solid var(--line);
+  opacity:0; transform:translateX(-8px);
+}
+.slide.active .agenda-list li{animation:pointIn .55s var(--ease) forwards;}
+.agenda-num{font-family:var(--font-mono); font-size:12px; color:var(--orange-600);}
+.agenda-txt{font-family:var(--font-display); font-size:18px; color:var(--ink);}
+
+/* stat / number highlight */
+.stat-row{display:flex; gap:44px; flex-wrap:wrap;}
+.stat{display:flex; flex-direction:column; gap:4px;}
+.stat-num{font-family:var(--font-display); font-size:clamp(34px,3.4vw,56px); font-weight:600; color:var(--purple-700); font-variant-numeric:tabular-nums; line-height:1;}
+.stat-num .unit{font-size:.42em; color:var(--orange-600); font-family:var(--font-mono); margin-left:2px;}
+.stat-label{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); max-width:18ch;}
+
+/* chapter divider treatment */
+.slide.divider .slide-inner{background:transparent;}
+.slide.divider{background:radial-gradient(120% 140% at 15% 15%, var(--purple-700), var(--purple-950) 62%);}
+.slide.divider .slide-chrome{color:rgba(255,255,255,.55);}
+.divider-num{font-family:var(--font-display); font-size:clamp(90px,13vw,220px); color:rgba(255,255,255,.1); line-height:.8; position:absolute; right:6vw; top:8vh; font-weight:600;}
+.divider-kicker{font-family:var(--font-mono); color:var(--orange-300); font-size:13px; letter-spacing:.04em; margin-bottom:18px;}
+.divider-title{font-family:var(--font-display); color:#fff; font-size:clamp(34px,4.4vw,64px); line-height:1.05; max-width:15ch;}
+.divider-sub{color:rgba(255,255,255,.68); font-size:16px; max-width:48ch; margin-top:20px; line-height:1.6;}
+
+/* final slide */
+.slide.finale{background:var(--paper);}
+.slide.finale .cover-blob svg{opacity:.1;}
+.slide.finale .slide-inner{align-items:center; text-align:center; justify-content:center;}
+.finale-title{font-family:var(--font-display); color:var(--black); font-size:clamp(44px,6vw,92px);}
+.finale-sub{color:var(--ink-soft); font-size:17px; margin-top:22px; max-width:50ch;}
+.finale-people{display:flex; gap:56px; margin-top:44px; font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft);}
+.finale-people b{display:block; color:var(--ink); font-family:var(--font-body); font-size:15px; font-weight:600; margin-bottom:4px;}
+
+/* ============================================================
+   DIAGRAM ANIMATION PRIMITIVES
+============================================================ */
+.diag .draw{stroke-dasharray:900; stroke-dashoffset:900;}
+.diag.play .draw{animation:drawPath 1.1s var(--ease) forwards;}
+.diag.play .draw:nth-of-type(2){animation-delay:.15s;}
+@keyframes drawPath{to{stroke-dashoffset:0;}}
+
+.diag .pop{opacity:0; transform:scale(.92); transform-origin:center; transition:none;}
+.diag.play .pop{animation:popIn .55s var(--ease) forwards;}
+.diag.play .pop:nth-of-type(2){animation-delay:.1s;}
+.diag.play .pop:nth-of-type(3){animation-delay:.2s;}
+.diag.play .pop:nth-of-type(4){animation-delay:.3s;}
+.diag.play .pop:nth-of-type(5){animation-delay:.4s;}
+.diag.play .pop:nth-of-type(6){animation-delay:.5s;}
+.diag.play .pop:nth-of-type(7){animation-delay:.6s;}
+.diag.play .pop:nth-of-type(8){animation-delay:.7s;}
+.diag.play .pop:nth-of-type(9){animation-delay:.8s;}
+.diag.play .pop:nth-of-type(10){animation-delay:.9s;}
+@keyframes popIn{to{opacity:1; transform:scale(1);}}
+
+.diag .vec{stroke-dasharray:420; stroke-dashoffset:420;}
+.diag.play #vecA{animation:drawPath .9s var(--ease) forwards;}
+.diag.play #vecB{animation:drawPath .9s var(--ease) .3s forwards;}
+
+.tl-node{opacity:0; transform:translateY(6px);}
+.diag.play .tl-node{animation:tlIn .5s var(--ease) forwards;}
+.diag.play .tl-node[data-i="0"]{animation-delay:.05s;}
+.diag.play .tl-node[data-i="1"]{animation-delay:.2s;}
+.diag.play .tl-node[data-i="2"]{animation-delay:.35s;}
+.diag.play .tl-node[data-i="3"]{animation-delay:.5s;}
+.diag.play .tl-node[data-i="4"]{animation-delay:.65s;}
+@keyframes tlIn{to{opacity:1; transform:translateY(0);}}
+
+.pipe-step{opacity:.5; transform:scale(.98); transition:opacity .4s ease, transform .4s ease, border-color .4s ease, box-shadow .4s ease;}
+.pipe-step.is-active{opacity:1; transform:scale(1); border-color:var(--orange-500) !important; box-shadow:0 10px 26px -10px rgba(228,88,31,.3);}
+
+#wsChunks .pop{animation-name:chunkPulse;}
+.diag.play #wsChunks .pop:nth-of-type(1){animation-delay:0s;}
+.diag.play #wsChunks .pop:nth-of-type(2){animation-delay:.12s;}
+.diag.play #wsChunks .pop:nth-of-type(3){animation-delay:.24s;}
+.diag.play #wsChunks .pop:nth-of-type(4){animation-delay:.36s;}
+.diag.play #wsChunks .pop:nth-of-type(5){animation-delay:.48s;}
+@keyframes chunkPulse{0%{opacity:0; transform:scale(.7);} 60%{opacity:1; transform:scale(1.05);} 100%{opacity:1; transform:scale(1);}}
+#httpBlock{animation:httpFill 2.4s ease-in-out infinite;}
+@keyframes httpFill{0%,100%{opacity:.5;} 50%{opacity:.9;}}
+
+code{background:var(--paper-alt); padding:1px 6px; border-radius:5px;}
+
+/* ============================================================
+   NEW DIAGRAM COMPONENTS — narrative steppers, state machine, sequence
+============================================================ */
+.zone-box{transition:filter .35s ease, stroke .35s ease;}
+.zone-box.tgt-active{stroke:var(--orange-500) !important; filter:drop-shadow(0 0 10px rgba(228,88,31,.5));}
+.flow-arrow{transition:stroke .3s ease, stroke-width .3s ease;}
+.flow-arrow.tgt-active{stroke:var(--orange-500) !important; stroke-width:3.2;}
+.rf-box{transition:filter .35s ease, stroke .35s ease;}
+.rf-box.tgt-active{stroke:var(--orange-500) !important; filter:drop-shadow(0 0 10px rgba(228,88,31,.4));}
+
+.step-chip{
+  border-left:3px solid var(--line-strong); padding:9px 12px; border-radius:6px;
+  font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); line-height:1.4;
+  opacity:.55; transition:opacity .3s ease, border-color .3s ease, background .3s ease, color .3s ease;
+  background:transparent;
+}
+.step-chip.small{font-size:10px; padding:7px 9px;}
+.step-chip-n{display:inline-block; font-weight:700; color:var(--purple-600); margin-right:6px;}
+.step-chip.is-active{opacity:1; border-left-color:var(--orange-500); background:var(--orange-100); color:var(--ink);}
+.step-chip.is-active .step-chip-n{color:var(--orange-600);}
+
+.state-node{cursor:default;}
+.state-node circle{transition:stroke .4s ease, filter .4s ease;}
+.state-node.is-current circle{stroke:var(--orange-500); stroke-width:4; filter:drop-shadow(0 0 12px rgba(228,88,31,.45));}
+
+.seq-msg{opacity:0; transition:opacity .35s ease;}
+.seq-msg path{transition:stroke .3s ease, stroke-width .3s ease;}
+.seq-msg text{transition:fill .3s ease;}
+.seq-msg.is-done{opacity:.4;}
+.seq-msg.is-active{opacity:1;}
+.seq-msg.is-active path{stroke:var(--orange-600) !important; stroke-width:2.8;}
+.seq-msg.is-active text{fill:var(--ink) !important; font-weight:600;}
+/* end shared CSS marker */
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <nav class="rail" id="rail">
+    <div class="rail-mark">Ai</div>
+    <div class="rail-chapters" id="railChapters"></div>
+    <div class="rail-foot">
+      <div class="rail-count"><b id="curNum">01</b>/<span id="totNum">32</span></div>
+      <button class="rail-btn" id="btnPrev" aria-label="Anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="rail-btn" id="btnNext" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <button class="rail-btn" id="btnFull" aria-label="Pantalla completa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>
+
+  <main class="deck" id="deck">
+    <section class="slide cover active" data-ch="0" id="slide-1">
+  <div class="cover-blob"><svg viewBox="0 0 800 800"><circle cx="600" cy="180" r="420" fill="none" stroke="#7C3FCE" stroke-width="2"/><circle cx="520" cy="260" r="300" fill="none" stroke="#E4581F" stroke-width="2"/></svg></div>
+  <div class="slide-inner">
+    <div class="cover-top">
+      <div class="cover-uni">UNIVERSIDAD TECNOLÓGICA<br>INDOAMÉRICA<br>Facultad de Ingeniería y<br>Tecnologías de la Información</div>
+      <div class="cover-logo">UTI</div>
+    </div>
+    <div class="cover-main">
+      <div class="cover-eyebrow">SUSTENTACIÓN DE TESIS — TECNOLOGÍAS DE LA INFORMACIÓN</div>
+      <h1 class="cover-title">Aria, el asistente<br><span class="line2">que entiende</span> lo que<br>preguntas.</h1>
+      <p class="cover-sub">Asistente Virtual Inteligente basado en Modelos de Lenguaje Grande (LLMs) y Generación Aumentada por Recuperación (RAG) para la carrera de Tecnologías de la Información.</p>
+    </div>
+    <div class="cover-bottom">
+      <div class="cover-people">
+        <div><b>Paulo Emilio Espinoza Jiménez</b>Autor</div>
+        <div><b>Christian Eduardo Iza Llumiguisín</b>Tutor</div>
+        <div><b>[Fecha de Defensa]</b>Fecha</div>
+      </div>
+      <div class="cover-cta">Usa &nbsp;→&nbsp; para navegar</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="0" id="slide-2">
+  <div class="slide-inner">
+    <div class="kicker">Hoja de ruta</div>
+    <h2 class="headline" style="max-width:20ch">Ocho paradas entre el problema y la solución.</h2>
+    <ol class="agenda-list" style="margin-top:44px;">
+      <li><span class="agenda-num">01</span><span class="agenda-txt">Contexto y planteamiento del problema</span></li>
+      <li><span class="agenda-num">02</span><span class="agenda-txt">Estado del arte y aporte</span></li>
+      <li><span class="agenda-num">03</span><span class="agenda-txt">Metas y justificación</span></li>
+      <li><span class="agenda-num">04</span><span class="agenda-txt">Fundamentación teórica</span></li>
+      <li><span class="agenda-num">05</span><span class="agenda-txt">Marco metodológico y planificación</span></li>
+      <li><span class="agenda-num">06</span><span class="agenda-txt">Diseño de la solución (arquitectura)</span></li>
+      <li><span class="agenda-num">07</span><span class="agenda-txt">Implementación y resultados</span></li>
+      <li><span class="agenda-num">08</span><span class="agenda-txt">Conclusiones y recomendaciones</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide" data-ch="1" id="slide-3">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Capítulo I · Contexto</div>
+      <h2 class="headline">La era de la información <em>universitaria</em>.</h2>
+      <p class="subhead">La carrera de TI administra un corpus enorme y disperso — y el estudiante de hoy no tiene paciencia para buscarlo a mano.</p>
+    </div>
+    <ul class="point-list">
+      <li><span class="point-mark">01</span><div class="point-body"><b>Un corpus vasto</b><p>Mallas curriculares, sílabos, reglamentos de titulación y prácticas preprofesionales conviven en decenas de documentos.</p></div></li>
+      <li><span class="point-mark">02</span><div class="point-body"><b>Formatos estáticos</b><p>La información oficial se distribuye en PDFs, repositorios institucionales, correos y tableros físicos.</p></div></li>
+      <li><span class="point-mark">03</span><div class="point-body"><b>Nuevas expectativas</b><p>El estudiante moderno exige inmediatez y precisión en la obtención de respuestas.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-ch="1" id="slide-4">
+  <div class="slide-inner">
+    <div class="kicker">Capítulo I · El problema</div>
+    <h2 class="headline" style="max-width:18ch">¿Por qué fallan los métodos actuales?</h2>
+    <div class="grid-2 tight" style="margin-top:40px; align-items:stretch;">
+      <div class="card"><div class="card-eyebrow">01 — Dispersión</div><b>Información fragmentada</b><p style="color:var(--ink-soft); margin-top:8px; font-size:14.5px; line-height:1.55;">Los datos oficiales viven repartidos entre múltiples archivos y plataformas sin un punto único de consulta.</p></div>
+      <div class="card"><div class="card-eyebrow">02 — Búsqueda sintáctica</div><b>Coincidencia de palabras, no de sentido</b><p style="color:var(--ink-soft); margin-top:8px; font-size:14.5px; line-height:1.55;">Si el estudiante busca <i>"tesis"</i> pero el reglamento dice <i>"titulación"</i>, el buscador no encuentra nada.</p></div>
+      <div class="card"><div class="card-eyebrow">03 — Sin comprensión semántica</div><b>El sistema no entiende la intención</b><p style="color:var(--ink-soft); margin-top:8px; font-size:14.5px; line-height:1.55;">Los repositorios tradicionales no interpretan qué quiere decir realmente la pregunta.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="1" id="slide-5">
+  <div class="slide-inner grid-2">
+    <ul class="point-list">
+      <li><span class="point-mark">!</span><div class="point-body"><b>Sobrecarga administrativa</b><p>Al frustrarse con los documentos, los estudiantes acuden físicamente a secretaría por dudas que son automatizables.</p></div></li>
+      <li><span class="point-mark">!</span><div class="point-body"><b>Cuellos de botella</b><p>Las secretarías invierten tiempo valioso repitiendo información estática en lugar de atender trámites complejos.</p></div></li>
+      <li><span class="point-mark">!</span><div class="point-body"><b>Interfaz reactiva y estática</b><p>Los portales exigen navegación manual — clics, teclado — sin ninguna proactividad.</p></div></li>
+    </ul>
+    <div>
+      <div class="kicker">Capítulo I · Consecuencias</div>
+      <h2 class="headline">Tres síntomas de un mismo problema.</h2>
+      <p class="subhead">La fricción documental no se queda en lo digital: termina convirtiéndose en filas, tiempo perdido y una experiencia pasiva.</p>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="2" id="slide-6">
+  <div class="slide-inner">
+    <div class="kicker">Capítulo I · Estado del arte</div>
+    <h2 class="headline" style="max-width:20ch">Lo que ya existe — y dónde se queda corto.</h2>
+    <div class="grid-2 tight" style="margin-top:38px; align-items:stretch; grid-template-columns:1fr 1fr 1fr; display:grid;">
+      <div class="card"><div class="card-eyebrow">Reglas fijas</div><b>Chatbots de árbol de decisión</b><p style="color:var(--ink-soft); margin-top:8px; font-size:14px; line-height:1.55;">Rígidos, fallan ante cualquier pregunta fuera del guion. Comunes en atención básica al cliente.</p></div>
+      <div class="card"><div class="card-eyebrow">Generalistas</div><b>Asistentes comerciales (Siri, Alexa)</b><p style="color:var(--ink-soft); margin-top:8px; font-size:14px; line-height:1.55;">Alta disponibilidad, pero sin conocimiento del reglamento interno de la universidad.</p></div>
+      <div class="card"><div class="card-eyebrow">Sin control</div><b>Plataformas GPT públicas</b><p style="color:var(--ink-soft); margin-top:8px; font-size:14px; line-height:1.55;">Alta inteligencia, pero propensas a alucinaciones y sin garantía de privacidad institucional.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="2" id="slide-7">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">El aporte del proyecto</div>
+      <h2 class="headline">Aria: un asistente <span class="accent">especializado</span>, no generalista.</h2>
+      <p class="subhead">Entrenado exclusivamente con el corpus oficial de la carrera, y diseñado para acercarse al estudiante en vez de esperarlo.</p>
+    </div>
+    <ul class="point-list">
+      <li><span class="point-mark">◆</span><div class="point-body"><b>Especialización</b><p>Conocimiento cerrado al corpus documental oficial de la carrera de TI.</p></div></li>
+      <li><span class="point-mark">◆</span><div class="point-body"><b>Proactividad multimodal</b><p>Sin teclado ni ratón: detecta la presencia física del estudiante y conversa por voz.</p></div></li>
+      <li><span class="point-mark">◆</span><div class="point-body"><b>Privacidad y fiabilidad</b><p>Motores locales y RAG para garantizar cero alucinaciones y total privacidad de las consultas.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-ch="3" id="slide-8">
+  <div class="slide-inner" style="max-width:1000px;">
+    <div class="kicker">Capítulo I · Metas</div>
+    <div class="card-accent acc-black" style="padding:52px 56px; border-radius:var(--radius-l);">
+      <div class="card-eyebrow" style="color:var(--orange-600);">OBJETIVO GENERAL</div>
+      <p style="font-family:var(--font-display); color:var(--black); font-size:clamp(22px,2.4vw,32px); line-height:1.35; max-width:26ch;">Desarrollar e implementar un Asistente Virtual Inteligente multimodal, impulsado por <em style="color:var(--purple-600); font-style:italic;">LLMs</em> y <em style="color:var(--orange-600); font-style:italic;">RAG</em>, para democratizar y automatizar el acceso a la información académica de la carrera.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="3" id="slide-9">
+  <div class="slide-inner">
+    <div class="kicker">Objetivos específicos</div>
+    <h2 class="headline" style="max-width:20ch">Cuatro pasos, de los datos a la validación.</h2>
+    <ul class="point-list" style="margin-top:30px; max-width:920px;">
+      <li><span class="point-mark">1</span><div class="point-body"><b>Recopilar y procesar</b><p>El conocimiento institucional — mallas y reglamentos — en una base de datos vectorial.</p></div></li>
+      <li><span class="point-mark">2</span><div class="point-body"><b>Diseñar la arquitectura lógica</b><p>Y las capas de interacción: visión artificial, Speech-to-Text y Text-to-Speech.</p></div></li>
+      <li><span class="point-mark">3</span><div class="point-body"><b>Implementar el sistema RAG</b><p>Para dotar al LLM de contexto cerrado y evitar alucinaciones.</p></div></li>
+      <li><span class="point-mark">4</span><div class="point-body"><b>Validar y medir</b><p>El rendimiento técnico (latencia, uso de recursos) y la precisión funcional del asistente.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-ch="3" id="slide-10">
+  <div class="slide-inner grid-2">
+    <ul class="point-list">
+      <li><span class="point-mark">✓</span><div class="point-body"><b>Innovación educativa</b><p>Posiciona a la carrera a la vanguardia tecnológica, usando IA generativa de forma ética y aplicada.</p></div></li>
+      <li><span class="point-mark">✓</span><div class="point-body"><b>Eficiencia operativa</b><p>Libera horas de trabajo administrativo en las secretarías.</p></div></li>
+      <li><span class="point-mark">✓</span><div class="point-body"><b>Accesibilidad</b><p>Transforma documentos densos de 50 páginas en respuestas conversacionales, inmediatas y en español natural.</p></div></li>
+    </ul>
+    <div>
+      <div class="kicker">Justificación</div>
+      <h2 class="headline">¿Por qué vale la pena?</h2>
+      <p class="subhead">Tres razones que conectan lo técnico con lo institucional.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="3" id="slide-11">
+  <div class="slide-inner">
+    <div class="kicker">Alcance y límites</div>
+    <h2 class="headline" style="max-width:18ch">Hasta dónde llega el sistema.</h2>
+    <div class="grid-2 tight" style="margin-top:36px;">
+      <div class="card" style="border-color:var(--purple-300); background:var(--purple-100);">
+        <span class="tag yes" style="margin-bottom:14px;">SÍ RESPONDE</span>
+        <ul style="margin:14px 0 0; padding-left:18px; color:var(--ink-soft); font-size:14.5px; line-height:1.9;">
+          <li>Mallas curriculares, requisitos de titulación y horas de vinculación.</li>
+          <li>Normativas propias de la carrera de TI.</li>
+          <li>Interacción proactiva por reconocimiento facial básico y voz.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:var(--orange-300); background:var(--orange-100);">
+        <span class="tag no" style="margin-bottom:14px;">FUERA DE ALCANCE</span>
+        <ul style="margin:14px 0 0; padding-left:18px; color:var(--ink-soft); font-size:14.5px; line-height:1.9;">
+          <li>No se integra transaccionalmente con el Sistema de Gestión Académica (SGA).</li>
+          <li>No matricula estudiantes ni consulta notas personales.</li>
+          <li>No responde fuera de su dominio académico (ej. recetas o cultura general).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="4" id="slide-12">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Fundamentación teórica</div>
+      <h2 class="headline">Modelos de Lenguaje Grande <span class="accent">(LLMs)</span>.</h2>
+      <p class="subhead">Redes neuronales masivas, entrenadas para predecir la siguiente palabra — y con eso, capaces de mucho más.</p>
+    </div>
+    <ul class="point-list">
+      <li><span class="point-mark">→</span><div class="point-body"><b>Predicción secuencial</b><p>Entrenadas para predecir la siguiente palabra dada una secuencia de texto.</p></div></li>
+      <li><span class="point-mark">→</span><div class="point-body"><b>Habilidades emergentes</b><p>Razonamiento y comprensión del lenguaje natural que surgen a gran escala.</p></div></li>
+      <li><span class="point-mark">✕</span><div class="point-body"><b>El reto: conocimiento congelado</b><p>Su saber se fija en la fecha de entrenamiento — no conocen documentos privados ni recientes de la universidad.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-ch="4" id="slide-13">
+  <div class="slide-inner">
+    <div class="kicker">Fundamentación teórica</div>
+    <h2 class="headline" style="max-width:22ch">RAG: el puente entre el LLM y los datos privados.</h2>
+    <div class="diag" id="diagRag" data-anim="rag" style="margin-top:46px;">
+      <svg viewBox="0 0 920 200" width="100%" height="220" style="overflow:visible;">
+        <defs>
+          <marker id="arrRag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--purple-500)"/></marker>
+        </defs>
+        <text x="60" y="30" class="rag-lbl" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-faint)">1. PREGUNTA</text>
+        <rect x="10" y="70" width="150" height="70" rx="12" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="85" y="110" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13" fill="var(--ink)">Estudiante</text>
+
+        <path class="draw" d="M165 105 H 330" stroke="var(--purple-400)" stroke-width="2" fill="none" marker-end="url(#arrRag)"/>
+        <text x="245" y="30" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-faint)">2. BÚSQUEDA</text>
+        <rect x="335" y="60" width="180" height="90" rx="12" fill="var(--purple-100)" stroke="var(--purple-300)" class="pop"/>
+        <text x="425" y="98" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13" fill="var(--purple-700)">Base Vectorial</text>
+        <text x="425" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--purple-600)">ChromaDB</text>
+
+        <path class="draw" d="M520 105 H 640" stroke="var(--purple-400)" stroke-width="2" fill="none" marker-end="url(#arrRag)"/>
+        <text x="530" y="30" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-faint)">3. CONTEXTO INYECTADO</text>
+        <rect x="645" y="55" width="190" height="100" rx="12" fill="var(--purple-950)" class="pop"/>
+        <text x="740" y="95" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13" fill="#fff">LLM</text>
+        <text x="740" y="115" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--orange-300)">contexto cerrado</text>
+
+        <path class="draw" d="M740 156 V 185" stroke="var(--orange-500)" stroke-width="2" fill="none" marker-end="url(#arrRag)"/>
+        <text x="748" y="200" font-family="IBM Plex Mono" font-size="11" fill="var(--orange-600)">4. RESPUESTA FIEL</text>
+      </svg>
+    </div>
+    <p class="subhead" style="margin-top:8px;">Antes de responder, el sistema busca en una base local los párrafos más relevantes y se los entrega al LLM como contexto. El modelo responde basándose <i>exclusivamente</i> en esos párrafos oficiales.</p>
+  </div>
+</section>
+
+<section class="slide" data-ch="4" id="slide-14">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Fundamentación teórica</div>
+      <h2 class="headline">Similitud del coseno.</h2>
+      <p class="subhead">ChromaDB no guarda texto plano: convierte cada oración en un vector de cientos de dimensiones. Un ángulo <i>θ</i> estrecho entre dos vectores significa el mismo significado semántico, aunque usen palabras distintas.</p>
+    </div>
+    <div class="diag" id="diagCos" data-anim="cosine">
+      <svg viewBox="0 0 360 300" width="100%" height="300" style="overflow:visible;">
+        <defs><marker id="arrCos" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z"/></marker></defs>
+        <line x1="30" y1="270" x2="330" y2="270" stroke="var(--line-strong)" stroke-width="1.5"/>
+        <line x1="30" y1="270" x2="30" y2="20" stroke="var(--line-strong)" stroke-width="1.5"/>
+        <line class="vec" id="vecA" x1="30" y1="270" x2="230" y2="60" stroke="var(--purple-600)" stroke-width="3" marker-end="url(#arrCos)" style="stroke:var(--purple-600);"/>
+        <text x="238" y="55" font-family="IBM Plex Mono" font-size="12" fill="var(--purple-600)">"titulación"</text>
+        <line class="vec" id="vecB" x1="30" y1="270" x2="270" y2="95" stroke="var(--orange-600)" stroke-width="3" marker-end="url(#arrCos)" style="stroke:var(--orange-600);"/>
+        <text x="278" y="92" font-family="IBM Plex Mono" font-size="12" fill="var(--orange-600)">"tesis"</text>
+        <path id="thetaArc" d="M 90 245 A 60 60 0 0 0 108 210" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" class="draw"/>
+        <text x="96" y="228" font-family="IBM Plex Mono" font-size="12" fill="var(--ink-soft)">θ</text>
+      </svg>
+      <div class="stat-row" style="margin-top:4px;">
+        <div class="stat"><span class="stat-num" data-count="97" data-suffix="%">0%</span><span class="stat-label">similitud coseno estimada</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="5" id="slide-15">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Capítulo II · Marco metodológico</div>
+      <h2 class="headline">Metodología ágil <span class="accent">(Scrum)</span>.</h2>
+      <p class="subhead">La naturaleza experimental de la IA vuelve rígido cualquier enfoque en cascada.</p>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">POR QUÉ SCRUM</div>
+      <p style="font-size:15px; line-height:1.65; color:var(--ink-soft);">Scrum permitió iteraciones rápidas —<i> sprints</i>— adaptando los <i>prompts</i> y ajustando el rendimiento del modelo progresivamente, tras cada prueba con datos reales.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="5" id="slide-16">
+  <div class="slide-inner">
+    <div class="kicker">Planificación</div>
+    <h2 class="headline" style="max-width:16ch">Cinco sprints, de los datos al despliegue.</h2>
+    <div class="diag" data-anim="timeline" style="margin-top:44px;">
+      <svg viewBox="0 0 1000 170" width="100%" height="170" style="overflow:visible;">
+        <line x1="20" y1="90" x2="980" y2="90" stroke="var(--line-strong)" stroke-width="2" class="draw" id="tlLine"/>
+        <g class="tl-node" data-i="0" transform="translate(80,90)"><circle r="7" fill="var(--purple-600)"/><text y="-24" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--orange-600)">FASE 1</text><text y="34" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="var(--ink)">Datos</text><text y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="10.5" fill="var(--ink-soft)">Recopilación y limpieza</text></g>
+        <g class="tl-node" data-i="1" transform="translate(280,90)"><circle r="7" fill="var(--purple-600)"/><text y="-24" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--orange-600)">FASE 2</text><text y="34" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="var(--ink)">Pipeline RAG</text><text y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="10.5" fill="var(--ink-soft)">Base de datos vectorial</text></g>
+        <g class="tl-node" data-i="2" transform="translate(500,90)"><circle r="7" fill="var(--purple-600)"/><text y="-24" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--orange-600)">FASE 3</text><text y="34" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="var(--ink)">Multimodal</text><text y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="10.5" fill="var(--ink-soft)">Visión y voz</text></g>
+        <g class="tl-node" data-i="3" transform="translate(720,90)"><circle r="7" fill="var(--purple-600)"/><text y="-24" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--orange-600)">FASE 4</text><text y="34" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="var(--ink)">Integración</text><text y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="10.5" fill="var(--ink-soft)">Estrés y latencia</text></g>
+        <g class="tl-node" data-i="4" transform="translate(920,90)"><circle r="8" fill="var(--orange-500)"/><text y="-24" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--orange-600)">FASE 5</text><text y="34" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="var(--ink)">Despliegue</text><text y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="10.5" fill="var(--ink-soft)">Docker + validación</text></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="5" id="slide-17">
+  <div class="slide-inner">
+    <div class="kicker">Viabilidad económica</div>
+    <h2 class="headline" style="max-width:16ch">IA de alto nivel, presupuesto casi nulo.</h2>
+    <div class="stat-row" style="margin-top:40px;">
+      <div class="stat"><span class="stat-num">$0<span class="unit">SOFTWARE</span></span><span class="stat-label">FastAPI, React, ChromaDB y HuggingFace — uso intensivo de tecnologías open source.</span></div>
+      <div class="stat"><span class="stat-num">~$0<span class="unit">HARDWARE</span></span><span class="stat-label">Procesamiento local/GPU o APIs de bajo costo (Groq) para inferencia rápida.</span></div>
+    </div>
+    <p class="subhead" style="margin-top:38px; max-width:60ch;">El proyecto demuestra que implementar IA de alto nivel no requiere presupuestos privativos inmensos a nivel institucional.</p>
+  </div>
+</section>
+
+<section class="slide" data-ch="5" id="slide-18">
+  <div class="slide-inner">
+    <div class="kicker">Requerimientos del sistema</div>
+    <h2 class="headline" style="max-width:18ch">Lo que el sistema hace — y cómo debe hacerlo.</h2>
+    <div class="grid-2 tight" style="margin-top:36px;">
+      <div class="card">
+        <div class="card-eyebrow">REQUERIMIENTOS FUNCIONALES</div>
+        <ul style="margin:12px 0 0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:12px;">
+          <li style="font-size:14px; color:var(--ink-soft);"><b style="color:var(--ink); font-family:var(--font-mono); font-size:12px;">RF-01</b> — Detección no biométrica de presencia.</li>
+          <li style="font-size:14px; color:var(--ink-soft);"><b style="color:var(--ink); font-family:var(--font-mono); font-size:12px;">RF-02</b> — Transcripción de voz a texto (STT) en tiempo real.</li>
+          <li style="font-size:14px; color:var(--ink-soft);"><b style="color:var(--ink); font-family:var(--font-mono); font-size:12px;">RF-03</b> — Búsqueda semántica vectorial.</li>
+        </ul>
+      </div>
+      <div class="card-accent acc-orange">
+        <div class="card-eyebrow" style="color:var(--orange-600);">REQUERIMIENTOS NO FUNCIONALES</div>
+        <ul style="margin:12px 0 0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:12px;">
+          <li style="font-size:14px; color:var(--ink-soft);"><b style="color:var(--black); font-family:var(--font-mono); font-size:12px;">RNF-01</b> — Privacidad por diseño: no guardar fotos ni audios.</li>
+          <li style="font-size:14px; color:var(--ink-soft);"><b style="color:var(--black); font-family:var(--font-mono); font-size:12px;">RNF-02</b> — Baja latencia operativa.</li>
+          <li style="font-size:14px; color:var(--ink-soft);"><b style="color:var(--black); font-family:var(--font-mono); font-size:12px;">RNF-03</b> — Tolerancia a fallos y alta disponibilidad (WebSockets).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="6" id="slide-19">
+  <div class="slide-inner" style="max-width:1300px;">
+    <div class="kicker">Capítulo II · Diseño de la solución</div>
+    <h2 class="headline" style="max-width:22ch">Arquitectura de software — <span class="accent">cliente-servidor</span> desacoplado.</h2>
+    <div class="diag" id="diagArch" data-anim="archflow" style="margin-top:22px;">
+      <svg viewBox="0 0 1180 320" width="100%" height="300" style="overflow:visible;">
+        <defs>
+          <marker id="arrA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--purple-500)"/></marker>
+          <marker id="arrA2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--orange-500)"/></marker>
+        </defs>
+
+        <rect x="6" y="20" width="224" height="270" rx="14" fill="var(--paper-soft)" stroke="var(--line)" stroke-dasharray="3 4" class="pop"/>
+        <text x="22" y="40" font-family="IBM Plex Mono" font-size="10.5" fill="var(--purple-600)">01 · CLIENTE (navegador)</text>
+        <rect x="26" y="58" width="184" height="44" rx="9" fill="#fff" stroke="var(--line-strong)" class="pop zone-box"/>
+        <text x="118" y="83" text-anchor="middle" font-family="IBM Plex Sans" font-size="12" font-weight="600" fill="var(--ink)">Interfaz de Usuario</text>
+        <rect id="boxCaptura" x="26" y="112" width="184" height="46" rx="9" fill="#fff" stroke="var(--line-strong)" class="pop zone-box"/>
+        <text x="118" y="132" text-anchor="middle" font-family="IBM Plex Sans" font-size="12" font-weight="600" fill="var(--ink)">Módulo de Captura</text>
+        <text x="118" y="148" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">micrófono + webcam</text>
+        <rect id="boxAvatar" x="26" y="168" width="184" height="100" rx="9" fill="#fff" stroke="var(--line-strong)" class="pop zone-box"/>
+        <text x="118" y="205" text-anchor="middle" font-family="IBM Plex Sans" font-size="12" font-weight="600" fill="var(--ink)">Avatar 3D</text>
+        <text x="118" y="222" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">WebGL — Three.js</text>
+        <text x="118" y="237" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">Ready Player Me</text>
+
+        <path id="arrToBackend" class="draw flow-arrow" d="M232 140 H 300" stroke="var(--line-strong)" stroke-width="2.5" fill="none" marker-end="url(#arrA)"/>
+        <path id="arrToClient" class="draw flow-arrow" d="M300 214 H 232" stroke="var(--line-strong)" stroke-width="2.5" fill="none" marker-end="url(#arrA2)"/>
+        <text x="267" y="130" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-faint)">WebSocket</text>
+
+        <rect x="304" y="20" width="224" height="270" rx="14" fill="var(--purple-100)" stroke="var(--purple-300)" stroke-dasharray="3 4" class="pop"/>
+        <text x="320" y="40" font-family="IBM Plex Mono" font-size="10.5" fill="var(--purple-600)">02 · BACKEND — FastAPI</text>
+        <rect id="boxVision" x="324" y="68" width="184" height="58" rx="9" fill="#fff" stroke="var(--purple-300)" class="pop zone-box"/>
+        <text x="416" y="93" text-anchor="middle" font-family="IBM Plex Sans" font-size="12" font-weight="600" fill="var(--ink)">Módulo de Visión</text>
+        <text x="416" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">triggers de presencia</text>
+        <rect id="boxRAG" x="324" y="140" width="184" height="58" rx="9" fill="#fff" stroke="var(--purple-300)" class="pop zone-box"/>
+        <text x="416" y="165" text-anchor="middle" font-family="IBM Plex Sans" font-size="12" font-weight="600" fill="var(--ink)">Gestor RAG</text>
+        <text x="416" y="182" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">asyncio</text>
+
+        <path id="arrToIA" class="draw flow-arrow" d="M530 150 H 596" stroke="var(--line-strong)" stroke-width="2.5" fill="none" marker-end="url(#arrA)"/>
+
+        <rect x="598" y="20" width="576" height="270" rx="14" fill="var(--purple-950)" class="pop"/>
+        <text x="614" y="40" font-family="IBM Plex Mono" font-size="10.5" fill="var(--orange-300)">03 · CAPA COGNITIVA — servicios IA</text>
+        <rect id="boxSTT" x="618" y="60" width="260" height="105" rx="10" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.18)" class="pop zone-box"/>
+        <text x="748" y="100" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="#fff">Motor STT</text>
+        <text x="748" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="rgba(255,255,255,.65)">Whisper-v3 (Groq)</text>
+        <text x="748" y="134" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="rgba(255,255,255,.65)">audio → texto</text>
+
+        <g id="boxChroma" class="pop zone-box">
+          <ellipse cx="1028" cy="152" rx="128" ry="14" fill="var(--purple-700)"/>
+          <rect x="900" y="72" width="256" height="80" fill="var(--purple-700)"/>
+          <ellipse cx="1028" cy="72" rx="128" ry="14" fill="var(--purple-600)" stroke="rgba(255,255,255,.3)"/>
+          <text x="1028" y="112" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="#fff">ChromaDB</text>
+          <text x="1028" y="130" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="rgba(255,255,255,.75)">base vectorial</text>
+        </g>
+
+        <rect id="boxLLM" x="618" y="182" width="260" height="98" rx="10" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.18)" class="pop zone-box"/>
+        <text x="748" y="222" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="#fff">Motor LLM</text>
+        <text x="748" y="240" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="rgba(255,255,255,.65)">Llama 3</text>
+        <text x="748" y="256" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="rgba(255,255,255,.65)">contexto + query → respuesta</text>
+
+        <rect id="boxTTS" x="900" y="182" width="256" height="98" rx="10" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.18)" class="pop zone-box"/>
+        <text x="1028" y="222" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="#fff">Motor TTS</text>
+        <text x="1028" y="240" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="rgba(255,255,255,.65)">ElevenLabs</text>
+        <text x="1028" y="256" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="rgba(255,255,255,.65)">texto → audio + visemas</text>
+      </svg>
+    </div>
+    <div class="stepper" id="stepperArch" style="margin-top:6px; display:grid; grid-template-columns:repeat(5,1fr); gap:8px;">
+      <div class="step-chip" data-target="boxCaptura"><span class="step-chip-n">1</span>Rostro detectado → activa micrófono</div>
+      <div class="step-chip" data-target="arrToBackend"><span class="step-chip-n">2</span>Audio enviado por WebSocket</div>
+      <div class="step-chip" data-target="boxSTT"><span class="step-chip-n">3</span>STT transcribe a texto</div>
+      <div class="step-chip" data-target="boxRAG"><span class="step-chip-n">4</span>Gestor RAG recibe la consulta</div>
+      <div class="step-chip" data-target="boxChroma"><span class="step-chip-n">5</span>Búsqueda en ChromaDB</div>
+      <div class="step-chip" data-target="boxChroma boxLLM"><span class="step-chip-n">6</span>Fragmentos relevantes al LLM</div>
+      <div class="step-chip" data-target="boxLLM"><span class="step-chip-n">7</span>LLM genera la respuesta</div>
+      <div class="step-chip" data-target="boxTTS"><span class="step-chip-n">8</span>TTS sintetiza audio + visemas</div>
+      <div class="step-chip" data-target="arrToClient"><span class="step-chip-n">9</span>Audio devuelto al cliente</div>
+      <div class="step-chip" data-target="boxAvatar"><span class="step-chip-n">10</span>Avatar reproduce con lip-sync</div>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="6" id="slide-20">
+  <div class="slide-inner">
+    <div class="kicker">Diagrama de contexto · Nivel 0</div>
+    <h2 class="headline" style="max-width:20ch">El sistema como <em>caja negra</em>.</h2>
+    <div class="diag" id="diagContext" data-anim="context" style="margin-top:26px; display:flex; justify-content:center;">
+      <svg viewBox="0 0 900 340" width="100%" height="340" style="max-width:900px; overflow:visible;">
+        <defs>
+          <marker id="arrCtxP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--purple-500)"/></marker>
+          <marker id="arrCtxO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--orange-500)"/></marker>
+        </defs>
+
+        <rect x="10" y="120" width="150" height="100" rx="16" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="85" y="164" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13.5" fill="var(--ink)">Estudiante</text>
+        <text x="85" y="182" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">audio + video</text>
+
+        <rect x="340" y="95" width="220" height="150" rx="20" fill="var(--black)" class="pop"/>
+        <text x="450" y="160" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="15" fill="#fff">Asistente Virtual</text>
+        <text x="450" y="180" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--orange-300)">RAG · LLM · WebGL</text>
+
+        <rect x="700" y="30" width="190" height="80" rx="14" fill="var(--purple-100)" stroke="var(--purple-300)" class="pop"/>
+        <text x="795" y="65" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="12.5" fill="var(--purple-700)">API Groq</text>
+        <text x="795" y="82" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--purple-600)">STT — Whisper-v3</text>
+
+        <rect x="700" y="250" width="190" height="80" rx="14" fill="var(--orange-100)" stroke="var(--orange-300)" class="pop"/>
+        <text x="795" y="285" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="12.5" fill="var(--orange-700)">ElevenLabs</text>
+        <text x="795" y="302" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--orange-700)">TTS — audio</text>
+
+        <rect x="340" y="10" width="220" height="60" rx="12" fill="none" stroke="var(--ink-faint)" stroke-dasharray="4 4" class="pop" opacity=".8"/>
+        <text x="450" y="34" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="var(--ink-faint)">Sistema de Gestión</text>
+        <text x="450" y="50" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="var(--ink-faint)">Académica (SGA)</text>
+        <path class="draw" d="M450 70 V 92" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="565" y="18" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-faint)">origen de PDFs — sin conexión en vivo</text>
+
+        <path class="draw" d="M162 150 C 240 130, 280 120, 338 135" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrCtxP)"/>
+        <path class="draw" d="M338 205 C 280 220, 240 210, 162 190" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrCtxO)"/>
+        <path class="draw" d="M562 130 C 620 100, 660 85, 698 68" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrCtxP)"/>
+        <path class="draw" d="M698 92 C 660 108, 620 118, 562 145" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrCtxO)"/>
+        <path class="draw" d="M562 220 C 620 245, 660 260, 698 275" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrCtxP)"/>
+        <path class="draw" d="M698 300 C 660 285, 620 260, 562 235" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrCtxO)"/>
+      </svg>
+    </div>
+    <p class="subhead" style="text-align:center; margin:10px auto 0; max-width:70ch;">El estudiante provee estímulos; el Asistente orquesta STT y TTS con APIs externas y responde con audio + avatar. El SGA es solo la fuente original de los documentos — el sistema opera desconectado de él.</p>
+  </div>
+</section>
+<section class="slide" data-ch="6" id="slide-21">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Diagrama de estados</div>
+      <h2 class="headline">El ciclo de vida del <em>avatar</em>.</h2>
+      <p class="subhead">Cuatro estados lógicos gobiernan la animación del avatar 3D en el frontend, disparados por eventos de percepción y de audio.</p>
+      <ul class="point-list" style="margin-top:20px;">
+        <li><span class="point-mark">◐</span><div class="point-body"><b>Dormido</b><p>Nadie en cámara — ojos cerrados, respiración lenta.</p></div></li>
+        <li><span class="point-mark">◑</span><div class="point-body"><b>Hablando</b><p>Lip-sync activo y gestos de manos mientras llega el audio del servidor.</p></div></li>
+      </ul>
+    </div>
+    <div class="diag" id="diagStates" data-anim="avatarstates">
+      <svg viewBox="0 0 460 460" width="100%" height="420" style="overflow:visible;">
+        <defs><marker id="arrSt" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink-faint)"/></marker></defs>
+
+        <path class="draw" d="M160 90 A 150 150 0 0 1 370 160" stroke="var(--line-strong)" stroke-width="2" fill="none" marker-end="url(#arrSt)"/>
+        <text x="300" y="80" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">presencia detectada</text>
+
+        <path class="draw" d="M390 210 A 150 150 0 0 1 340 380" stroke="var(--line-strong)" stroke-width="2" fill="none" marker-end="url(#arrSt)"/>
+        <text x="358" y="300" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">silencio detectado</text>
+
+        <path class="draw" d="M270 410 A 150 150 0 0 1 110 350" stroke="var(--line-strong)" stroke-width="2" fill="none" marker-end="url(#arrSt)"/>
+        <text x="150" y="410" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">TTFB completado</text>
+
+        <path class="draw" d="M95 300 A 150 150 0 0 1 100 140" stroke="var(--orange-400)" stroke-width="2" fill="none" marker-end="url(#arrSt)" stroke-dasharray="5 4"/>
+        <text x="20" y="230" font-family="IBM Plex Mono" font-size="9.5" fill="var(--orange-600)">fin de audio</text>
+
+        <path class="draw" d="M150 105 A 150 150 0 0 0 105 300" stroke="var(--ink-faint)" stroke-width="1.5" fill="none" marker-end="url(#arrSt)" stroke-dasharray="2 4" opacity=".6"/>
+        <text x="55" y="200" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-faint)">timeout</text>
+
+        <g class="state-node pop" id="stDormido" data-state="0" transform="translate(130,60)">
+          <circle r="52" fill="#fff" stroke="var(--line-strong)" stroke-width="2.5"/>
+          <text y="-4" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13" fill="var(--ink)">Dormido</text>
+          <text y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">idle</text>
+        </g>
+        <g class="state-node pop" id="stEscuchando" data-state="1" transform="translate(400,190)">
+          <circle r="55" fill="#fff" stroke="var(--purple-300)" stroke-width="2.5"/>
+          <text y="-4" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13" fill="var(--ink)">Escuchando</text>
+          <text y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">listening</text>
+        </g>
+        <g class="state-node pop" id="stPensando" data-state="2" transform="translate(310,400)">
+          <circle r="55" fill="#fff" stroke="var(--purple-300)" stroke-width="2.5"/>
+          <text y="-4" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13" fill="var(--ink)">Pensando</text>
+          <text y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">processing</text>
+        </g>
+        <g class="state-node pop" id="stHablando" data-state="3" transform="translate(80,360)">
+          <circle r="55" fill="#fff" stroke="var(--orange-300)" stroke-width="2.5"/>
+          <text y="-4" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13" fill="var(--ink)">Hablando</text>
+          <text y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">speaking</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="6" id="slide-22">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Capa de percepción</div>
+      <h2 class="headline">Visión artificial, <em>optimizada</em>.</h2>
+      <p class="subhead">La idea inicial —redes profundas de reconocimiento facial— consumía CPU/GPU en exceso.</p>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">SOLUCIÓN ADOPTADA</div>
+      <b>Bounding box ligero</b>
+      <p style="color:var(--ink-soft); font-size:14.5px; line-height:1.6; margin-top:8px;">El sistema detecta el área del rostro en píxeles. Si supera un umbral de proximidad, asume intención de interactuar y "despierta" al avatar — eficiencia computacional extrema.</p>
+    </div>
+  </div>
+</section><section class="slide" data-ch="6" id="slide-23">
+  <div class="slide-inner">
+    <div class="kicker">Comunicación</div>
+    <h2 class="headline" style="max-width:18ch">¿Por qué WebSockets?</h2>
+    <div class="diag" data-anim="ws" style="margin-top:34px;">
+      <svg viewBox="0 0 1000 210" width="100%" height="210" style="overflow:visible;">
+        <text x="0" y="24" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-faint)">HTTP CLÁSICO</text>
+        <rect x="0" y="40" width="480" height="34" rx="8" fill="var(--orange-100)"/>
+        <rect id="httpBlock" class="pop" x="0" y="40" width="480" height="34" rx="8" fill="var(--orange-300)" opacity=".7"/>
+        <text x="240" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--orange-700)">un solo hilo bloqueado hasta terminar</text>
+
+        <text x="0" y="120" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-faint)">WEBSOCKETS (STREAMING)</text>
+        <rect x="0" y="136" width="480" height="34" rx="8" fill="var(--purple-100)"/>
+        <g id="wsChunks">
+          <rect class="pop" x="4" y="136" width="52" height="34" rx="6" fill="var(--purple-500)"/>
+          <rect class="pop" x="64" y="136" width="52" height="34" rx="6" fill="var(--purple-500)"/>
+          <rect class="pop" x="124" y="136" width="52" height="34" rx="6" fill="var(--purple-500)"/>
+          <rect class="pop" x="184" y="136" width="52" height="34" rx="6" fill="var(--purple-500)"/>
+          <rect class="pop" x="244" y="136" width="52" height="34" rx="6" fill="var(--purple-500)"/>
+        </g>
+        <text x="240" y="192" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--purple-700)">audio fragmentado, bidireccional y asíncrono</text>
+      </svg>
+    </div>
+    <p class="subhead" style="margin-top:10px;">Un túnel bidireccional evita que la interfaz se congele: el audio binario viaja fragmentado y el estado del asistente se actualiza en tiempo real.</p>
+  </div>
+</section><section class="slide" data-ch="6" id="slide-24">
+  <div class="slide-inner" style="max-width:1300px;">
+    <div class="kicker">El motor cognitivo (RAG)</div>
+    <h2 class="headline" style="max-width:22ch">Dos flujos, una misma base vectorial.</h2>
+    <div class="diag" id="diagRagFlow" data-anim="ragflow" style="margin-top:24px;">
+      <svg viewBox="0 0 1180 260" width="100%" height="250" style="overflow:visible;">
+        <defs><marker id="arrRF" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--purple-500)"/></marker></defs>
+
+        <text x="0" y="24" font-family="IBM Plex Mono" font-size="10.5" fill="var(--purple-600)">INGESTA — proceso batch / offline</text>
+        <rect id="ing1" class="pop rf-box" x="0" y="36" width="180" height="60" rx="10" fill="var(--paper-soft)" stroke="var(--line-strong)"/>
+        <text x="90" y="60" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" font-weight="600" fill="var(--ink)">Documentos PDF</text>
+        <text x="90" y="77" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">mallas · reglamentos</text>
+        <path class="draw" d="M182 66 H 216" stroke="var(--line-strong)" stroke-width="2" marker-end="url(#arrRF)"/>
+
+        <rect id="ing2" class="pop rf-box" x="220" y="36" width="200" height="60" rx="10" fill="var(--paper-soft)" stroke="var(--line-strong)"/>
+        <text x="320" y="58" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" font-weight="600" fill="var(--ink)">Extracción a Markdown</text>
+        <text x="320" y="76" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">pymupdf4llm</text>
+        <path class="draw" d="M422 66 H 456" stroke="var(--line-strong)" stroke-width="2" marker-end="url(#arrRF)"/>
+
+        <rect id="ing3" class="pop rf-box" x="460" y="36" width="200" height="60" rx="10" fill="var(--paper-soft)" stroke="var(--line-strong)"/>
+        <text x="560" y="58" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" font-weight="600" fill="var(--ink)">División en Chunks</text>
+        <text x="560" y="76" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">MarkdownTextSplitter</text>
+        <path class="draw" d="M662 66 H 696" stroke="var(--line-strong)" stroke-width="2" marker-end="url(#arrRF)"/>
+
+        <rect id="ing4" class="pop rf-box" x="700" y="36" width="200" height="60" rx="10" fill="var(--paper-soft)" stroke="var(--line-strong)"/>
+        <text x="800" y="58" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" font-weight="600" fill="var(--ink)">Vectorización</text>
+        <text x="800" y="76" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">SentenceTransformer</text>
+        <path class="draw" d="M902 66 C 940 66, 960 90, 972 108" stroke="var(--purple-400)" stroke-width="2.2" marker-end="url(#arrRF)" fill="none"/>
+
+        <g id="dbCyl" class="pop zone-box" transform="translate(980,10)">
+          <ellipse cx="100" cy="150" rx="95" ry="13" fill="var(--purple-700)"/>
+          <rect x="5" y="60" width="190" height="90" fill="var(--purple-700)"/>
+          <ellipse cx="100" cy="60" rx="95" ry="13" fill="var(--purple-600)"/>
+          <text x="100" y="102" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="#fff">ChromaDB</text>
+          <text x="100" y="120" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="rgba(255,255,255,.7)">colección vectorial</text>
+        </g>
+
+        <text x="0" y="185" font-family="IBM Plex Mono" font-size="10.5" fill="var(--orange-600)">CONSULTA — tiempo real</text>
+        <rect id="q1" class="pop rf-box" x="0" y="197" width="180" height="56" rx="10" fill="var(--orange-100)" stroke="var(--orange-300)"/>
+        <text x="90" y="220" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" font-weight="600" fill="var(--orange-700)">Pregunta del usuario</text>
+        <text x="90" y="236" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--orange-700)">texto transcrito</text>
+        <path class="draw" d="M182 225 H 216" stroke="var(--orange-400)" stroke-width="2" marker-end="url(#arrRF)"/>
+
+        <rect id="q2" class="pop rf-box" x="220" y="197" width="200" height="56" rx="10" fill="var(--orange-100)" stroke="var(--orange-300)"/>
+        <text x="320" y="220" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" font-weight="600" fill="var(--orange-700)">Vectorización</text>
+        <text x="320" y="236" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--orange-700)">de la consulta</text>
+        <path class="draw" d="M422 225 H 456" stroke="var(--orange-400)" stroke-width="2" marker-end="url(#arrRF)"/>
+
+        <rect id="q3" class="pop rf-box" x="460" y="197" width="200" height="56" rx="10" fill="var(--orange-100)" stroke="var(--orange-300)"/>
+        <text x="560" y="217" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" font-weight="600" fill="var(--orange-700)">Similitud del coseno</text>
+        <text x="560" y="234" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--orange-700)">consulta k-chunks</text>
+        <path class="draw" d="M660 215 C 780 190, 880 170, 972 130" stroke="var(--orange-400)" stroke-width="2.2" marker-end="url(#arrRF)" fill="none" stroke-dasharray="5 4"/>
+      </svg>
+    </div>
+    <div class="stepper" id="stepperRag" style="margin-top:2px; display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+      <div class="step-chip" data-target="ing1"><span class="step-chip-n">1</span>PDFs institucionales</div>
+      <div class="step-chip" data-target="ing2"><span class="step-chip-n">2</span>Extracción a Markdown</div>
+      <div class="step-chip" data-target="ing3"><span class="step-chip-n">3</span>Chunks de 1500 car.</div>
+      <div class="step-chip" data-target="ing4 dbCyl"><span class="step-chip-n">4</span>Vector insertado en ChromaDB</div>
+      <div class="step-chip" data-target="q1"><span class="step-chip-n">5</span>Llega la pregunta</div>
+      <div class="step-chip" data-target="q2"><span class="step-chip-n">6</span>Se vectoriza la consulta</div>
+      <div class="step-chip" data-target="q3 dbCyl"><span class="step-chip-n">7</span>Coseno → contexto para el LLM</div>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="6" id="slide-25">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Diseño de base de datos (NoSQL)</div>
+      <h2 class="headline">Un documento, <em>tres capas</em>.</h2>
+      <p class="subhead">ChromaDB desnormaliza a propósito: texto, vector y metadatos viven en el mismo registro para calcular la similitud del coseno en memoria, sin joins.</p>
+      <div class="diag" data-anim="classhub" style="margin-top:20px;">
+        <svg viewBox="0 0 420 150" width="100%" height="150" style="overflow:visible;">
+          <defs><marker id="arrBD" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink-faint)"/></marker></defs>
+          <rect x="10" y="55" width="140" height="42" rx="9" class="pop" fill="var(--purple-100)" stroke="var(--purple-300)"/>
+          <text x="80" y="80" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--purple-700)">Collection</text>
+          <path class="draw" d="M150 76 H 178" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrBD)"/>
+          <text x="164" y="68" font-family="IBM Plex Mono" font-size="8" fill="var(--ink-faint)">1..N</text>
+          <rect x="182" y="55" width="140" height="42" rx="9" class="pop" fill="var(--black)" />
+          <text x="252" y="80" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="#fff">VectorDocument</text>
+          <path class="draw" d="M322 76 H 350" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrBD)"/>
+          <text x="336" y="68" font-family="IBM Plex Mono" font-size="8" fill="var(--ink-faint)">1..1</text>
+          <rect x="354" y="30" width="66" height="90" rx="9" class="pop" fill="var(--orange-100)" stroke="var(--orange-300)"/>
+          <text x="387" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--orange-700)">Metadata</text>
+          <text x="387" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--orange-700)">JSON</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card pop" style="background:var(--black); border:none; font-family:var(--font-mono); font-size:12px; line-height:1.85; color:#D8CFF0; overflow:auto;">
+      <div class="card-eyebrow" style="color:var(--orange-300);">DOCUMENTO ALMACENADO</div>
+<pre style="margin:0; white-space:pre-wrap;">{
+  "id": "Reglamento_Titulacion_2024
+        .pdf_chunk_42",
+  "document": "Art. 15.- Las
+    modalidades de titulación...",
+  "embedding": [0.0124, -0.0453,
+    0.8921, "...(384 dim)"],
+  "metadata": {
+    "source": "Reglamento_Titulacion
+      _2024.pdf",
+    "page": 12,
+    "tipo_documento":
+      "Normativa Institucional"
+  }
+}</pre>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="6" id="slide-26">
+  <div class="slide-inner">
+    <div class="kicker">Diagrama de clases (backend)</div>
+    <h2 class="headline" style="max-width:20ch">Un orquestador, cinco especialistas.</h2>
+    <div class="diag" data-anim="classhub" style="margin-top:20px; display:flex; justify-content:center;">
+      <svg viewBox="0 0 940 380" width="100%" height="380" style="max-width:940px; overflow:visible;">
+        <defs><marker id="arrCH" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink-faint)"/></marker></defs>
+
+        <path class="draw" d="M420 190 L 175 65" stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#arrCH)"/>
+        <path class="draw" d="M470 155 L 420 40" stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#arrCH)"/>
+        <path class="draw" d="M530 155 L 590 40" stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#arrCH)"/>
+        <path class="draw" d="M580 190 L 800 65" stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#arrCH)"/>
+        <path class="draw" d="M470 235 L 400 340" stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#arrCH)"/>
+
+        <rect x="380" y="160" width="180" height="70" rx="12" fill="var(--black)" class="pop"/>
+        <text x="470" y="190" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="13.5" fill="#fff">FastAPIApp</text>
+        <text x="470" y="208" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="rgba(255,255,255,.65)">orquestador central</text>
+
+        <g transform="translate(20,20)"><rect width="180" height="66" rx="11" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+          <text x="90" y="27" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="12" fill="var(--ink)">RAGManager</text>
+          <text x="90" y="43" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">search_similar_context()</text>
+          <text x="90" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">- db_client, embedding_model</text>
+        </g>
+        <g transform="translate(330,0)"><rect width="180" height="66" rx="11" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+          <text x="90" y="27" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="12" fill="var(--ink)">LLMController</text>
+          <text x="90" y="43" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">generate_response()</text>
+          <text x="90" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">- model_name, system_prompt</text>
+        </g>
+        <g transform="translate(590,0)"><rect width="190" height="66" rx="11" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+          <text x="95" y="27" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="12" fill="var(--ink)">AudioProcessor</text>
+          <text x="95" y="43" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">transcribe_audio() · synthesize_speech()</text>
+          <text x="95" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">- groq_api_key, tts_provider</text>
+        </g>
+        <g transform="translate(740,20)"><rect width="180" height="66" rx="11" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+          <text x="90" y="27" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="12" fill="var(--ink)">VisionHandler</text>
+          <text x="90" y="43" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">detect_presence()</text>
+          <text x="90" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">- threshold_pixels</text>
+        </g>
+        <g transform="translate(310,290)"><rect width="200" height="70" rx="11" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+          <text x="100" y="28" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="12" fill="var(--ink)">DatabaseHandler</text>
+          <text x="100" y="45" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">authenticate_user()</text>
+          <text x="100" y="58" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="var(--ink-soft)">- db_path, conn</text>
+        </g>
+      </svg>
+    </div>
+    <div class="stat-row" style="margin-top:6px; justify-content:center;">
+      <span class="tag yes">Alta cohesión</span>
+      <span class="tag yes">Bajo acoplamiento</span>
+      <span class="tag no">Ninguna clase desconectada</span>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="6" id="slide-27">
+  <div class="slide-inner" style="max-width:1300px;">
+    <div class="kicker">Diagrama de secuencia · flujo completo</div>
+    <h2 class="headline" style="max-width:24ch">Quince mensajes, una sola conversación.</h2>
+    <div class="diag" id="diagSequence" data-anim="sequence" style="margin-top:16px;">
+      <svg viewBox="0 0 1180 520" width="100%" height="360" style="overflow:visible;">
+        <defs>
+        <marker id="arrSeqP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--purple-500)"/></marker>
+        <marker id="arrSeqO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--orange-500)"/></marker>
+        </defs>
+        <rect x="2" y="8" width="116" height="34" rx="8" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="60" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="11" fill="var(--ink)">Estudiante</text>
+        <line class="draw" x1="60" y1="42" x2="60" y2="516" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="167" y="8" width="116" height="34" rx="8" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="225" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="11" fill="var(--ink)">Frontend</text>
+        <line class="draw" x1="225" y1="42" x2="225" y2="516" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="362" y="8" width="116" height="34" rx="8" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="420" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="11" fill="var(--ink)">Backend</text>
+        <line class="draw" x1="420" y1="42" x2="420" y2="516" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="557" y="8" width="116" height="34" rx="8" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="615" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="11" fill="var(--ink)">Groq (STT)</text>
+        <line class="draw" x1="615" y1="42" x2="615" y2="516" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="727" y="8" width="116" height="34" rx="8" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="785" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="11" fill="var(--ink)">ChromaDB</text>
+        <line class="draw" x1="785" y1="42" x2="785" y2="516" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="887" y="8" width="116" height="34" rx="8" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="945" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="11" fill="var(--ink)">LLM</text>
+        <line class="draw" x1="945" y1="42" x2="945" y2="516" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="1052" y="8" width="116" height="34" rx="8" fill="var(--paper-soft)" stroke="var(--line-strong)" class="pop"/>
+        <text x="1110" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-weight="600" font-size="11" fill="var(--ink)">ElevenLabs</text>
+        <line class="draw" x1="1110" y1="42" x2="1110" y2="516" stroke="var(--line)" stroke-width="1.5"/>
+        <g class="seq-msg" id="msg1"><path d="M 60 70 H 225" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqP)"/><text x="142.5" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">1. Se acerca a la cámara</text></g>
+        <g class="seq-msg" id="msg2"><path d="M 225 100 H 420" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqP)"/><text x="322.5" y="94" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">2. Frame por WebSockets</text></g>
+        <g class="seq-msg" id="msg3"><path d="M 420 130 H 225" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqO)"/><text x="322.5" y="124" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">3. PRESENCIA_DETECTADA</text></g>
+        <g class="seq-msg" id="msg4"><path d="M 225 165 C 295 159, 295 181, 225 181" stroke="var(--purple-400)" stroke-width="2" fill="none" marker-end="url(#arrSeqP)"/><text x="303" y="159" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">4. Activa micrófono</text></g>
+        <g class="seq-msg" id="msg5"><path d="M 225 198 H 420" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqP)"/><text x="322.5" y="192" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">5. Envía blob de audio</text></g>
+        <g class="seq-msg" id="msg6"><path d="M 420 228 H 615" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqP)"/><text x="517.5" y="222" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">6. Audio para STT</text></g>
+        <g class="seq-msg" id="msg7"><path d="M 615 258 H 420" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqO)"/><text x="517.5" y="252" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">7. Retorna texto (query)</text></g>
+        <g class="seq-msg" id="msg8"><path d="M 420 288 H 785" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqP)"/><text x="602.5" y="282" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">8. Busca contexto semántico</text></g>
+        <g class="seq-msg" id="msg9"><path d="M 785 318 H 420" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqO)"/><text x="602.5" y="312" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">9. Retorna chunks (hit rate)</text></g>
+        <g class="seq-msg" id="msg10"><path d="M 420 348 H 945" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqP)"/><text x="682.5" y="342" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">10. Prompt + contexto + query</text></g>
+        <g class="seq-msg" id="msg11"><path d="M 945 378 H 420" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqO)"/><text x="682.5" y="372" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">11. Genera respuesta textual</text></g>
+        <g class="seq-msg" id="msg12"><path d="M 420 408 H 1110" stroke="var(--purple-400)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqP)"/><text x="765.0" y="402" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">12. Texto para TTS</text></g>
+        <g class="seq-msg" id="msg13"><path d="M 1110 438 H 420" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqO)"/><text x="765.0" y="432" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">13. Retorna chunk de audio</text></g>
+        <g class="seq-msg" id="msg14"><path d="M 420 468 H 225" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqO)"/><text x="322.5" y="462" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">14. Audio en Base64</text></g>
+        <g class="seq-msg" id="msg15"><path d="M 225 498 H 60" stroke="var(--orange-500)" stroke-width="2.2" fill="none" marker-end="url(#arrSeqO)"/><text x="142.5" y="492" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-soft)">15. Reproduce + lip-sync</text></g>
+      </svg>
+      <div class="stepper" id="stepperSeq" style="margin-top:0; display:grid; grid-template-columns:repeat(5,1fr); gap:6px;">
+        <div class="step-chip small" data-target="msg1"><span class="step-chip-n">1</span>Se acerca a la cámara</div>
+        <div class="step-chip small" data-target="msg2"><span class="step-chip-n">2</span>Frame por WebSockets</div>
+        <div class="step-chip small" data-target="msg3"><span class="step-chip-n">3</span>PRESENCIA_DETECTADA</div>
+        <div class="step-chip small" data-target="msg4"><span class="step-chip-n">4</span>Activa micrófono</div>
+        <div class="step-chip small" data-target="msg5"><span class="step-chip-n">5</span>Envía blob de audio</div>
+        <div class="step-chip small" data-target="msg6"><span class="step-chip-n">6</span>Audio para STT</div>
+        <div class="step-chip small" data-target="msg7"><span class="step-chip-n">7</span>Retorna texto (query)</div>
+        <div class="step-chip small" data-target="msg8"><span class="step-chip-n">8</span>Busca contexto semántico</div>
+        <div class="step-chip small" data-target="msg9"><span class="step-chip-n">9</span>Retorna chunks (hit rate)</div>
+        <div class="step-chip small" data-target="msg10"><span class="step-chip-n">10</span>Prompt + contexto + query</div>
+        <div class="step-chip small" data-target="msg11"><span class="step-chip-n">11</span>Genera respuesta textual</div>
+        <div class="step-chip small" data-target="msg12"><span class="step-chip-n">12</span>Texto para TTS</div>
+        <div class="step-chip small" data-target="msg13"><span class="step-chip-n">13</span>Retorna chunk de audio</div>
+        <div class="step-chip small" data-target="msg14"><span class="step-chip-n">14</span>Audio en Base64</div>
+        <div class="step-chip small" data-target="msg15"><span class="step-chip-n">15</span>Reproduce + lip-sync</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="7" id="slide-28">
+  <div class="slide-inner">
+    <div class="kicker">Capítulo III · Implementación</div>
+    <h2 class="headline" style="max-width:18ch">De la especificación al contenedor.</h2>
+    <ul class="point-list" style="margin-top:30px; max-width:920px;">
+      <li><span class="point-mark">◆</span><div class="point-body"><b>Frontend</b><p>Kiosco en React con avatar animado (CSS/Canvas) que reacciona visualmente al hablar del estudiante y al responder el asistente.</p></div></li>
+      <li><span class="point-mark">◆</span><div class="point-body"><b>Backend</b><p>Python + FastAPI, con la API de Whisper-v3 (vía Groq) para transcripción ultrarrápida de voz a texto.</p></div></li>
+      <li><span class="point-mark">◆</span><div class="point-body"><b>Despliegue</b><p>Empacado en Docker Compose — portabilidad y ejecución sencilla en cualquier hardware de la universidad.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-ch="7" id="slide-29">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Prevención de alucinaciones</div>
+      <h2 class="headline">Contexto cerrado, <span class="accent">estricto</span>.</h2>
+      <p class="subhead">Los LLMs tienden a inventar respuestas con gran seguridad cuando no saben algo. La solución: nunca dejarlos responder sin evidencia.</p>
+    </div>
+    <div class="stack">
+      <div class="card"><b>System Prompt restrictivo</b><p style="color:var(--ink-soft); font-size:14px; margin-top:6px;">Prohíbe taxativamente inferir datos no presentes en el contexto.</p></div>
+      <div class="card"><b>Umbral de similitud</b><p style="color:var(--ink-soft); font-size:14px; margin-top:6px;">Si los documentos recuperados tienen baja similitud coseno, el sistema intercepta la petición.</p></div>
+      <div class="card-accent acc-orange"><div class="card-eyebrow" style="color:var(--orange-600);">DECLINACIÓN PROACTIVA</div><p class="big-quote" style="border:none; padding:0; color:var(--black); font-size:16px;">"No dispongo de información reglamentaria para responder esto."</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="7" id="slide-30">
+  <div class="slide-inner grid-2">
+    <div>
+      <div class="kicker">Resultados · Pruebas funcionales</div>
+      <h2 class="headline">Robustez conversacional en caja negra.</h2>
+      <p class="subhead">Más de 50 consultas aleatorias con estudiantes, incluyendo modismos ecuatorianos y formulaciones gramaticales informales.</p>
+      <div class="stat-row" style="margin-top:30px;">
+        <div class="stat"><span class="stat-num" data-count="50" data-suffix="+">0</span><span class="stat-label">consultas aleatorias probadas</span></div>
+        <div class="stat"><span class="stat-num" data-count="0">0</span><span class="stat-label">alucinaciones registradas</span></div>
+      </div>
+    </div>
+    <div class="diag" data-anim="gauge" style="display:flex; flex-direction:column; align-items:center;">
+      <svg viewBox="0 0 220 220" width="240" height="240">
+        <circle cx="110" cy="110" r="92" fill="none" stroke="var(--line)" stroke-width="16"/>
+        <circle id="gaugeArc" cx="110" cy="110" r="92" fill="none" stroke="var(--purple-600)" stroke-width="16" stroke-linecap="round" transform="rotate(-90 110 110)" stroke-dasharray="578" stroke-dashoffset="578"/>
+        <text x="110" y="102" text-anchor="middle" font-family="IBM Plex Sans" font-weight="700" font-size="46" fill="var(--ink)" id="gaugeNum">0%</text>
+        <text x="110" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--orange-600)">RECUPERACIÓN CORRECTA</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-ch="7" id="slide-31">
+  <div class="slide-inner">
+    <div class="kicker">Resultados · Latencia operativa</div>
+    <h2 class="headline" style="max-width:20ch">1.25 segundos, de principio a fin.</h2>
+    <p class="subhead" style="margin-top:10px;">El estándar de alta disponibilidad (ChatGPT Voice) exige entre 500 ms y 1.5 s para una ilusión de conversación fluida.</p>
+    <div class="diag" id="diagLatency" data-anim="latency" style="margin-top:40px; max-width:760px;">
+      <div style="display:flex; height:56px; border-radius:12px; overflow:hidden; border:1px solid var(--line-strong);">
+        <div class="lat-bar" data-target="24" style="width:0%; background:var(--purple-300); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11px; color:var(--purple-950); transition:width 1.1s var(--ease);">STT</div>
+        <div class="lat-bar" data-target="12" style="width:0%; background:var(--purple-600); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11px; color:#fff; transition:width 1.1s var(--ease) .15s;">RAG</div>
+        <div class="lat-bar" data-target="64" style="width:0%; background:var(--orange-500); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11px; color:#fff; transition:width 1.1s var(--ease) .3s;">LLM + TTS</div>
+      </div>
+      <div class="stat-row" style="margin-top:30px;">
+        <div class="stat"><span class="stat-num" data-count="300" data-suffix="ms">0</span><span class="stat-label">transcripción de voz (STT)</span></div>
+        <div class="stat"><span class="stat-num" data-count="150" data-suffix="ms">0</span><span class="stat-label">búsqueda vectorial (RAG)</span></div>
+        <div class="stat"><span class="stat-num" data-count="800" data-suffix="ms">0</span><span class="stat-label">generación LLM + síntesis TTS</span></div>
+        <div class="stat"><span class="stat-num" style="color:var(--orange-600)" data-count="1.25" data-suffix="s" data-decimal="2">0</span><span class="stat-label">total promedio — dentro del estándar</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="slide" data-ch="8" id="slide-32">
+  <div class="slide-inner">
+    <div class="kicker">Capítulo IV · Conclusiones</div>
+    <h2 class="headline" style="max-width:20ch">Tres hallazgos que sostienen el proyecto.</h2>
+    <ul class="point-list" style="margin-top:30px; max-width:940px;">
+      <li><span class="point-mark">01</span><div class="point-body"><b>RAG es viable y escalable</b><p>La integración de LLMs con técnicas RAG demostró ser una solución técnica altamente viable para descentralizar la burocracia académica.</p></div></li>
+      <li><span class="point-mark">02</span><div class="point-body"><b>Sin interrupciones</b><p>WebSockets y el procesamiento asíncrono en FastAPI garantizaron un flujo de interacción continuo, vital para interfaces basadas en voz.</p></div></li>
+      <li><span class="point-mark">03</span><div class="point-body"><b>Privacidad sin sacrificar recursos</b><p>Sustituir biometría compleja por bounding boxes cumplió el RNF-01 (Privacidad por Diseño) y ahorró recursos del servidor.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-ch="8" id="slide-33">
+  <div class="slide-inner">
+    <div class="kicker">Recomendaciones y trabajo futuro</div>
+    <h2 class="headline" style="max-width:18ch">Tres caminos para seguir creciendo.</h2>
+    <div class="grid-2 tight" style="margin-top:36px; grid-template-columns:repeat(3,1fr); display:grid;">
+      <div class="card"><div class="card-eyebrow">01 · INTEGRACIÓN</div><b>Conexión transaccional con el SGA</b><p style="color:var(--ink-soft); font-size:13.5px; margin-top:8px; line-height:1.55;">Consultas hiperpersonalizadas bajo sesión autenticada — ej. "¿con mi nota actual puedo tomar esta materia?"</p></div>
+      <div class="card"><div class="card-eyebrow">02 · AFFECTIVE COMPUTING</div><b>Microexpresiones faciales</b><p style="color:var(--ink-soft); font-size:13.5px; margin-top:8px; line-height:1.55;">Que el avatar adapte su tono de voz al estado de ánimo del estudiante.</p></div>
+      <div class="card"><div class="card-eyebrow">03 · ESCALABILIDAD</div><b>Soporte multilingüe</b><p style="color:var(--ink-soft); font-size:13.5px; margin-top:8px; line-height:1.55;">Inglés automático, en beneficio de estudiantes de intercambio.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide finale" data-ch="8" id="slide-34">
+  <div class="slide-inner">
+    <div class="cover-blob"><svg viewBox="0 0 800 800"><circle cx="620" cy="180" r="420" fill="none" stroke="#7C3FCE" stroke-width="2"/><circle cx="180" cy="620" r="340" fill="none" stroke="#E4581F" stroke-width="2"/></svg></div>
+    <h2 class="finale-title">Gracias por<br>su atención.</h2>
+    <p class="finale-sub">Espacio abierto para la ronda de preguntas y el debate técnico con el honorable tribunal.</p>
+    <div class="finale-people">
+      <div><b>Paulo Emilio Espinoza Jiménez</b>Autor</div>
+      <div><b>Christian Eduardo Iza Llumiguisín</b>Tutor</div>
+    </div>
+  </div>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  var deck = document.getElementById('deck');
+  var slides = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
+  var total = slides.length;
+  var current = 1;
+  var activeTimers = [];
+
+  function clearTimers(){
+    activeTimers.forEach(function(id){ clearInterval(id); clearTimeout(id); });
+    activeTimers = [];
+  }
+
+  var chapterNames = ["Presentación","Contexto y planteamiento","Estado del arte y aporte","Metas y justificación","Fundamentación teórica","Marco metodológico","Diseño de la solución","Implementación y resultados","Conclusiones y recomendaciones"];
+  var chapterFirstSlide = {};
+  slides.forEach(function(s,i){
+    var ch = s.getAttribute('data-ch');
+    if(chapterFirstSlide[ch] === undefined) chapterFirstSlide[ch] = i+1;
+  });
+
+  var railChapters = document.getElementById('railChapters');
+  chapterNames.forEach(function(name, idx){
+    if(chapterFirstSlide[idx] === undefined) return;
+    var b = document.createElement('button');
+    b.className = 'rail-dot';
+    b.setAttribute('data-ch', idx);
+    b.setAttribute('data-label', (idx<10?'0':'')+ idx + ' · ' + name);
+    b.addEventListener('click', function(){ goTo(chapterFirstSlide[idx]); });
+    railChapters.appendChild(b);
+  });
+  var railDots = Array.prototype.slice.call(railChapters.querySelectorAll('.rail-dot'));
+
+  var curNumEl = document.getElementById('curNum');
+  var totNumEl = document.getElementById('totNum');
+  var progressFill = document.getElementById('progressFill');
+  totNumEl.textContent = total;
+
+  function pad(n){ return (n<10?'0':'') + n; }
+
+  /* ---- generic narrative stepper: chips highlight in sequence, each
+     driving one or more SVG targets via .tgt-active / .rf-box / .zone-box */
+  function runChipStepper(root, opts){
+    opts = opts || {};
+    var interval = opts.interval || 900;
+    var cumulative = !!opts.cumulative;
+    var startDelay = opts.startDelay || 250;
+    var chips = Array.prototype.slice.call(root.querySelectorAll('.step-chip'));
+    chips.forEach(function(c){
+      c.classList.remove('is-active');
+      if(cumulative) c.classList.remove('is-done');
+      var targets = (c.getAttribute('data-target')||'').split(/\s+/).filter(Boolean);
+      targets.forEach(function(tid){
+        var el = root.querySelector('#'+tid);
+        if(el){ el.classList.remove('tgt-active','is-done','is-active'); }
+      });
+    });
+    var i = 0;
+    function step(){
+      if(i>0){
+        var prevChip = chips[i-1];
+        var prevTargets = (prevChip.getAttribute('data-target')||'').split(/\s+/).filter(Boolean);
+        if(cumulative){
+          prevChip.classList.remove('is-active');
+          prevChip.classList.add('is-done');
+          prevTargets.forEach(function(tid){
+            var el = root.querySelector('#'+tid);
+            if(el){ el.classList.remove('is-active'); el.classList.add('is-done'); }
+          });
+        } else {
+          prevChip.classList.remove('is-active');
+          prevTargets.forEach(function(tid){
+            var el = root.querySelector('#'+tid);
+            if(el){ el.classList.remove('tgt-active'); }
+          });
+        }
+      }
+      if(i >= chips.length) return;
+      chips[i].classList.add('is-active');
+      var targets = (chips[i].getAttribute('data-target')||'').split(/\s+/).filter(Boolean);
+      targets.forEach(function(tid){
+        var el = root.querySelector('#'+tid);
+        if(el){ el.classList.add(cumulative ? 'is-active' : 'tgt-active'); }
+      });
+      i++;
+      if(i < chips.length){ var id = setTimeout(step, interval); activeTimers.push(id); }
+    }
+    var id0 = setTimeout(step, startDelay); activeTimers.push(id0);
+  }
+
+  function runStateCycle(root){
+    var nodes = Array.prototype.slice.call(root.querySelectorAll('.state-node'));
+    if(!nodes.length) return;
+    var i = 0;
+    nodes.forEach(function(n){ n.classList.remove('is-current'); });
+    function tick(){
+      nodes.forEach(function(n){ n.classList.remove('is-current'); });
+      nodes[i].classList.add('is-current');
+      i = (i+1) % nodes.length;
+    }
+    tick();
+    var id = setInterval(tick, 1700);
+    activeTimers.push(id);
+  }
+
+  function runDiagrams(slide){
+    clearTimers();
+    var anims = slide.querySelectorAll('.diag');
+    anims.forEach(function(d){
+      d.classList.remove('play');
+      void d.offsetWidth;
+      d.classList.add('play');
+      var kind = d.getAttribute('data-anim');
+
+      if(kind === 'gauge'){
+        var arc = d.querySelector('#gaugeArc');
+        var num = d.querySelector('#gaugeNum');
+        if(arc){
+          arc.style.transition = 'none';
+          arc.setAttribute('stroke-dashoffset','578');
+          void arc.offsetWidth;
+          arc.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.22,.68,.18,1)';
+          var target = 578 - (578*0.95);
+          requestAnimationFrame(function(){ arc.setAttribute('stroke-dashoffset', target); });
+        }
+        if(num) countUpText(num, 95, 1400, '%', 0);
+      }
+
+      if(kind === 'latency'){
+        var bars = d.querySelectorAll('.lat-bar');
+        bars.forEach(function(b){ b.style.width = '0%'; });
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){
+            bars.forEach(function(b){ b.style.width = b.getAttribute('data-target') + '%'; });
+          });
+        });
+      }
+
+      if(kind === 'pipeline'){
+        var steps = d.querySelectorAll('.pipe-step');
+        var prog = d.querySelector('#pipeProgress');
+        steps.forEach(function(s){ s.classList.remove('is-active'); });
+        if(prog){ prog.style.transition='none'; prog.setAttribute('width',0); void prog.offsetWidth; prog.style.transition='width .9s ease'; }
+        var i = 0;
+        function step(){
+          if(i>0) steps[i-1] && steps[i-1].classList.remove('is-active');
+          if(i >= steps.length) return;
+          steps[i].classList.add('is-active');
+          if(prog) prog.setAttribute('width', ((i+1)/steps.length*100));
+          i++;
+          if(i < steps.length){ var id=setTimeout(step, 1250); activeTimers.push(id); }
+        }
+        var id0 = setTimeout(step, 200); activeTimers.push(id0);
+      }
+
+      if(kind === 'archflow'){
+        runChipStepper(d, {interval: 950, cumulative:false});
+      }
+
+      if(kind === 'ragflow'){
+        runChipStepper(d, {interval: 900, cumulative:false});
+      }
+
+      if(kind === 'sequence'){
+        runChipStepper(d, {interval: 620, cumulative:true});
+      }
+
+      if(kind === 'avatarstates'){
+        runStateCycle(d);
+      }
+    });
+    // count-up stat numbers anywhere in the slide
+    var counts = slide.querySelectorAll('[data-count]');
+    counts.forEach(function(el){
+      var target = parseFloat(el.getAttribute('data-count'));
+      var suffix = el.getAttribute('data-suffix') || '';
+      var decimals = parseInt(el.getAttribute('data-decimal') || '0', 10);
+      countUpText(el, target, 1100, suffix, decimals);
+    });
+  }
+
+  function countUpText(el, target, duration, suffix, decimals){
+    var start = performance.now();
+    function frame(t){
+      var p = Math.min(1, (t-start)/duration);
+      var eased = 1 - Math.pow(1-p, 3);
+      var val = target * eased;
+      el.textContent = (decimals ? val.toFixed(decimals) : Math.round(val)) + suffix;
+      if(p < 1) requestAnimationFrame(frame);
+      else el.textContent = (decimals ? target.toFixed(decimals) : target) + suffix;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function goTo(n, dir){
+    n = Math.max(1, Math.min(total, n));
+    if(n === current) { render(); return; }
+    dir = dir || (n > current ? 1 : -1);
+    var prevSlide = slides[current-1];
+    var nextSlide = slides[n-1];
+    prevSlide.classList.remove('active');
+    if(dir > 0){ prevSlide.classList.add('exit-left'); } else { prevSlide.classList.remove('exit-left'); }
+    nextSlide.classList.remove('exit-left');
+    void nextSlide.offsetWidth;
+    nextSlide.classList.add('active');
+    setTimeout(function(){ prevSlide.classList.remove('exit-left'); }, 700);
+    current = n;
+    render();
+    runDiagrams(nextSlide);
+  }
+
+  function render(){
+    curNumEl.textContent = pad(current);
+    progressFill.style.width = (current/total*100) + '%';
+    var ch = parseInt(slides[current-1].getAttribute('data-ch'), 10);
+    railDots.forEach(function(dot){
+      var dch = parseInt(dot.getAttribute('data-ch'),10);
+      dot.classList.toggle('active', dch === ch);
+      dot.classList.toggle('done', dch < ch);
+    });
+    document.getElementById('btnPrev').style.opacity = current===1 ? .3 : 1;
+    document.getElementById('btnNext').style.opacity = current===total ? .3 : 1;
+  }
+
+  document.getElementById('btnNext').addEventListener('click', function(){ goTo(current+1,1); });
+  document.getElementById('btnPrev').addEventListener('click', function(){ goTo(current-1,-1); });
+  document.getElementById('btnFull').addEventListener('click', function(){
+    if(!document.fullscreenElement){ document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }
+    else { document.exitFullscreen && document.exitFullscreen(); }
+  });
+
+  window.addEventListener('keydown', function(e){
+    if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>-1){ e.preventDefault(); goTo(current+1,1); }
+    else if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){ e.preventDefault(); goTo(current-1,-1); }
+    else if(e.key === 'Home'){ goTo(1,-1); }
+    else if(e.key === 'End'){ goTo(total,1); }
+  });
+
+  var touchX = null;
+  deck.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    if(touchX===null) return;
+    var dx = e.changedTouches[0].clientX - touchX;
+    if(Math.abs(dx) > 50){ dx < 0 ? goTo(current+1,1) : goTo(current-1,-1); }
+    touchX = null;
+  }, {passive:true});
+
+  // click zones on left/right edges of deck (avoid interactive elements)
+  deck.addEventListener('click', function(e){
+    if(e.target.closest('a,button,input,textarea')) return;
+    var rect = deck.getBoundingClientRect();
+    var x = e.clientX - rect.left;
+    if(x < rect.width*0.12){ goTo(current-1,-1); }
+    else if(x > rect.width*0.88){ goTo(current+1,1); }
+  });
+
+  render();
+  runDiagrams(slides[0]);
+})();
+
+</script>
+</body>
+</html>
