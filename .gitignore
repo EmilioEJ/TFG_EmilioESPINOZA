@@ -20,6 +20,11 @@ tmp_render/
 .DS_Store
 
 Nuevo_TFG_mejorado/
+TFG_mejorado_v3/
 Extras/
 ejemplos_diagramas/
 Correcciones/
+uploads/
+.agents/
+*.py
+*.zip
