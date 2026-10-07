@@ -15,21 +15,14 @@
 \else
   \RequirePackage{fontspec}
   \defaultfontfeatures{Ligatures=TeX}
-  % Century Gothic: instalada en el sistema, o los archivos locales en fonts/
-  % (no versionados por licencia); en su ausencia, TeX Gyre Adventor (clon libre).
-  \IfFontExistsTF{Century Gothic}{%
-    \setmainfont{Century Gothic}
-    \setsansfont{Century Gothic}
+  % Todo el documento usa la misma letra que la portada: Times New Roman
+  % (o TeX Gyre Termes, su equivalente libre, si no está instalada).
+  \IfFontExistsTF{Times New Roman}{%
+    \setmainfont{Times New Roman}
+    \setsansfont{Times New Roman}
   }{%
-    \IfFileExists{fonts/CenturyGothicPaneuropeanRegular.ttf}{%
-      \setmainfont{CenturyGothicPaneuropean}[Path=fonts/, Extension=.ttf,
-        UprightFont=*Regular, BoldFont=*Bold, ItalicFont=*Italic, BoldItalicFont=*BoldItalic]
-      \setsansfont{CenturyGothicPaneuropean}[Path=fonts/, Extension=.ttf,
-        UprightFont=*Regular, BoldFont=*Bold, ItalicFont=*Italic, BoldItalicFont=*BoldItalic]
-    }{%
-      \setmainfont{TeX Gyre Adventor}
-      \setsansfont{TeX Gyre Adventor}
-    }%
+    \setmainfont{TeX Gyre Termes}
+    \setsansfont{TeX Gyre Termes}
   }
   \IfFontExistsTF{Times New Roman}{%
     \newfontfamily\UTIPortadaFuente{Times New Roman}%
