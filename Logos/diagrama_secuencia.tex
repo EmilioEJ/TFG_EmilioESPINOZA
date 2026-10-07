@@ -1,0 +1,83 @@
+% Diagrama de secuencia de una consulta por voz (versión implementada).
+% Se incluye desde Capítulos/02_Metodología.tex con \input.
+\begin{tikzpicture}[
+    font=\sffamily\small,
+    part/.style={draw=#1, fill=#1!8, line width=0.9pt, rounded corners=3pt,
+                 minimum width=3.3cm, minimum height=1.05cm, align=center, font=\sffamily\small},
+    vida/.style={draw=black!80, line width=0.8pt},
+    act/.style={draw=#1, fill=#1!15, minimum width=7pt, inner sep=0pt},
+    msg/.style={-{Stealth[length=2.6mm]}, line width=0.8pt},
+    resp/.style={-{Stealth[length=2.6mm]}, line width=0.8pt, densely dotted},
+    num/.style={circle, fill=black!85, text=white, font=\sffamily\scriptsize\bfseries,
+                inner sep=0pt, minimum size=4.4mm},
+    etq/.style={font=\sffamily\scriptsize, above=1pt, fill=white, inner sep=1pt}
+]
+% Posiciones horizontales de las líneas de vida
+\def\xE{0}\def\xF{5.3}\def\xB{11.0}\def\xG{14.6}\def\xR{18.0}\def\xL{21.4}\def\xT{24.8}
+\def\dy{0.66}
+\pgfmathsetmacro{\yfin}{-1.2-21*\dy}
+
+% Participantes (arriba y abajo) y líneas de vida
+\foreach \x/\c/\t in {\xF/teal/{Frontend (WebGL/JS)\\\scriptsize MediaPipe, Three.js},
+                      \xB/orange/{Backend (FastAPI)\\\scriptsize \texttt{api.py}},
+                      \xG/cyan/{API Groq (STT)\\\scriptsize Whisper large-v3},
+                      \xR/green!70!black/{RAG híbrido\\\scriptsize ChromaDB + BM25},
+                      \xL/violet/{LLM local\\\scriptsize Nemotron (Ollama)},
+                      \xT/red!80!black/{API ElevenLabs\\\scriptsize TTS Flash v2.5}} {
+  \draw[vida] (\x,-0.5) -- (\x,\yfin);
+  \node[part=\c] at (\x,0) {\t};
+  \node[part=\c] at (\x,\yfin-0.55) {\t};
+}
+\draw[vida] (\xE,-0.6) -- (\xE,\yfin);
+\foreach \y in {0.15, \yfin-0.45} {
+  \begin{scope}[shift={(\xE,\y)}, violet!70!magenta, line width=0.8pt]
+    \draw (0,0.32) circle (0.13);
+    \draw (0,0.19) -- (0,-0.08) (-0.18,0.1) -- (0.18,0.1) (0,-0.08) -- (-0.15,-0.3) (0,-0.08) -- (0.15,-0.3);
+  \end{scope}
+}
+\node[font=\sffamily\small] at (\xE,-0.42) {Estudiante};
+\node[font=\sffamily\small] at (\xE,\yfin-1.0) {Estudiante};
+
+% Barras de activación
+\newcommand{\activa}[4]{\fill[#2!15] ($(#1,-1.2-#3*\dy)+(-3.5pt,0)$) rectangle ($(#1,-1.2-#4*\dy)+(3.5pt,0)$);
+                        \draw[#2] ($(#1,-1.2-#3*\dy)+(-3.5pt,0)$) rectangle ($(#1,-1.2-#4*\dy)+(3.5pt,0)$);}
+\activa{\xF}{teal}{0.8}{20.2}
+\activa{\xB}{orange}{2.8}{3.2}
+\activa{\xB}{orange}{5.8}{8.2}
+\activa{\xB}{orange}{9.8}{14.2}
+\activa{\xB}{orange}{15.8}{18.2}
+\activa{\xG}{cyan}{6.8}{7.2}
+\activa{\xR}{green!70!black}{10.8}{11.2}
+\activa{\xL}{violet}{12.8}{13.2}
+\activa{\xT}{red!80!black}{16.8}{17.2}
+
+% Mensajes: \m{número}{desde}{hasta}{fila}{texto}{estilo}
+\newcommand{\m}[6]{%
+  \draw[#6] (#2,-1.2-#4*\dy) -- node[etq] {#5} (#3,-1.2-#4*\dy);
+  \node[num] at (#2,-1.2-#4*\dy) {#1};}
+\newcommand{\self}[4]{%
+  \draw[msg] (#2,-1.2-#3*\dy) -- ++(0.75,0) -- ++(0,-0.36) -- ++(-0.62,0);
+  \node[num] at (#2,-1.2-#3*\dy) {#1};
+  \node[font=\sffamily\scriptsize, anchor=west, fill=white, inner sep=1pt] at ($(#2,-1.2-#3*\dy)+(0.85,-0.21)$) {#4};}
+
+\m{1}{\xE}{\xF}{1}{Se acerca a la cámara}{msg}
+\self{2}{\xF}{2}{Detecta el rostro en el navegador (cajas delimitadoras)}
+\m{3}{\xF}{\xB}{3}{Envía solo las cajas por WebSocket \texttt{/ws}}{msg}
+\m{4}{\xB}{\xF}{4}{Evento \texttt{person\_arrived} (2 fotogramas)}{resp}
+\m{5}{\xE}{\xF}{5}{Pulsa el micrófono y formula la pregunta}{msg}
+\m{6}{\xF}{\xB}{6}{Envía el audio WebM (\texttt{POST /api/stt})}{msg}
+\m{7}{\xB}{\xG}{7}{Audio para transcripción}{msg}
+\m{8}{\xG}{\xB}{8}{Texto de la consulta}{resp}
+\m{9}{\xB}{\xF}{9}{Texto transcrito}{resp}
+\m{10}{\xF}{\xB}{10}{Consulta por WebSocket \texttt{/ws/chat}}{msg}
+\m{11}{\xB}{\xR}{11}{Búsqueda semántica + BM25, RRF y reordenamiento}{msg}
+\m{12}{\xR}{\xB}{12}{Top-3 fragmentos}{resp}
+\m{13}{\xB}{\xL}{13}{\textit{Prompt} + contexto + consulta}{msg}
+\m{14}{\xL}{\xB}{14}{Fragmentos de texto (\textit{streaming})}{resp}
+\m{15}{\xB}{\xF}{15}{Fragmentos de texto por \texttt{/ws/chat} (TTFB)}{resp}
+\m{16}{\xF}{\xB}{16}{Respuesta completa (\texttt{POST /api/tts})}{msg}
+\m{17}{\xB}{\xT}{17}{Texto para síntesis de voz}{msg}
+\m{18}{\xT}{\xB}{18}{Audio MP3 (\textit{streaming})}{resp}
+\m{19}{\xB}{\xF}{19}{Audio MP3 (\textit{streaming} HTTP)}{resp}
+\m{20}{\xF}{\xE}{20}{Reproduce el audio con \textit{lip-sync} y subtítulos}{msg}
+\end{tikzpicture}

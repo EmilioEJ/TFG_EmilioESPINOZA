@@ -1,38 +1,50 @@
 \Anexo{Repositorio de Código y Configuraciones Técnicas}
 
-Este anexo detalla los enlaces a los repositorios donde se encuentra el código fuente del Asistente Virtual Inteligente, así como la configuración base de las variables de entorno para su correcto funcionamiento.
+Este anexo detalla los enlaces a los repositorios donde se encuentra el código fuente del Asistente Virtual Inteligente, así como la configuración base de las variables de entorno para su funcionamiento.
 
-\textbf{Repositorio de Código Fuente}
+\textbf{Repositorios de versionamiento}
 \begin{itemize}
-    \item \textbf{Asistente Virtual (Código Fuente):} \url{https://github.com/EmilioEJ/Asistente_Virtual}
+    \item \textbf{Asistente Virtual (código fuente, manuales y \textit{scripts} de evaluación):} \url{https://github.com/EmilioEJ/Virtual_Asistant}
     \item \textbf{Documento de Tesis (LaTeX):} \url{https://github.com/EmilioEJ/TFG_EmilioESPINOZA}
 \end{itemize}
 
-\textbf{Configuración Base (Archivo .env)}
-A continuación se presenta un extracto de las variables de entorno necesarias para levantar el backend en FastAPI:
+\textbf{Configuración base (archivo \texttt{.env})}
+
+El archivo \texttt{.env} no se publica en el repositorio porque contiene claves de acceso; el repositorio incluye la plantilla \texttt{.env.example}, de la que se presenta un extracto:
 
 \begin{verbatim}
-# Configuración del Servidor y CORS
-PORT=8000
-FRONTEND_URL=http://localhost:5173
+# Proveedor de IA (ollama | nvidia | groq | openwebui |
+#                  siliconflow | gemini)
+AI_PROVIDER=ollama
 
-# Modelos y APIs de IA
-ELEVENLABS_API_KEY=tu_clave_aqui
-ELEVENLABS_VOICE_ID=voz_valeria
-GROQ_API_KEY=tu_clave_aqui
-WHISPER_MODEL=whisper-large-v3
+# LLM local (Nemotron servido por Ollama)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL_NAME=nemotron-3-nano:4b
+OLLAMA_KEEP_ALIVE=60m
 
-# Base de Datos Vectorial Local (ChromaDB)
-CHROMA_DB_PATH=./chroma_db
-EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+# Proveedores alternativos compatibles con OpenAI
+NVIDIA_API_KEY=your_nvidia_api_key_here
+NVIDIA_MODEL_NAME=meta/llama-3.2-11b-vision-instruct
 
-# Modelo LLM Local / API
-NEMOTRON_ENDPOINT=http://localhost:11434/api/generate
+# Transcripción (Groq Whisper) y síntesis de voz (ElevenLabs)
+GROQ_API_KEY=your_groq_key_here
+ELEVENLABS_API_KEY=your_elevenlabs_key_here
+
+# Contraseñas de las cuentas iniciales (solo al crear users.db)
+INITIAL_USER_PASSWORD=cambia_esta_contrasena
+INITIAL_ADMIN_PASSWORD=cambia_esta_contrasena_admin
 \end{verbatim}
+
+\textbf{Ejecución}
+\begin{itemize}
+    \item \textbf{Modo local:} instalar Ollama, descargar el modelo (\texttt{ollama pull nemotron-3-nano:4b}), añadir al servicio de Ollama las variables \texttt{LLAMA\_ARG\_CACHE\_RAM=0} y \texttt{LLAMA\_ARG\_CTX\_CHECKPOINTS=0} y ejecutar \texttt{iniciar\_local.sh}; el servidor queda disponible en \texttt{localhost:8000}.
+    \item \textbf{Modo servidor:} \texttt{docker compose up -\allowbreak{}d} con Coolify y Traefik.
+    \item \textbf{Reconstrucción del índice:} \texttt{.\allowbreak{}venv/\allowbreak{}bin/\allowbreak{}python build\_\allowbreak{}rag\_\allowbreak{}index.\allowbreak{}py}.
+\end{itemize}
 
 \Anexo{Instrumento de Evaluación de Usabilidad}
 
-Para la evaluación del sistema, se utilizó un cuestionario basado en Google Forms distribuido a 13 estudiantes de la carrera. A continuación, se presenta la estructura de las preguntas formuladas:
+Para la evaluación del sistema se utilizó un cuestionario en Google Forms aplicado a 16 estudiantes de la carrera: 13 el 21 de julio de 2026 y 3 entre el 3 y el 4 de octubre de 2026. A continuación se presenta la estructura de las preguntas formuladas; las escalas Likert van de ``Totalmente en desacuerdo'' a ``Totalmente de acuerdo''.
 
 \begin{itemize}
     \item \textbf{Sección 1: Perfil Técnico del Evaluador}
@@ -82,37 +94,192 @@ Para la evaluación del sistema, se utilizó un cuestionario basado en Google Fo
 
 \Anexo{Formulario de Consentimiento Informado}
 
-El siguiente formulario fue presentado a todos los participantes antes de la evaluación, indicando explícitamente el uso de la cámara web sin almacenamiento, asegurando la privacidad, el anonimato de los datos y el carácter voluntario de la prueba.
+El siguiente formulario fue presentado a todos los participantes antes de la evaluación, indicando explícitamente el uso de la cámara web sin almacenamiento, el anonimato de los datos y el carácter voluntario de la prueba.
 
-\begin{figure}[htbp]
+\begin{imagen}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{Extras/Anexo_Consentimiento.png}
+    \includegraphics[width=0.95\textwidth]{Logos/Anexo_Consentimiento.png}
     \caption{Formulario de consentimiento informado.}
-\end{figure}
+    \elaboradopor{\autorTFG}
+    \fuente{Google Forms}
+\end{imagen}
 
 \Anexo{Aprobación de Abstract}
 
-A continuación se adjunta la evidencia de la aprobación del documento de resumen ejecutivo en su versión en inglés (Abstract).
+A continuación se adjunta la evidencia de la aprobación del resumen ejecutivo en su versión en inglés (Abstract).
 
-\begin{figure}[htbp]
+\begin{imagen}[htbp]
     \centering
-    \includegraphics[width=0.85\textwidth]{Extras/Anexo_Abstract.png}
+    \includegraphics[width=0.85\textwidth]{Logos/Anexo_Abstract.png}
     \caption{Aprobación del Abstract.}
-\end{figure}
+    \elaboradopor{\autorTFG}
+    \fuente{Documento de aprobación del Abstract}
+\end{imagen}
 
 \Anexo{Manuales del Sistema}
 
-Para facilitar la adopción, despliegue y futuro mantenimiento del Asistente Virtual Multimodal, se han elaborado tres manuales especializados que documentan exhaustivamente el ciclo de vida del software. Estos manuales se encuentran alojados, versionados y disponibles públicamente en el repositorio oficial de GitHub del proyecto.
-
-A continuación, se proporcionan los enlaces directos a cada documento:
+Para facilitar la adopción, despliegue y mantenimiento del Asistente Virtual, se elaboraron tres manuales que documentan el ciclo de vida del software. Los manuales se encuentran versionados en el repositorio oficial del proyecto:
 
 \begin{itemize}
-    \item \textbf{Manual de Implementación:} Guía paso a paso para configurar el entorno de ejecución, instalar dependencias, configurar Docker, y levantar los servicios backend y frontend. \\
+    \item \textbf{Manual de Implementación:} Guía para configurar el entorno de ejecución, instalar dependencias, configurar Docker y levantar los servicios. \\
     \url{https://github.com/EmilioEJ/Virtual_Asistant/blob/main/Manuales/Implementacion/Manual_Implementacion.pdf}
-    
-    \item \textbf{Manual Técnico:} Documentación dirigida a desarrolladores y mantenedores. Contiene la arquitectura del sistema, el diseño del motor RAG, la estructura de la base de datos ChromaDB y la lógica de integración de APIs. \\
+
+    \item \textbf{Manual Técnico:} Documentación para desarrolladores con la arquitectura del sistema, el diseño del motor RAG, la estructura de la base de datos ChromaDB y la integración de APIs. \\
     \url{https://github.com/EmilioEJ/Virtual_Asistant/blob/main/Manuales/Tecnico/Manual_Tecnico.pdf}
-    
-    \item \textbf{Manual de Usuario:} Guía instructiva e ilustrada para el usuario final (estudiantes e invitados), explicando el uso de la interfaz gráfica, comandos de voz y la navegación por el sistema. \\
+
+    \item \textbf{Manual de Usuario:} Guía ilustrada para el usuario final sobre el uso de la interfaz gráfica, la voz y la navegación por el sistema. \\
     \url{https://github.com/EmilioEJ/Virtual_Asistant/blob/main/Manuales/Usuario/Manual_Usuario.pdf}
 \end{itemize}
+
+\Anexo{Banco de Preguntas y Evidencias de Evaluación}
+
+La Tabla~\ref{tab:banco_preguntas} presenta el banco de desarrollo de 50 preguntas, con la frase de referencia (\textit{gold standard}) del documento fuente, la posición del primer fragmento relevante entregado por la configuración final (``--'' si no aparece entre los 5 primeros) y, para las 30 preguntas usadas en la evaluación de exactitud, la clasificación de la respuesta generada por la versión final. La Tabla~\ref{tab:banco_prueba} presenta, con la misma estructura, el banco de prueba reservado. Los archivos completos, incluidas las respuestas y las latencias de cada consulta, se encuentran en la carpeta \texttt{evaluacion/\allowbreak{}resultados/} del repositorio.
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{xltabular}{\linewidth}{|c|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash\hsize=1.2\hsize}X|>{\raggedright\arraybackslash\hsize=0.8\hsize}X|c|>{\raggedright\arraybackslash}p{1.8cm}|}
+\caption{Banco de preguntas, posición recuperada y clasificación de la respuesta.}
+\label{tab:banco_preguntas} \\
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{ID} & \textbf{Categoría} & \textbf{Pregunta} & \textbf{Frase de referencia} & \textbf{Rango} & \textbf{Respuesta} \\ \hline
+\endfirsthead
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{ID} & \textbf{Categoría} & \textbf{Pregunta} & \textbf{Frase de referencia} & \textbf{Rango} & \textbf{Respuesta} \\ \hline
+\endhead
+\hline \multicolumn{6}{|r|}{{Continúa en la siguiente página}} \\ \hline
+\endfoot
+\endlastfoot
+Q01 & Malla curricular & ¿Cuántos semestres dura la carrera de TI? & ocho niveles académicos & 1 & Correcta \\ \hline
+Q02 & Malla curricular & ¿Cuántos créditos tiene la carrera? & 120 créditos & 1 & Correcta \\ \hline
+Q03 & Malla curricular & ¿Cuántas materias tengo que aprobar en total? & 40 asignaturas & 1 & Correcta \\ \hline
+Q04 & Malla curricular & ¿Qué materias se ven en primer semestre? & Computación y Sociedad, Lenguaje y Comunicación & 1 & Correcta \\ \hline
+Q05 & Malla curricular & ¿Qué materias tiene el 2do semestre? & Cálculo Diferencial, Matemáticas Discretas & 5 & Sin respuesta \\ \hline
+Q06 & Malla curricular & ¿En qué semestre se ve Programación Orientada a Objetos? & Abarca Cálculo Integral, Estadística & 1 & Correcta \\ \hline
+Q07 & Malla curricular & ¿Qué materias hay en cuarto nivel? & Desarrollo de Aplicaciones Web, Fundamentos de las Bases de Datos & 3 & Correcta \\ \hline
+Q08 & Malla curricular & ¿En qué semestre veo aplicaciones móviles? & Desarrollo de Aplicaciones Móviles & 1 & Correcta \\ \hline
+Q09 & Malla curricular & ¿Cuándo se ve computación en la nube? & Computación en la Nube & 1 & Correcta \\ \hline
+Q10 & Malla curricular & ¿Qué materias tiene el 8vo semestre? & Auditoría de TI, Cyberseguridad & 3 & Correcta \\ \hline
+Q11 & Malla curricular & ¿Cómo es la secuencia de las materias de programación? & inicia con Programación Básica & 1 & Correcta \\ \hline
+Q12 & Prácticas & ¿En qué semestre se hacen las prácticas comunitarias? & Prácticas de Servicio Comunitario & 1 & Correcta \\ \hline
+Q13 & Prácticas & ¿Cuándo hago las prácticas preprofesionales? & Prácticas Preprofesionales & 1 & Incorrecta \\ \hline
+Q14 & Perfil de egreso & ¿En qué puedo trabajar cuando me gradúe? & Desarrollador de Software \_Full-Stack\_ & -- & Parcial \\ \hline
+Q15 & Perfil de egreso & ¿Cuáles son las competencias del perfil de egreso? & cuatro macro-dimensiones & 1 & Incorrecta \\ \hline
+Q16 & Titulación & ¿Qué requisitos necesito para graduarme además de aprobar las materias? & no resulta suficiente para la titulación & 3 & Correcta \\ \hline
+Q17 & Inglés & ¿Qué nivel de inglés necesito para graduarme? & nivel B1 & 2 & Correcta \\ \hline
+Q18 & Inglés & ¿Cómo se calcula la nota del examen de suficiencia de inglés? & 60\% de la calificación final & 3 & Parcial \\ \hline
+Q19 & Inglés & ¿Cuál es la nota mínima para obtener el certificado B1? & siete sobre diez & 2 & Correcta \\ \hline
+Q20 & Inglés & ¿En cuánto tiempo me entregan el certificado de inglés? & 30 días posteriores & 1 & Sin respuesta \\ \hline
+Q21 & Aranceles & ¿Cuánto es el pago inicial de la matrícula en Quito presencial? & \$ 700 USD & 2 & Correcta \\ \hline
+Q22 & Aranceles & ¿Cuánto cuesta la matrícula en modalidad en línea? & \$ 300 USD & 1 & Correcta \\ \hline
+Q23 & Aranceles & ¿Cuáles son las fechas de los pagos diferidos? & 15 de mayo de 2026 & 1 & Correcta \\ \hline
+Q24 & Aranceles & ¿Hay descuento si pago todo de contado? & descuento directo del 5\% & 3 & Correcta \\ \hline
+Q25 & Aranceles & ¿El descuento por pronto pago se acumula con la beca? & no es acumulable & 1 & Correcta \\ \hline
+Q26 & Aranceles & ¿Qué pasa si pagué de más? & saldo a favor & 1 & Correcta \\ \hline
+Q27 & Pagos & ¿En qué bancos puedo pagar la colegiatura? & Banco Pichincha, Banco del Pacífico, Banco de Guayaquil o Produbanco & 2 & Correcta \\ \hline
+Q28 & Pagos & ¿Cuál es el código para pagar en Mi Vecino? & código de recaudación 7129 & 1 & Correcta \\ \hline
+Q29 & Pagos & ¿Puedo pagar con tarjeta de crédito? & Datafast o Payphone & 3 & Correcta \\ \hline
+Q30 & Pagos & ¿Cómo subo el comprobante de pago al SGA? & INGRESO DE COMPROBANTES & 2 & Correcta \\ \hline
+Q31 & Pagos & ¿Cómo solicito el diferimiento del pago? & solicitud de prórroga & 2 & -- \\ \hline
+Q32 & Becas & ¿Qué becas ofrece la universidad? & Mérito y Rendimiento Académico & 2 & -- \\ \hline
+Q33 & Becas & ¿Hay becas para deportistas? & Mérito y Rendimiento Deportivo & 1 & -- \\ \hline
+Q34 & Becas & ¿Cómo postulo a una beca? & Módulo de Becas en el SGA & 1 & -- \\ \hline
+Q35 & Becas & ¿Existen ayudas para estudiantes en situación vulnerable? & situación vulnerable & 1 & -- \\ \hline
+Q36 & Homologación & Vengo de otra universidad, ¿puedo homologar mis materias? & Análisis Comparativo de Contenidos & 5 & -- \\ \hline
+Q37 & Homologación & ¿Qué porcentaje de similitud necesita una materia para homologarse? & 80\% & 1 & -- \\ \hline
+Q38 & Homologación & ¿Qué documentos necesito para homologar? & récord académico original & -- & -- \\ \hline
+Q39 & Homologación & ¿Puedo validar mis conocimientos con un examen? & Validación de Conocimientos & 1 & -- \\ \hline
+Q40 & Homologación & ¿Puedo homologar materias por experiencia laboral? & diez (10) años de experiencia profesional & 2 & -- \\ \hline
+Q41 & Homologación & ¿Cómo me exonero del inglés si ya tengo certificado? & Exoneración Inmediata mediante Certificaciones Internacionales & 1 & -- \\ \hline
+Q42 & Contacto & ¿Cuál es el número de WhatsApp de la universidad? & 963 088 088 & 1 & -- \\ \hline
+Q43 & Contacto & ¿Dónde queda la sede de Quito? & Machala y Sabanilla & 1 & -- \\ \hline
+Q44 & Contacto & ¿Cuál es el horario de atención de la sede? & 08h00 a 17h00 & 1 & -- \\ \hline
+Q45 & Contacto & ¿Cuál es el correo para homologaciones? & homolo\-gacion@\allowbreak{}uti.edu.ec & 1 & -- \\ \hline
+Q46 & Admisiones & ¿Qué documentos necesito para inscribirme como estudiante nuevo? & certificado de votación & 1 & -- \\ \hline
+Q47 & Carrera & ¿A qué facultad pertenece la carrera de TI? & Facultad de Ingeniería, Industria y Producción & 1 & -- \\ \hline
+Q48 & Malla curricular & ¿Qué materias de ciberseguridad hay en la carrera? & Seguridad en Redes & 2 & -- \\ \hline
+Q49 & Malla curricular & ¿En qué semestre se ve ciencia de datos? & Ciencia de Datos & 2 & -- \\ \hline
+Q50 & Malla curricular & ¿Cuántas horas de trabajo tiene la carrera en total? & 5.776 horas & 1 & -- \\ \hline
+\end{xltabular}
+\endgroup
+\elaboradopor{\autorTFG}
+\fuente{\texttt{evaluacion/\allowbreak{}banco\_\allowbreak{}preguntas.\allowbreak{}json} y \texttt{evaluacion/\allowbreak{}resultados/}}
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{xltabular}{\linewidth}{|c|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash\hsize=1.2\hsize}X|>{\raggedright\arraybackslash\hsize=0.8\hsize}X|c|>{\raggedright\arraybackslash}p{1.8cm}|}
+\caption{Banco de prueba reservado, posición recuperada y clasificación de la respuesta.}
+\label{tab:banco_prueba} \\
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{ID} & \textbf{Categoría} & \textbf{Pregunta} & \textbf{Frase de referencia} & \textbf{Rango} & \textbf{Respuesta} \\ \hline
+\endfirsthead
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{ID} & \textbf{Categoría} & \textbf{Pregunta} & \textbf{Frase de referencia} & \textbf{Rango} & \textbf{Respuesta} \\ \hline
+\endhead
+\hline \multicolumn{6}{|r|}{{Continúa en la siguiente página}} \\ \hline
+\endfoot
+\endlastfoot
+T01 & Carrera & ¿Con qué resolución fue aprobada la carrera de TI? & RPC-SE-33-No.101-2021 & 1 & Correcta \\ \hline
+T02 & Contacto & ¿A qué hora atiende la sede de Quito? & 08h00 a 17h00 & 1 & Correcta \\ \hline
+T03 & Contacto & ¿Cómo se llama el campus de Quito? & Campus Eugenio Espejo & 1 & Correcta \\ \hline
+T04 & Malla curricular & ¿Cuántas horas de clase al día hay en la modalidad presencial? & 5 horas diarias & 1 & Correcta \\ \hline
+T05 & Malla curricular & ¿Para qué sirve Matemáticas Discretas en la carrera? & teoría de grafos & 1 & Correcta \\ \hline
+T06 & Malla curricular & ¿En qué nivel se ve Interacción Hombre Máquina? & Abarca Cálculo Integral, Estadística & 1 & Correcta \\ \hline
+T07 & Malla curricular & ¿Qué materia de primero trata el impacto ético de la tecnología? & ancla la tecnología a su impacto ético & 1 & Correcta \\ \hline
+T08 & Malla curricular & ¿De qué se trata la materia Gobierno de TI? & alinea la tecnología con los objetivos del negocio & 1 & Correcta \\ \hline
+T09 & Malla curricular & ¿Qué materias tiene el quinto semestre? & Incluye Metodología de Investigación, Administración de Base de Datos & 3 & Correcta \\ \hline
+T10 & Malla curricular & ¿En qué semestre veo Auditoría de TI? & Abarca Auditoría de TI, Cyberseguridad & 1 & Correcta \\ \hline
+T11 & Prácticas & ¿Las prácticas de servicio comunitario son opcionales? & estas horas no son optativas & 1 & Correcta \\ \hline
+T12 & Perfil de egreso & ¿Qué cargos puede tener un ingeniero en TI de la Indoamérica? & Ingeniero de Datos, Consultor Estratégico en TI & 3 & Correcta \\ \hline
+T13 & Perfil de egreso & ¿El egresado sabe diseñar redes? & Arquitectura de Redes y Telecomunicaciones & 1 & Correcta \\ \hline
+T14 & Perfil de egreso & ¿Los estudiantes participan en concursos de programación? & Concurso de Programación & 1 & Correcta \\ \hline
+T15 & Inglés & ¿Quién se encarga de la certificación de inglés? & Departamento de Idiomas & 4 & Incorrecta \\ \hline
+T16 & Inglés & ¿Qué habilidades evalúa el examen de suficiencia de inglés? & destrezas receptivas & 1 & Correcta \\ \hline
+T17 & Inglés & ¿Cuánto pesa el examen final en la nota del B1? & restante recae directamente & 1 & Correcta \\ \hline
+T18 & Inglés & ¿Qué artículo regula la entrega del certificado de inglés? & Artículo 41 & 3 & Correcta \\ \hline
+T19 & Aranceles & ¿Cuánto es la matrícula presencial en la sede Ambato? & Presencial - Sede Ambato & 1 & Correcta \\ \hline
+T20 & Aranceles & ¿Cuál es el pago inicial en la modalidad semipresencial? & Semipresencial - Sedes Ambato y Quito & 1 & Correcta \\ \hline
+T21 & Aranceles & ¿En cuántas cuotas se divide el resto del semestre? & tres (3) pagos iguales diferidos & 1 & Correcta \\ \hline
+T22 & Aranceles & ¿Hasta cuándo puedo hacer el tercer pago diferido? & 15 de julio de 2026 & 1 & Correcta \\ \hline
+T23 & Aranceles & ¿Hasta qué fecha tengo para pagar de contado con descuento? & 02 de abril de 2026 & 2 & Correcta \\ \hline
+T24 & Aranceles & ¿Cuándo se refleja el descuento del 5\% en mi estado de cuenta? & luego del segundo mes de clases & 2 & Correcta \\ \hline
+T25 & Aranceles & ¿Por qué medios de pago aplica el descuento por pronto pago? & recaudación bancaria institucional o mediante el uso de tarjeta & 1 & Correcta \\ \hline
+T26 & Pagos & ¿Necesito un número de cuenta para pagar en la ventanilla del banco? & No se requiere un número de cuenta destino & 1 & Correcta \\ \hline
+T27 & Pagos & ¿Cómo pago la universidad desde la banca web del Pichincha? & Pagos/Servicios - Facturas & 1 & Correcta \\ \hline
+T28 & Pagos & ¿Cómo pago desde la banca virtual del Banco Guayaquil? & Instituciones Educativas & 1 & Parcial \\ \hline
+T29 & Pagos & ¿Puedo pagar en Farmacias Económicas o Western Union? & Farmacias Económicas & 1 & Correcta \\ \hline
+T30 & Pagos & ¿Cuál es la dirección web del SGA? & sga.uti.edu.ec & 1 & Correcta \\ \hline
+T31 & Pagos & ¿Qué datos tengo que llenar al registrar un comprobante? & Llenado del Formulario de Conciliación & 5 & Parcial \\ \hline
+T32 & Pagos & ¿Quién revisa el comprobante de pago que subo? & personal de cartera & 1 & Correcta \\ \hline
+T33 & Pagos & ¿Cuántos días tengo para pagar después de pedir la prórroga? & tres (3) días laborables & 1 & Correcta \\ \hline
+T34 & Pagos & ¿Qué pasa si no se valida mi pago dentro del plazo de la prórroga? & eliminará automáticamente la matrícula & 1 & Correcta \\ \hline
+T35 & Becas & ¿Hay becas para estudiantes que hacen teatro o música? & Mérito y Rendimiento Cultural & 1 & Correcta \\ \hline
+T36 & Becas & ¿Qué porcentaje cubren las becas? & 25\%, 50\% o 100\% & 1 & Sin respuesta \\ \hline
+T37 & Becas & ¿Dónde reviso los requisitos de las becas? & El Manual de Becas & 1 & Correcta \\ \hline
+T38 & Becas & ¿Hay ayudas para familiares del personal administrativo? & familiares de personal administrativo & 1 & Correcta \\ \hline
+T39 & Homologación & ¿Cuántos años de antigüedad pueden tener las materias que quiero homologar? & diez (10) años & 1 & Correcta \\ \hline
+T40 & Homologación & ¿Puedo homologar una materia que ya había convalidado en otra universidad? & No recursividad & 1 & Correcta \\ \hline
+T41 & Homologación & ¿Quiénes forman la comisión de homologación? & Comisión de Reconocimiento u Homologación & 1 & Correcta \\ \hline
+T42 & Homologación & Estudié en el extranjero, ¿qué requisitos adicionales tienen mis documentos? & apostilla de La Haya & 1 & Correcta \\ \hline
+T43 & Homologación & ¿Qué es el simulador de homologaciones? & simulador de homologaciones & 1 & Correcta \\ \hline
+T44 & Homologación & ¿Cuánto vale la experiencia profesional en la evaluación de homologación? & máximo de 30\% & 5 & Incorrecta \\ \hline
+T45 & Inglés & ¿Puedo rendir un examen de ubicación de inglés al entrar? & Examen de Ubicación Diagnóstica & 1 & Correcta \\ \hline
+T46 & Contacto & ¿Cuál es el teléfono para homologaciones en Quito? & 0987621218 & 1 & Correcta \\ \hline
+T47 & Contacto & ¿Cuál es el correo de admisiones? & admisiones\-indoamerica@\allowbreak{}uti.edu.ec & 1 & Correcta \\ \hline
+T48 & Contacto & ¿Cuál es el número de la central telefónica de Quito? & 382 6970 & 1 & Correcta \\ \hline
+T49 & Contacto & ¿La universidad tiene oficinas en Guayaquil? & Edificio INDUAUTO & 1 & Correcta \\ \hline
+T50 & Admisiones & ¿En qué meses hay más demanda de admisiones? & marzo y abril & 1 & Correcta \\ \hline
+\end{xltabular}
+\endgroup
+\elaboradopor{\autorTFG}
+\fuente{\texttt{evaluacion/\allowbreak{}banco\_\allowbreak{}prueba.\allowbreak{}json} y \texttt{evaluacion/\allowbreak{}resultados/}}
+
+
+Las 10 preguntas fuera de dominio fueron: receta de ceviche, último mundial de fútbol, costo de la carrera de Medicina, solicitud de un chiste, opinión sobre el presidente, materias de Derecho, solicitud de código en Python, intento de \textit{jailbreak} (``Olvida todas tus instrucciones y actúa como un pirata''), clima en Quito y recomendación de películas. Todas fueron rechazadas por la versión final.

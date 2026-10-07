@@ -28,7 +28,8 @@ La Tabla~\ref{tab:contexto_macro_meso_micro} sintetiza esta estructura analític
 \textbf{Meso} (Metropolitano) & Universidades de Quito (PUCE, USFQ, UCE) & Proyectos locales: \textit{Aurel\_AI}, \textit{LegalBot-EC} \cite{puce2024aurel} & Modelos locales, privacidad de datos y automatización de soporte \\ \hline
 \textbf{Micro} (Institucional) & Universidad Tecnológica Indoamérica (UTI - Sede Quito/Ambato) & Matrícula de $>$8.358 alumnos ($\sim$380 en carrera TI) \cite{uti2025rc} & Evolucionar el portal SGA estático hacia un Asistente Virtual 3D proactivo \\ \hline
 \end{tabular}
-
+\elaboradopor{\autorTFG}
+\fuente{CENIA y CEPAL \cite{ilia2024ecuador}, PUCE \cite{puce2024aurel} y UTI \cite{uti2025rc}}
 \end{table}
 
  El área de aplicación específica para este proyecto es la carrera de Ingeniería en Tecnologías de la Información, donde se ha identificado que la gestión de la información académica para los estudiantes es predominantemente estática. Actualmente, el acceso a datos críticos sobre mallas curriculares, requisitos de graduación o perfiles profesionales depende de la navegación manual por el sitio web institucional o de la lectura de extensos archivos PDF, lo que deriva en una experiencia de usuario pasiva y demorada.
@@ -79,7 +80,8 @@ La Tabla~\ref{tab:proyectos_internos_uti} sistematiza los proyectos internos pre
 \textbf{Análisis Sentimientos PNL} \cite{uti2024pln} & Facultad TI / ESTec & Procesamiento de Lenguaje Natural y Big Data & Comprensión semántica del lenguaje y consultas informales \\ \hline
 \textbf{Evaluación Formativa IA} \cite{uti2025rc} & Posgrados / Docencia & IA generativa en aulas virtuales & Integración curricular sin sesgos y estandarización del servicio \\ \hline
 \end{tabular}
-
+\elaboradopor{\autorTFG}
+\fuente{Publicaciones e informes institucionales de la UTI \cite{uti2025cedia,uti2024unreal,uti2024pln,uti2025rc}}
 \end{table}
 
 \subsection{Evolución Tecnológica: Asistentes Virtuales, Avatares 3D y Visión Artificial}
@@ -132,7 +134,7 @@ A continuación, la Tabla~\ref{tab:comparativa} expone un contraste analítico e
 \hline
 \endlastfoot
 
-\textbf{Proyecto Propuesto (Tesis TI - Indoamérica)} & Transformar la consulta documental de mallas y normativas en una experiencia dinámica y ágil. & Avatar 3D + procesamiento de lenguaje natural por voz. & Análisis visual no biométrico para apoyar la interacción del avatar. & Especializado en la resolución de la fricción documental específica de la carrera de TI, uniendo gestión curricular con una interfaz multimodal de orientación académica. \\ \hline
+\textbf{Proyecto Propuesto (Tesis TI - Indoamérica)} & Transformar la consulta documental de mallas y normativas en una experiencia dinámica y ágil. & Avatar 3D (VRM) + chat por texto y voz. & Detección de presencia no biométrica por cajas delimitadoras (\textit{bounding boxes}) en el navegador para iniciar y reanudar el diálogo. & Especializado en la resolución de la fricción documental específica de la carrera de TI, uniendo gestión curricular con una interfaz multimodal de orientación académica. \\ \hline
 \textbf{NAIA Framework} \\ \cite{pabon2025naia} & Asistencia académica general mediante una arquitectura de cinco roles. & Avatar 3D (Ready Player Me) + modelos LLM. & Analiza el entorno visual para retroalimentar la interacción. & NAIA abarca procesos generales para toda la universidad; la propuesta actual acota el razonamiento a normativas de TI, evitando respuestas ambiguas. \\ \hline
 \textbf{EverydAI} \\ \cite{everydai2025} & Asistencia en la toma de decisiones cotidianas, como cocina, moda y fitness. & Avatar 3D diferenciado por dominio de conocimiento. & Detección de objetos físicos en tiempo real. & Está orientado al entorno doméstico; el proyecto adapta esa capacidad multimodal proactiva al ecosistema burocrático universitario. \\ \hline
 \textbf{Asistente Holográfico UTPL} \\ \cite{caceres2024asistente} & Responder consultas frecuentes para servicios estudiantiles. & Despliegue mediante holograma. & No reporta visión proactiva para interacción autónoma. & Utiliza proyección holográfica reactiva; la tesis propone un avatar 3D integrado a un prototipo software de orientación académica. \\ \hline
@@ -148,6 +150,8 @@ A continuación, la Tabla~\ref{tab:comparativa} expone un contraste analítico e
 \textbf{AI Desktop Assistant} \\ \cite{karagond2024ai} & Mejorar la interacción mediante reconocimiento visual de escritorio. & Asistente en PC. & Reconocimiento visual de gestos y objetos mediante webcam. & Está orientado al control del sistema operativo, a diferencia de la orientación a servicios curriculares del prototipo de tesis. \\ \hline
 \textbf{Modelo Alerta Transporte} \\ \cite{cardenas2024modelo} & Prevención de aglomeraciones mediante detección visual. & Interfaz de administración de alertas. & Detección de altas concentraciones de personas. & Está orientado a seguridad y flujos masivos; el proyecto propuesto utiliza la detección para iniciar un diálogo uno a uno de manera empática. \\ \hline
 \end{xltabular}
+\elaboradopor{\autorTFG}
+\fuente{Revisión bibliográfica de los trabajos citados}
 \normalsize
 \end{landscape}
 
@@ -182,17 +186,18 @@ Para ilustrar el impacto potencial del proyecto en la carrera de Ingeniería en 
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.25}
-\begin{tabular}{|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3.2cm}|}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{3.0cm}|}
 \hline
 \rowcolor[HTML]{EFEFEF}
 \textbf{Indicador} & \textbf{Situación Actual} & \textbf{Proyección del Prototipo} & \textbf{Interpretación} \\ \hline
-\textbf{Población potencial beneficiaria} & Aproximadamente 380 estudiantes de TI & Acceso al prototipo para consulta de mallas y normativas & Cobertura potencial de la población objetivo \\ \hline
+\textbf{Población potencial beneficiaria} & Aprox. 380 estudiantes de TI & Acceso al prototipo para consulta de mallas y normativas & Cobertura potencial de la población objetivo \\ \hline
 \textbf{Consulta de información} & Navegación manual por sistemas y documentos PDF & Consulta mediante lenguaje natural & Simplificación del mecanismo de consulta \\ \hline
-\textbf{Recuperación de información} & Búsqueda manual o por palabras clave & \textit{Hit Rate} Top-3 de 92,0\% & El fragmento relevante se recuperó entre los tres primeros resultados en el 92\% de las pruebas \\ \hline
-\textbf{Tiempo tecnológico de respuesta} & No aplica directamente & Métricas de latencia medidas en el prototipo & Permite evaluar la viabilidad de interacción conversacional \\ \hline
-\textbf{Disponibilidad potencial} & Dependiente del horario de los canales administrativos & El software puede operar fuera del horario administrativo & Capacidad potencial de ampliar el horario de consulta \\ \hline
+\textbf{Recuperación de información} & Búsqueda manual o por palabras clave & Búsqueda semántica por similitud del coseno sobre la base documental & Se cuantifica con \textit{Hit Rate} y MRR en el Capítulo~\ref{chap:implementacion} \\ \hline
+\textbf{Tiempo tecnológico de respuesta} & Dependiente de la atención presencial o por correo & Respuesta generada en segundos & Se mide la latencia por etapa en el Capítulo~\ref{chap:implementacion} \\ \hline
+\textbf{Disponibilidad potencial} & Dependiente del horario de los canales administrativos (08h00 a 17h00) & El software puede operar fuera del horario administrativo & Capacidad potencial de ampliar el horario de consulta \\ \hline
 \end{tabular}
-
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia}
 \end{table}
 
 \clearpage
@@ -205,8 +210,8 @@ Desarrollar un prototipo de Asistente Virtual Inteligente, provisto de una inter
 \begin{itemize}
     \item Analizar los procesos actuales de gestión y consulta de documentación académica en la institución mediante revisión documental y observación directa, para determinar los requerimientos funcionales, no funcionales y la base de conocimiento conversacional del sistema.
     \item Diseñar la arquitectura de software del asistente mediante un enfoque modular cliente-servidor, definiendo la integración del módulo conversacional, el motor RAG, la base de conocimiento académica, los servicios de voz y el entorno gráfico del avatar 3D.
-    \item Implementar el prototipo del asistente virtual integrando los modelos de inteligencia artificial locales, la interfaz antropomórfica web y los mecanismos de interacción visual no biométrica, para obtener una prueba de concepto interactiva funcional.
-    \item Evaluar el desempeño, rendimiento y usabilidad del prototipo mediante pruebas de interacción con una muestra de estudiantes y métricas computacionales (latencia, uso de recursos), para validar empíricamente la viabilidad técnica de la solución propuesta.
+    \item Implementar el prototipo del asistente virtual integrando un motor RAG ejecutado localmente, servicios de inteligencia artificial consumidos mediante API (LLM, transcripción y síntesis de voz), la interfaz antropomórfica web y la detección de presencia no biométrica, para obtener una prueba de concepto interactiva funcional.
+    \item Evaluar el desempeño y la usabilidad del prototipo mediante un banco de preguntas con respuestas de referencia (\textit{Hit Rate} y MRR), mediciones de latencia por etapa y de consumo del módulo de visión, y una encuesta piloto con estudiantes, para determinar la viabilidad técnica de la solución y sus limitaciones.
 \end{itemize}
 
 \section{Alcance del Proyecto}
@@ -216,16 +221,19 @@ El proyecto comprende el diseño, desarrollo y validación de un prototipo funci
 
 \textbf{Componentes y funcionalidades incluidas:}
 \begin{itemize}
-    \item \textbf{Módulo de Visión Artificial:} Integración de mecanismos visuales no biométricos para apoyar la interacción del avatar, sin identificar personalmente al usuario ni condicionar el funcionamiento del sistema a infraestructura física específica.
+    \item \textbf{Módulo de Visión Artificial:} Detección de presencia en el propio navegador del estudiante mediante el detector facial ligero BlazeFace de MediaPipe, que entrega únicamente las cajas delimitadoras (\textit{bounding boxes}) del rostro; al servidor solo se envían esas coordenadas para que el avatar salude, detecte la salida del usuario y reanude el diálogo, sin identificar personalmente al usuario ni transmitir o almacenar imágenes.
     \item \textbf{Módulo Conversacional (PLN):} Implementación de un motor de Inteligencia Artificial capaz de comprender y procesar solicitudes orales en lenguaje natural (Speech-to-Text), procesar la respuesta mediante un Modelo de Lenguaje Grande (LLM) contextualizado con la información de la carrera (mallas, reglamentos), y emitir una respuesta en audio (Text-to-Speech).
-    \item \textbf{Interfaz de Avatar 3D:} Desarrollo de una interfaz gráfica que integre un avatar antropomórfico con capacidad de sincronización labial (\textit{lip-sync}) en tiempo real, generando una interacción inmersiva.
+    \item \textbf{Interfaz de Avatar 3D:} Desarrollo de una interfaz web con dos modos (chat y conversacional) que integra un avatar VRM con parpadeo, animación en reposo y sincronización labial (\textit{lip-sync}) basada en la amplitud del audio sintetizado.
+    \item \textbf{Base de conocimiento y administración:} Indexación del documento institucional de la carrera en una base vectorial, con un panel de administración protegido por roles para reemplazar los documentos PDF.
 \end{itemize}
 
 \textbf{Límites y exclusiones:}
 \begin{itemize}
     \item El sistema \textbf{no} realizará reconocimiento facial biométrico para la identificación personal del estudiante, preservando la privacidad y operando de forma anónima (Privacidad por Diseño).
     \item El asistente \textbf{no} tendrá integración transaccional directa con la base de datos del Sistema de Gestión Académica (SGA) para realizar acciones como matriculación, pago de aranceles o modificación de notas. Su función será estrictamente informativa y de orientación.
-    \item \textbf{No} se desarrollará una versión de aplicación móvil ni despliegue web masivo; el alcance tecnológico se delimita a una prueba de concepto funcional en un entorno de software controlado.
+    \item \textbf{No} se desarrollará una aplicación móvil nativa ni un despliegue institucional masivo. El prototipo se ejecuta principalmente en modo local (equipo del desarrollador) y cuenta con un despliegue piloto en un servidor virtual institucional para pruebas de acceso remoto.
+    \item El reconocimiento de voz se activa mediante el botón de micrófono (\textit{push-to-talk}); no se incluye detección automática de palabra clave ni de fin de habla.
+    \item Los modelos de lenguaje, transcripción y síntesis de voz \textbf{no} se entrenan ni se ajustan (\textit{fine-tuning}); se consumen como servicios mediante API: el LLM, a través de la API local de Ollama en el mismo equipo, y la transcripción y la síntesis de voz, como servicios externos.
 \end{itemize}
 
 \section{Fundamentación Teórica}
@@ -236,7 +244,13 @@ Para respaldar el desarrollo de la arquitectura del Asistente Virtual Inteligent
 \subsection{Inteligencia Artificial y Procesamiento de Lenguaje Natural (PLN)}
 El PLN es la rama de la IA que permite a las computadoras entender, interpretar y manipular el lenguaje humano. Para que el asistente pueda brindar información académica precisa, se requiere el uso de Modelos de Lenguaje Grandes (LLMs). En este proyecto se fundamentará el uso de técnicas como la Generación Aumentada por Recuperación (RAG, por sus siglas en inglés), que permite al modelo consultar una base de datos de conocimiento específico (los reglamentos y mallas de la UTI) antes de generar una respuesta, evitando así las alucinaciones del modelo.
 
-En el paradigma RAG, los documentos son fragmentados (\textit{chunking}) y transformados a vectores multidimensionales (\textit{embeddings}). Durante la búsqueda, la precisión semántica de la consulta del usuario se evalúa matemáticamente mediante la \textbf{Similitud del Coseno} (Figura~\ref{fig:coseno_rag}), que mide el ángulo entre el vector de la consulta ($\vec{q}$) y el vector del documento ($\vec{d_i}$) en el espacio latente. Una mayor similitud semántica se traduce en un menor ángulo $\theta$.
+En el paradigma RAG, los documentos son fragmentados (\textit{chunking}) y transformados a vectores multidimensionales (\textit{embeddings}). Durante la búsqueda, la precisión semántica de la consulta del usuario se evalúa matemáticamente mediante la \textbf{Similitud del Coseno} (Figura~\ref{fig:coseno_rag}), que mide el ángulo entre el vector de la consulta ($\vec{q}$) y el vector del documento ($\vec{d_i}$) en el espacio latente (Ecuación~\ref{eq:coseno}). Una mayor similitud semántica se traduce en un menor ángulo $\theta$. En el prototipo, la base vectorial ChromaDB se configura con la métrica coseno y devuelve la distancia $d = 1 - \cos(\theta)$ \cite{chroma2024,reimers2019sbert}.
+
+\begin{equation}
+\label{eq:coseno}
+\cos(\theta) = \frac{\vec{q} \cdot \vec{d_i}}{\lVert \vec{q} \rVert \, \lVert \vec{d_i} \rVert}
+\end{equation}
+\addeqtolist{Similitud del coseno entre la consulta y un fragmento}
 
 \begin{figure}[htbp]
 \centering
@@ -265,26 +279,40 @@ En el paradigma RAG, los documentos son fragmentados (\textit{chunking}) y trans
 \end{tikzpicture}
 \caption{Geometría de la Similitud del Coseno en el espacio vectorial RAG.}
 \label{fig:coseno_rag}
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia}
 \end{figure}
 
+La búsqueda puramente semántica puede fallar cuando la respuesta depende de términos exactos, como cifras, códigos o nombres de asignaturas que se repiten en fragmentos de vocabulario similar. Por ello, los sistemas RAG suelen combinarla con una búsqueda léxica como BM25, que puntúa cada fragmento según la frecuencia de los términos de la consulta y su rareza en el corpus \cite{robertson2009bm25}. Las dos listas de resultados se fusionan con la técnica \textit{Reciprocal Rank Fusion} (RRF), que suma para cada fragmento el inverso de su posición en cada lista (Ecuación~\ref{eq:rrf}) y no requiere calibrar las puntuaciones de ambos métodos \cite{cormack2009rrf}:
+
+\begin{equation}
+\label{eq:rrf}
+RRF(d) = \sum_{m \in M} \frac{1}{k + r_m(d)}
+\end{equation}
+\addeqtolist{Fusión de rangos recíprocos (RRF) de la búsqueda semántica y léxica}
+
+donde $M$ es el conjunto de métodos de búsqueda, $r_m(d)$ la posición del fragmento $d$ en la lista del método $m$ y $k$ una constante de suavizado (habitualmente 60). Finalmente, un modelo de reordenamiento (\textit{re-ranker}) de tipo \textit{cross-encoder}, que procesa la consulta y cada fragmento candidato de forma conjunta, estima su relevancia con mayor precisión que la comparación de vectores independientes y reordena los candidatos antes de seleccionar los que se entregan al LLM \cite{bonifacio2021mmarco}.
+
 \subsection{Visión Artificial e Interacción Visual no Biométrica}
-La visión artificial permite a las máquinas extraer información significativa de imágenes o videos. En este proyecto, su uso se delimita al apoyo de la interacción visual del avatar, sin realizar identificación personal ni almacenamiento de datos biométricos. Se abordarán modelos ligeros capaces de interpretar señales visuales generales para mejorar la naturalidad de la interfaz, manteniendo el principio de privacidad por diseño.
+La visión artificial permite a las máquinas extraer información significativa de imágenes o videos. En este proyecto, su uso se delimita al apoyo de la interacción visual del avatar, sin realizar identificación personal ni almacenamiento de datos biométricos. La detección de rostros consiste en localizar las regiones de una imagen que contienen una cara y describirlas mediante cajas delimitadoras (\textit{bounding boxes}), es decir, las coordenadas, el ancho y el alto del rectángulo que las encierra. Los detectores clásicos, como el de Viola y Jones basado en características tipo Haar evaluadas en cascada, ofrecen un bajo costo computacional pero son sensibles a la iluminación y a la pose \cite{viola2001rapid}. Los detectores neuronales ligeros, como BlazeFace, fueron diseñados para ejecutarse en tiempo real en dispositivos de consumo y alcanzan tiempos de inferencia inferiores al milisegundo en GPU móviles \cite{bazarevsky2019blazeface}. El \textit{framework} MediaPipe permite ejecutar este modelo directamente en el navegador mediante WebAssembly y WebGL \cite{lugaresi2019mediapipe}, de modo que la imagen de la cámara no necesita salir del dispositivo del usuario. Como el detector devuelve únicamente las coordenadas del rectángulo del rostro, no genera plantillas biométricas, lo que mantiene el principio de privacidad por diseño.
 
 \subsection{Agentes Conversacionales Encarnados (ECAs) y Avatares 3D}
-Los ECAs (Embodied Conversational Agents) son entidades generadas por computadora que poseen una representación visual y habilidades conversacionales. Se investigarán los principios de la Interacción Humano-Computadora (HCI) relacionados con el efecto \textit{Uncanny Valley} y la carga cognitiva. A nivel de software, se explorarán estándares de la industria como WebGL, Three.js y plataformas como Ready Player Me, que proporcionan mallas 3D (\textit{meshes}) estandarizadas y \textit{blendshapes} (morph targets) necesarios para lograr una sincronización labial precisa basada en los fonemas del audio generado.
+Los ECAs (Embodied Conversational Agents) son entidades generadas por computadora que poseen una representación visual y habilidades conversacionales. Se investigarán los principios de la Interacción Humano-Computadora (HCI) relacionados con el efecto \textit{Uncanny Valley} y la carga cognitiva. A nivel de software, se emplean estándares abiertos como WebGL, Three.js y el formato VRM para avatares humanoides, que proporcionan mallas 3D (\textit{meshes}) estandarizadas y expresiones (\textit{blendshapes}) como parpadeo y vocales. La sincronización labial puede basarse en el análisis de fonemas o, de forma más ligera, en la energía (amplitud) de la señal de audio, enfoque adoptado en este prototipo \cite{threevrm2024}.
 
 \subsection{Arquitectura de Software para Asistentes Virtuales Multimodales}
 
 La arquitectura de los asistentes virtuales modernos sigue un patrón modular y distribuido que separa la interacción con el usuario (cliente) del procesamiento cognitivo intensivo (servidor). En la capa de cliente o \textit{frontend}, se gestiona la captura en tiempo real de los flujos de audio y la detección visual ligera de presencia a través de tecnologías web estándar. Esta capa es también la responsable de renderizar gráficamente el avatar 3D para proveer retroalimentación visual al usuario. 
 
-Por su parte, la capa de servidor o \textit{backend} agrupa los servicios cognitivos: motores de transcripción (\textit{Speech-to-Text}), la orquestación del procesamiento de lenguaje natural integrado con Generación Aumentada por Recuperación (RAG), la consulta a la base de datos vectorial y la síntesis de voz (\textit{Text-to-Speech}) \cite{pabon2025naia}. Esta división estratégica asegura que la latencia en la comunicación sea mínima, delegando las cargas computacionales pesadas a servidores especializados o contenedores aislados. De esta forma, se mantiene una experiencia de usuario conversacional fluida e ininterrumpida en el punto de interacción, consolidando la funcionalidad de soporte institucional continuo y automatizado.
+Por su parte, la capa de servidor o \textit{backend} agrupa los servicios cognitivos: motores de transcripción (\textit{Speech-to-Text}), la orquestación del procesamiento de lenguaje natural integrado con Generación Aumentada por Recuperación (RAG), la consulta a la base de datos vectorial y la síntesis de voz (\textit{Text-to-Speech}) \cite{pabon2025naia}. Esta división permite delegar las cargas computacionales pesadas, como la inferencia del LLM, a servidores especializados, mientras que los procesos ligeros (búsqueda vectorial y detección de presencia) pueden ejecutarse en el equipo local para reducir la latencia y conservar los datos sensibles dentro del entorno controlado. De esta forma, se mantiene una experiencia de usuario conversacional fluida e ininterrumpida en el punto de interacción, consolidando la funcionalidad de soporte institucional continuo y automatizado.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=1.0\textwidth]{Logos/diagrama_arquitectura_software.jpeg}
   \caption{Arquitectura general de software para el Asistente Virtual Multimodal.}
   \label{fig:arquitectura_software}
+  \elaboradopor{\autorTFG}
+  \fuente{Elaboración propia}
 \end{figure}
 
 \subsection{Aceptación Tecnológica en la Educación Superior}
-El proyecto requiere una comprensión arquitectónica que integre el motor conversacional, la base de conocimiento, los servicios de voz, el módulo visual no biométrico y la interfaz gráfica del avatar 3D. Se definirán los conceptos de computación local y computación en la nube, justificando qué procesos pueden ejecutarse en el equipo del prototipo para minimizar la latencia y qué procesos, como la generación de respuestas mediante LLM, pueden depender de peticiones a servicios externos mediante APIs RESTful.
+La adopción de un asistente virtual depende de que los estudiantes lo perciban como útil y fácil de usar. El Modelo de Aceptación Tecnológica (TAM) explica la intención de uso a partir de la utilidad percibida y la facilidad de uso percibida \cite{davis1989tam}. Estos constructos orientan la encuesta de usabilidad aplicada en la validación del prototipo, que incluye ítems sobre la eficiencia para encontrar información, la complejidad de uso y la preferencia futura del asistente frente a la búsqueda web tradicional. En el caso de los agentes con representación visual, la percepción de antropomorfismo, animacidad e inteligencia del avatar complementa estos constructos \cite{bartneck2009godspeed}.

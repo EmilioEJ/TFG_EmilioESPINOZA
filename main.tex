@@ -21,9 +21,6 @@
 \renewcommand{\bibname}{REFERENCIAS} % report/book
 % (si fuera article sería \renewcommand{\refname}{REFERENCIAS})
 
-% Fix temporal removido para que los símbolos ¿ se rendericen correctamente
-\usepackage[utf8]{inputenc}
-
 % Útiles (opcionales y requeridos por el rediseño)
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage[table]{xcolor}
@@ -34,7 +31,12 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, shadows, fit, babel}
 \usepackage{pgfplots}
-\pgfplotsset{compat=1.17}
+\pgfplotsset{compat=1.17, /pgf/number format/assume math mode=true}
+
+% Autor para las notas "Elaborado por:" de tablas, figuras e imágenes
+% Margen de tolerancia para evitar desbordes con términos técnicos largos
+\setlength{\emergencystretch}{3em}
+\newcommand{\autorTFG}{Paulo Emilio Espinoza Jiménez}
 
 \begin{document}
 

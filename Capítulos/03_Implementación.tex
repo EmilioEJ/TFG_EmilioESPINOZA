@@ -1,140 +1,229 @@
 \chapter{Implementación, Pruebas y Resultados}
 \label{chap:implementacion}
 
-\section{Requisitos de Implementación}
-Para llevar a cabo el desarrollo y despliegue del Asistente Virtual Inteligente, se establecieron diversos requisitos técnicos tanto a nivel de hardware como de software. Esto garantiza que la arquitectura distribuida del prototipo funcione sin cuellos de botella y de manera orquestada.
+\section{Descripción de la Solución}
+La solución implementada es ARIA, un asistente virtual web compuesto por un \textit{frontend} en HTML, CSS y JavaScript con un avatar 3D, y un \textit{backend} en Python con FastAPI. El código fuente se encuentra versionado en GitHub (Anexo~A) y los componentes desarrollados, configurados o integrados se resumen en la Tabla~\ref{tab:componentes}.
 
-\subsection{Requisitos de Hardware}
-El sistema fue implementado y probado en un entorno local con las siguientes especificaciones recomendadas para soportar la carga asíncrona y la inferencia generativa:
-\begin{itemize}
-    \item \textbf{Procesador (CPU):} Intel Core i7 de 12.ª generación (o superior), necesario para manejar la concurrencia de WebSockets y FastAPI.
-    \item \textbf{Memoria RAM:} 32 GB, requeridos para cargar el entorno virtual de Python, ChromaDB y los modelos ligeros en memoria.
-    \item \textbf{Tarjeta Gráfica (GPU):} NVIDIA RTX 3060 de 12GB VRAM. Fundamental para la generación acelerada de respuestas si se usan modelos LLM cuantizados locales.
-    \item \textbf{Periféricos del Cliente:} Cámara web estándar (resolución mínima 640x480) y micrófono integrado para capturar las intenciones del usuario.
-\end{itemize}
+\begin{table}[H]
+  \caption{Componentes desarrollados, configurados e integrados en el prototipo.}
+  \label{tab:componentes}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{6.7cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Componente} & \textbf{Tipo} & \textbf{Descripción} \\ \hline
+    \texttt{api.py} & Desarrollado & API FastAPI: autenticación, chat con RAG en \textit{streaming} por WebSocket, STT, TTS, panel RAG y WebSocket de presencia. \\ \hline
+    \texttt{rag\_\allowbreak{}manager.\allowbreak{}py} & Desarrollado & Parámetros comunes del RAG, preprocesamiento de consultas, recuperador híbrido (MiniLM, BM25, RRF y reordenamiento) y reconstrucción de la base vectorial en segundo plano. \\ \hline
+    \texttt{init\_db.py} & Desarrollado & Base SQLite de usuarios y sesiones; contraseñas con PBKDF2-HMAC-SHA256 y \textit{salt}. \\ \hline
+    \texttt{static/} & Desarrollado & Interfaz web (inicio de sesión, chat, modo conversacional y panel de administración), lógica del avatar y detección facial en el navegador. \\ \hline
+    \texttt{evaluacion/} & Desarrollado & Banco de preguntas y \textit{scripts} de evaluación reproducible. \\ \hline
+    ChromaDB & Configurado & Base vectorial persistente con métrica coseno (colección \texttt{carrera\_\allowbreak{}ti\_\allowbreak{}indoamerica\_\allowbreak{}collection}). \\ \hline
+    Avatar \texttt{ARIA2.0.vrm} & Configurado & Modelo VRM creado en VRoid, animado con Three.js y \texttt{three-vrm}. \\ \hline
+    Ollama + Nemotron 3 Nano 4B & Configurado & LLM local en la GPU del equipo (\texttt{nemotron-\allowbreak{}3-\allowbreak{}nano:4b}, Q4\_K\_M). \\ \hline
+    MediaPipe Face Detector & Integrado & Detección facial BlazeFace en el navegador (WebAssembly/WebGL), modelo servido desde \texttt{static/\allowbreak{}models/}. \\ \hline
+    Groq, ElevenLabs & Integrado & Servicios de STT y TTS consumidos mediante API. \\ \hline
+    Docker, Coolify, Traefik & Configurado & Contenedores y publicación HTTPS del despliegue en servidor. \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Repositorio del prototipo}
+\end{table}
 
-\subsection{Requisitos de Software y Tecnologías}
-El entorno de desarrollo requiere la instalación y configuración de múltiples herramientas tecnológicas, resumidas a continuación:
+\subsection{Entorno de Ejecución}
+Todas las pruebas de este capítulo se ejecutaron en \textbf{modo local}, en el equipo del desarrollador, cuyas características se detallan en la Tabla~\ref{tab:hardware}. La GPU ejecuta el LLM Nemotron (servido por Ollama) y el modelo de reordenamiento; el modelo de \textit{embeddings} y la búsqueda BM25 se ejecutan en CPU; la detección de presencia se ejecuta en el navegador; y la transcripción y la síntesis de voz se realizan en los proveedores remotos.
 
-\begin{table}[htbp]
+\begin{table}[H]
+  \caption{Entorno de hardware y software de las pruebas (modo local).}
+  \label{tab:hardware}
+  \centering
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|p{4cm}|p{9cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Elemento} & \textbf{Especificación} \\ \hline
+    Procesador & AMD Ryzen 7 7735HS (8 núcleos, 16 hilos) \\ \hline
+    Memoria RAM & 14 GiB disponibles para el sistema \\ \hline
+    GPU & NVIDIA GeForce RTX 4060 Laptop, 8 GB (LLM y reordenador) \\ \hline
+    Sistema operativo & Ubuntu 24.04 LTS, Python 3.12.3 \\ \hline
+    Cliente & Navegador web con cámara web y micrófono integrados \\ \hline
+    LLM & Ollama 0.34.4, \texttt{nemotron-\allowbreak{}3-\allowbreak{}nano:4b} (4.000 millones de parámetros, Q4\_K\_M), contexto de 8.192 \textit{tokens}, caché de \textit{prompts} en RAM desactivada \\ \hline
+    Recuperación & \texttt{paraphrase-\allowbreak{}multilingual-\allowbreak{}MiniLM-\allowbreak{}L12-\allowbreak{}v2}, BM25 y \texttt{cross-\allowbreak{}encoder/\allowbreak{}mmarco-\allowbreak{}mMiniLMv2-\allowbreak{}L12-\allowbreak{}H384-\allowbreak{}v1} \\ \hline
+    STT / TTS & Groq \texttt{whisper-\allowbreak{}large-\allowbreak{}v3} / ElevenLabs \texttt{eleven\_\allowbreak{}flash\_\allowbreak{}v2\_5} \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Equipo de desarrollo y archivo de configuración \texttt{.env}}
+\end{table}
+
+\subsection{Software y Herramientas}
+La Tabla~\ref{tab:requisitos_software} resume las herramientas necesarias para ejecutar el prototipo.
+
+\begin{table}[H]
   \caption{Software y herramientas requeridas para la implementación.}
   \label{tab:requisitos_software}
   \centering
-  \renewcommand{\arraystretch}{1.25}
-  \begin{tabular}{|p{4cm}|p{11cm}|}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|p{4cm}|p{9cm}|}
     \hline
     \rowcolor[HTML]{EFEFEF}
     \textbf{Herramienta / Framework} & \textbf{Propósito y Configuración} \\ \hline
-    \textbf{Python 3.10+} & Lenguaje principal del Backend. Requiere configuración de un entorno virtual (venv) e instalación de dependencias vía \texttt{requirements.txt}. \\ \hline
-    \textbf{FastAPI y Uvicorn} & Framework para construir la API Gateway y manejar conexiones asíncronas y WebSockets. \\ \hline
-    \textbf{ChromaDB} & Base de datos vectorial embebida. Se debe configurar para persistencia local en disco. \\ \hline
-    \textbf{SentenceTransformers} & Librería para vectorización matemática (Modelo \texttt{paraphrase-\-multilingual-\-MiniLM-\-L12-\-v2}). \\ \hline
-    \textbf{HTML, CSS, JS (Vite/Three.js)} & Capa Frontend. Requiere configuración para renderizar gráficos WebGL y capturar media del usuario. \\ \hline
-    \textbf{Docker y Docker Compose} & Opcional para el despliegue de contenedores aislados. Requiere escritura de un \texttt{Dockerfile}. \\ \hline
+    \textbf{Python 3.10+} & Lenguaje del \textit{backend}; entorno virtual (\texttt{.venv}) y dependencias en \texttt{requirements.\allowbreak{}txt}. \\ \hline
+    \textbf{FastAPI y Uvicorn} & API REST, WebSocket (chat en \textit{streaming} y presencia) y servicio de archivos estáticos. \\ \hline
+    \textbf{Ollama} & Servidor local del LLM Nemotron con API HTTP; variables \texttt{LLAMA\_\allowbreak{}ARG\_\allowbreak{}CACHE\_\allowbreak{}RAM=0} y \texttt{LLAMA\_\allowbreak{}ARG\_\allowbreak{}CTX\_\allowbreak{}CHECKPOINTS=0}. \\ \hline
+    \textbf{ChromaDB} & Base de datos vectorial embebida con persistencia en disco (\texttt{chroma\_db/}). \\ \hline
+    \textbf{Sentence\-Transformers} & Vectorización con \texttt{paraphrase-\allowbreak{}\-\allowbreak{}multilingual-\allowbreak{}\-\allowbreak{}MiniLM-\allowbreak{}\-\allowbreak{}L12-\allowbreak{}\-\allowbreak{}v2} y reordenamiento con un \textit{cross-encoder} multilingüe. \\ \hline
+    \textbf{rank-bm25} & Índice léxico BM25 sobre los fragmentos de la colección. \\ \hline
+    \textbf{PyMuPDF4LLM y LangChain} & Conversión de PDF a Markdown y fragmentación (\texttt{MarkdownTextSplitter}). \\ \hline
+    \textbf{HTML, CSS y JavaScript} & \textit{Frontend} sin \textit{framework}; Three.js, \texttt{three-vrm} y MediaPipe Tasks Vision 0.10.14 cargados desde CDN. \\ \hline
+    \textbf{Docker y Docker Compose} & Despliegue en servidor (modo servidor). \\ \hline
   \end{tabular}
-\end{table}
-
-\begin{table}[H]
-  \caption{Matriz Comparativa: Proceso Manual vs. Asistente Virtual.}
-  \label{tab:matriz_comparativa}
-  \centering
-  
-  
-  \renewcommand{\arraystretch}{1.2}
-  \begin{tabular}{|p{0.25\textwidth}|p{0.33\textwidth}|p{0.33\textwidth}|}
-    \hline
-    \rowcolor[HTML]{EFEFEF}
-    \textbf{Criterio} & \textbf{Antes (Manual/SGA)} & \textbf{Después (Protopipo de IA)} \\ \hline
-    \textbf{Modo de Interacción} & Navegación manual por menús. & Conversacional (Voz natural). \\ \hline
-    \textbf{Formato de Respuesta} & Archivos estáticos (PDF). & Respuestas orales y visuales exactas. \\ \hline
-    \textbf{Esfuerzo del Usuario} & Alto (búsqueda y lectura exhaustiva). & Bajo (solo requiere preguntar). \\ \hline
-    \textbf{Soporte a Dudas} & Acudir a secretaría (demorado). & Capacidad técnica de ofrecer consultas fuera del horario administrativo, condicionada a la disponibilidad de infraestructura. \\ \hline
-  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Archivo \texttt{requirements.\allowbreak{}txt} y \texttt{static/\allowbreak{}script.\allowbreak{}js} del prototipo}
 \end{table}
 
 \section{Proceso de Implementación}
-El proceso de implementación siguió un enfoque iterativo, comenzando desde la configuración de la base de datos y culminando con el ensamblaje de la interfaz de usuario en el frontend. A continuación, se detallan los pasos lógicos.
+El proceso de implementación siguió el enfoque iterativo descrito en el Capítulo~\ref{chap:metodologia}, comenzando por la base de conocimiento y culminando con la interfaz, el despliegue y la evaluación.
 
-\subsection{Paso 1: Configuración a nivel de Base de Datos Vectorial}
-El primer paso consistió en la inicialización y población de \textbf{ChromaDB}. Se desarrolló el script \texttt{rag\_manager.py} que toma los reglamentos y mallas curriculares (archivos PDF), los extrae y divide en fragmentos semánticos (\textit{chunks}). Posteriormente, utilizando \texttt{SentenceTransformers}, cada bloque de texto se convierte en un arreglo numérico y se inserta en una colección persistente llamada \texttt{carrera\_ti\_indoamerica\_collection}. Este proceso debe ejecutarse y completarse antes de levantar el servidor, pues el motor de inteligencia artificial depende de este conocimiento previo.
+\subsection{Paso 1: Construcción de la Base de Datos Vectorial}
+El documento base de la carrera se convierte a Markdown con PyMuPDF4LLM, conservando la estructura de títulos y tablas, y se divide con \texttt{MarkdownTextSplitter} en fragmentos de 800 caracteres con un solapamiento de 160, lo que produjo 89 fragmentos (la elección de este tamaño se justifica en la Sección~\ref{sec:resultados_rag}). Cada fragmento se convierte en un vector de 384 dimensiones con \texttt{SentenceTransformers} y se inserta en la colección \texttt{carrera\_\allowbreak{}ti\_\allowbreak{}indoamerica\_\allowbreak{}collection}, configurada con la métrica coseno. Este proceso puede ejecutarse por consola (\texttt{build\_\allowbreak{}rag\_\allowbreak{}index.\allowbreak{}py}) o desde el panel de administración, y ambos comparten los mismos parámetros definidos en \texttt{rag\_\allowbreak{}manager.\allowbreak{}py}.
 
-Para ilustrar la estructuración de la base de datos vectorial, a continuación se presenta un ejemplo representativo de cómo se almacena un registro en ChromaDB (formato JSON):
-
-\begin{verbatim}
-{
-  "id": "Reglamento_Academico_chunk_42",
-  "document": "Art. 15.- Las modalidades de titulacion incluyen...",
-  "embedding": [0.0124, -0.0453, 0.8921, ...],
-  "metadata": {
-    "source": "Reglamento_Titulacion_2024.pdf",
-    "page": 12,
-    "tipo_documento": "Normativa Institucional"
-  }
-}
-\end{verbatim}
-
-Esta estructura de almacenamiento separada se diseñó estratégicamente por dos razones. Primero, el modelo de \textit{embedding} procesa exclusivamente el campo \texttt{document} (contenido puro) para calcular la similitud semántica con la consulta del usuario, evitando que palabras de control o datos referenciales modifiquen la pureza del vector matemático. Segundo, el diccionario \texttt{metadata} permite aislar los datos de origen; esto habilita al sistema para aplicar filtros cruzados preventivos antes de buscar (\textit{metadata filtering}) y permite que el Asistente Virtual cite de forma transparente al usuario la página exacta y el nombre del documento oficial de donde extrajo la respuesta.
+La Figura~\ref{fig:bd_chroma} presenta el modelo conceptual inicial del registro vectorial. En la implementación final, cada registro contiene el identificador del fragmento, su texto, su vector y el nombre del documento de origen, como se muestra en la Figura~\ref{fig:registro_real}.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.95\textwidth]{Logos/Diagrama de base de datos vectorial.jpeg}
-  \caption{Estructura lógica y proceso de vectorización en la base de datos ChromaDB.}
+  \includegraphics[width=0.85\textwidth]{Logos/Diagrama de base de datos vectorial.jpeg}
+  \caption{Estructura lógica y proceso de vectorización en la base de datos ChromaDB (modelo conceptual).}
   \label{fig:bd_chroma}
+  \elaboradopor{\autorTFG}
+  \fuente{Elaboración propia}
 \end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.9\textwidth]{Logos/Seccion_AdminRAG.png}
-  \caption{Panel de Administración del RAG para actualizar mallas curriculares.}
-  \label{img:admin_rag}
-  \elaboradopor{Estudiante}
-  \fuente{Captura de pantalla del sistema}
-\end{figure}
-
-\subsection{Paso 2: Construcción del Servidor Backend (FastAPI)}
-Una vez establecida la base de datos, se programó el orquestador principal: el archivo \texttt{api.py}. En este nivel de aplicación se configuraron las rutas (endpoints) RESTful y las conexiones WebSockets. El servidor se encarga de:
-1. Recibir fotogramas ligeros vía WebSockets y calcular el área del \textit{bounding box} del rostro ($W_{box} \times H_{box}$) para determinar presencia activa, de acuerdo al siguiente modelo lógico:
-
-\begin{equation}
-\label{eq:presence}
-Estado = 
-\begin{cases} 
-Activo, & \text{si } (W_{box} \times H_{box}) > \tau_{pixeles} \\
-Reposo, & \text{de lo contrario}
-\end{cases}
-\end{equation}
-\addeqtolist{Cálculo lógico para detección de presencia del usuario vía WebSockets}
-2. Recibir audios en formato WebM, enviarlos a Groq API (Whisper-v3) para transcripción ultrarrápida.
-3. Orquestar la consulta a ChromaDB usando la similitud del coseno.
-4. Conectar con el LLM para formular la respuesta y luego con ElevenLabs para el proceso de Text-to-Speech (TTS).
 
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
-    scale=0.85, transform shape,
-    box/.style={draw, rounded corners, fill=blue!10, minimum width=3cm, minimum height=1cm, align=center, text width=2.8cm},
-    arrow/.style={->, >=stealth, thick}
+    scale=0.9, transform shape,
+    caja/.style={draw, thick, rounded corners, fill=blue!5, align=left, font=\ttfamily\footnotesize, inner sep=8pt},
+    proc/.style={draw, rounded corners, fill=green!10, align=center, font=\small, minimum height=0.9cm, text width=2.9cm},
+    flecha/.style={->, >=stealth, thick}
 ]
-% Nodes
-\node[box] (mic) {Cliente (Micrófono)};
-\node[box, right=3.5cm of mic] (fastapi) {FastAPI (Backend)};
-\node[box, fill=green!10, above right=0.8cm and 1.5cm of fastapi] (groq) {API Groq (Whisper-v3)};
-\node[box, fill=orange!10, below right=0.8cm and 1.5cm of fastapi] (eleven) {ElevenLabs (TTS Streaming)};
-\node[box, right=2cm of groq] (llm) {Motor LLM / RAG};
-% Arrows
-\draw[arrow] (mic) to[bend left=15] node[above] {\small Audio .webm} (fastapi);
-\draw[arrow] (fastapi) |- node[above, near start] {\small Delegar Audio} (groq);
-\draw[arrow] (groq) -- node[above] {\small Texto} (llm);
-\draw[arrow] (llm) -- node[right] {\small Respuesta Textual} (eleven);
-\draw[arrow] (eleven) -| node[below, near end] {\small Audio (Chunks)} (fastapi);
-\draw[arrow] (fastapi) to[bend left=15] node[below] {\small Audio Frontend} (mic);
+\node[proc] (pdf) at (0,0) {PDF institucional};
+\node[proc] (md) at (0,-1.6) {Markdown\\(PyMuPDF4LLM)};
+\node[proc] (ch) at (0,-3.2) {89 fragmentos\\800 / 160};
+\node[proc] (emb) at (0,-4.8) {\textit{Embedding}\\384 dimensiones};
+\draw[flecha] (pdf) -- (md);
+\draw[flecha] (md) -- (ch);
+\draw[flecha] (ch) -- (emb);
+\node[caja, anchor=west] (reg) at (3.2,-2.4) {\{\\
+\ \ \textquotedbl{}id\textquotedbl{}: \textquotedbl{}chunk\_31\textquotedbl{},\\
+\ \ \textquotedbl{}document\textquotedbl{}: \textquotedbl{}Para el periodo A26, los valores\\
+\ \ \ \ iniciales varían ... Presencial - Sede\\
+\ \ \ \ Quito: ... \$ 700 USD ...\textquotedbl{},\\
+\ \ \textquotedbl{}embedding\textquotedbl{}: [0.0213, -0.0871, ... ] (384),\\
+\ \ \textquotedbl{}metadata\textquotedbl{}: \{\\
+\ \ \ \ \textquotedbl{}source\textquotedbl{}: \textquotedbl{}Investigación Carrera TI\\
+\ \ \ \ \ \ \ \ \ \ \ Indoamérica Quito.pdf\textquotedbl{}\\
+\ \ \}\\
+\}\\[3pt]
+\normalfont\scriptsize Colección: carrera\_ti\_indoamerica\_collection\\
+\normalfont\scriptsize Métrica: \{\textquotedbl{}hnsw:space\textquotedbl{}: \textquotedbl{}cosine\textquotedbl{}\}};
+\draw[flecha] (emb.east) -- (reg.west |- emb.east);
 \end{tikzpicture}
-\caption{Diagrama de delegación y procesamiento de voz asíncrono en el backend.}
+\caption{Registro real almacenado en ChromaDB y proceso de indexación implementado.}
+\label{fig:registro_real}
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia a partir de \texttt{build\_\allowbreak{}rag\_\allowbreak{}index.\allowbreak{}py}}
+\end{figure}
+
+El texto (\texttt{document}) y su vector se almacenan juntos para que la búsqueda devuelva directamente el contenido que se inyecta en el \textit{prompt}; la metadata conserva el documento de origen para trazabilidad. Al iniciar el servidor, y cada vez que se reconstruye la colección, el recuperador construye en memoria el índice léxico BM25 sobre los mismos fragmentos. La Imagen~\ref{img:admin_rag} muestra el panel desde el que el administrador reemplaza los documentos y supervisa el progreso de la reconstrucción.
+
+\begin{imagen}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Logos/Seccion_AdminRAG.png}
+  \caption{Panel de Administración del RAG para actualizar la base documental.}
+  \label{img:admin_rag}
+  \elaboradopor{\autorTFG}
+  \fuente{Captura de pantalla del prototipo}
+\end{imagen}
+
+\subsection{Paso 2: Construcción del Servidor Backend (FastAPI)}
+Una vez establecida la base de datos, se programó el orquestador principal en \texttt{api.py}. La Tabla~\ref{tab:endpoints} resume los \textit{endpoints} expuestos y su nivel de acceso.
+
+\begin{table}[H]
+  \caption{\textit{Endpoints} del backend y control de acceso.}
+  \label{tab:endpoints}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{4.3cm}|>{\raggedright\arraybackslash}p{5.6cm}|>{\raggedright\arraybackslash}p{2.7cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Endpoint} & \textbf{Función} & \textbf{Acceso} \\ \hline
+    \texttt{POST /\allowbreak{}api/\allowbreak{}login}, \texttt{/api/logout} & Inicio y cierre de sesión (\textit{cookie} \texttt{httponly}) & Público \\ \hline
+    \texttt{GET /api/me} & Usuario y rol de la sesión & Usuario \\ \hline
+    \texttt{WS /\allowbreak{}ws/\allowbreak{}chat} & Filtro anti-\textit{jailbreak}, RAG híbrido Top-3 y LLM; envía cada fragmento de la respuesta (\texttt{token}) y al final la respuesta completa con sus latencias (\texttt{fin}) & Usuario \\ \hline
+    \texttt{POST /\allowbreak{}api/\allowbreak{}chat} & Misma lógica que \texttt{/ws/chat} en una sola respuesta (compatibilidad) & Usuario \\ \hline
+    \texttt{POST /api/stt} & Transcripción con Whisper (Groq) & Usuario \\ \hline
+    \texttt{POST /api/tts} & Síntesis de voz con ElevenLabs en \textit{streaming} & Usuario \\ \hline
+    \texttt{WS /ws} & Eventos de presencia a partir de las cajas delimitadoras enviadas por el navegador & Usuario \\ \hline
+    \texttt{POST /\allowbreak{}api/\allowbreak{}admin/\allowbreak{}upload\_\allowbreak{}docs} & Carga de PDF y reindexación en segundo plano & Administrador \\ \hline
+    \texttt{GET /\allowbreak{}api/\allowbreak{}admin/\allowbreak{}rag\_\allowbreak{}status} & Progreso de la reindexación & Administrador \\ \hline
+    \texttt{GET /\allowbreak{}debug/\allowbreak{}rag}, \texttt{/debug/md} & Diagnóstico de la recuperación & Administrador \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Código fuente \texttt{api.py}}
+\end{table}
+
+\textbf{Detección de presencia.} El navegador ejecuta una vez por segundo MediaPipe Face Detector sobre el video de la cámara y envía por el WebSocket \texttt{/ws} un mensaje JSON con las cajas delimitadoras detectadas, por ejemplo \texttt{\{"cajas": [[112, 64, 96, 118]]\}}, o una lista vacía si no hay rostro. En el servidor, la clase \texttt{DetectorPresencia} evita falsos disparos mediante contadores de fotogramas consecutivos con rostro ($p_t$) y sin rostro ($m_t$), según la Ecuación~\ref{eq:presence}:
+
+\begin{equation}
+\label{eq:presence}
+Evento_t =
+\begin{cases}
+\texttt{person\_\allowbreak{}arrived}, & \text{si } p_t \geq 2 \text{ y el usuario no estaba presente} \\
+\texttt{person\_left}, & \text{si } m_t \geq 4 \text{ y el usuario estaba presente} \\
+\text{sin evento}, & \text{en otro caso}
+\end{cases}
+\end{equation}
+\addeqtolist{Regla de detección de llegada y salida del usuario por fotogramas consecutivos}
+
+Con un fotograma por segundo, la llegada se confirma en unos 2 segundos y la salida en unos 4 segundos. Ninguna imagen se transmite al servidor: el contenido del mensaje se limita a las coordenadas, el ancho y el alto de cada rostro.
+
+\textbf{Recuperación híbrida.} Para cada consulta, el recuperador obtiene los 20 fragmentos más similares por distancia coseno en ChromaDB y los 20 con mayor puntuación BM25, sobre un texto normalizado (minúsculas, sin acentos ni palabras vacías y con los términos truncados a 6 caracteres). Ambas listas se fusionan por RRF con $k = 60$ (Ecuación~\ref{eq:rrf}) y el \textit{cross-encoder} \texttt{mmarco-\allowbreak{}mMiniLMv2-\allowbreak{}L12-\allowbreak{}H384-\allowbreak{}v1}, entrenado en la versión multilingüe de MS MARCO \cite{bonifacio2021mmarco}, puntúa cada par (pregunta, fragmento) en la GPU para seleccionar los 3 que se entregan al LLM. Antes de insertarlos en el \textit{prompt} se elimina el marcado que no aporta información (negritas y referencias numéricas), lo que reduce en un 6\% los \textit{tokens} del contexto.
+
+\textbf{Respuesta en \textit{streaming}.} El LLM se invoca a través de la API de Ollama con temperatura 0,1, un máximo de 500 \textit{tokens} y el razonamiento interno desactivado. Cada fragmento de texto que genera el modelo se reenvía de inmediato al navegador por el WebSocket \texttt{/ws/chat}, de modo que el tiempo hasta el primer fragmento (TTFB) depende solo de la recuperación y del procesamiento del \textit{prompt}, y no de la longitud de la respuesta. El servidor conserva por sesión los tres últimos turnos de la conversación para atender preguntas de seguimiento.
+
+\textbf{Pipeline de voz.} El frontend graba el audio entre dos pulsaciones del micrófono, lo transcribe con \texttt{/api/stt}, envía el texto por \texttt{/ws/chat} y, al completarse la respuesta, solicita el audio a \texttt{/api/tts}. En el chat, la consulta se normaliza y se expande, se recuperan los 3 fragmentos más relevantes y se envían al LLM junto con las reglas del sistema (identidad de ARIA, alcance limitado a la carrera, brevedad, uso exclusivo del contexto y prohibición de cambiar de rol). Antes de la recuperación, un filtro de expresiones regulares bloquea intentos de \textit{jailbreak} sin consultar al LLM. La Figura~\ref{fig:flujo_voz} resume esta orquestación.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.78, transform shape,
+    box/.style={draw, rounded corners, fill=blue!10, minimum width=3cm, minimum height=1cm, align=center, text width=2.8cm, font=\small},
+    ext/.style={draw, rounded corners, fill=orange!12, minimum width=3cm, minimum height=1cm, align=center, text width=2.8cm, font=\small},
+    arrow/.style={->, >=stealth, thick},
+    etq/.style={font=\scriptsize, align=center, fill=white, inner sep=1pt}
+]
+\node[box] (cli) at (0,0) {Cliente\\(navegador)};
+\node[box] (api) at (6,0) {FastAPI\\(\texttt{api.py})};
+\node[ext] (groq) at (12.5,3.0) {Groq\\Whisper large-v3};
+\node[box, fill=green!10] (rag) at (12.5,1.0) {RAG híbrido\\ChromaDB + BM25};
+\node[box, fill=green!10] (llm) at (12.5,-1.0) {LLM local\\Nemotron (Ollama)};
+\node[ext] (eleven) at (12.5,-3.0) {ElevenLabs\\TTS \textit{streaming}};
+\draw[arrow] ([yshift=3mm]cli.east) -- node[etq, above=2pt] {1. Audio WebM y consulta (WS)} ([yshift=3mm]api.west);
+\draw[arrow] ([yshift=-3mm]api.west) -- node[etq, below=2pt] {Texto (WS) y audio MP3} ([yshift=-3mm]cli.east);
+\draw[arrow] (api.east) -- node[etq, pos=0.55] {2. Audio / texto} (groq.west);
+\draw[arrow] (api.east) -- node[etq, pos=0.55] {3. Consulta} (rag.west);
+\draw[arrow] (api.east) -- node[etq, pos=0.55] {4. \textit{Prompt} + contexto} (llm.west);
+\draw[arrow] (api.east) -- node[etq, pos=0.55] {5. Texto completo} (eleven.west);
+\end{tikzpicture}
+\caption{Orquestación del procesamiento de voz en el backend.}
 \label{fig:flujo_voz}
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia}
 \end{figure}
 
 \subsection{Paso 3: Desarrollo de la Capa de Cliente (Frontend)}
-A nivel de frontend, se diseñó la interfaz dual que permite a los usuarios interactuar. Se integró Three.js para renderizar un avatar 3D (formato VRM) provisto por Ready Player Me. La aplicación cliente captura los \textit{streams} de audio y video utilizando \texttt{navigator.mediaDevices} y los remite al servidor. Además, recibe los \textit{chunks} de audio de respuesta e interpreta los fonemas (visemas) para sincronizar el movimiento de la boca del avatar, generando una presencia empática.
+El \textit{frontend} integra Three.js y \texttt{three-vrm} para renderizar el avatar ARIA en formato VRM, creado en VRoid. El avatar parpadea, respira y mantiene una postura natural en reposo; mientras habla, un \texttt{AnalyserNode} de la Web Audio API mide la energía del audio y la traduce en la apertura de la boca. La interfaz ofrece dos modos (Figura~\ref{fig:interfaz_dual}): el modo conversacional, con el avatar en primer plano, el micrófono, subtítulos y un carrusel de preguntas sugeridas; y el modo chat, con el historial de mensajes en texto con formato Markdown, en el que la respuesta se escribe a medida que llegan sus fragmentos por el WebSocket. La captura de la cámara y la detección facial se ejecutan en el mismo navegador con MediaPipe Tasks Vision; el modelo BlazeFace (230 KB) se sirve desde el propio servidor y se carga una sola vez al activar la cámara.
 
 \begin{figure}[htbp]
 \centering
@@ -144,261 +233,537 @@ A nivel de frontend, se diseñó la interfaz dual que permite a los usuarios int
     ui/.style={draw, fill=blue!10, rectangle, minimum width=3cm, minimum height=1cm, align=center, rounded corners},
     arrow/.style={->, >=stealth, thick}
 ]
-% Background box representing the browser
 \draw[fill=white, thick, rounded corners] (-1,-1) rectangle (11.5,5);
 \node[above] at (5.25,5) {\textbf{Arquitectura del Frontend (Dual UI Mode)}};
-% Components
 \node[component] (webgl) at (2, 3) {Canvas WebGL\\(Avatar 3D VRM)};
-\node[ui] (bubbles) at (2, 1) {Burbujas Flotantes\\(Sugerencias HTML/CSS)};
-\node[ui] (chat) at (8.5, 3) {Panel de Chat\\(Historial de Texto)};
-\node[ui] (mic) at (8.5, 1) {Controles de Voz\\(Botón Micrófono)};
-% Arrows
-\draw[arrow, dashed] (bubbles) -- node[left] {\small Z-Index Superior} (webgl);
+\node[ui] (bubbles) at (2, 1) {Preguntas sugeridas\\(carrusel HTML/CSS)};
+\node[ui] (chat) at (8.5, 3) {Panel de Chat\\(Historial y subtítulos)};
+\node[ui] (mic) at (8.5, 1) {Controles\\(micrófono y cámara)};
+\draw[arrow, dashed] (bubbles) -- node[left] {\small Superpuestas} (webgl);
 \draw[arrow] (mic) -- node[left] {\small Activa} (chat);
-\draw[<->, >=stealth, thick] (webgl) -- node[above, align=center] {\small Sincronización \\ \small Labial} (chat);
+\draw[<->, >=stealth, thick] (webgl) -- node[above, align=center] {\small Sincronización \\ \small labial} (chat);
 \end{tikzpicture}
 \caption{Diagrama de bloques de la Interfaz Dual y composición de elementos web.}
 \label{fig:interfaz_dual}
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia}
 \end{figure}
 
-\begin{figure}[htbp]
+Las Imágenes~\ref{img:login} a \ref{img:seccion_conversacional} muestran las pantallas principales del prototipo.
+
+\begin{imagen}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{Logos/Seccion_Login.png}
+  \caption{Pantalla de inicio de sesión del Asistente Virtual.}
+  \label{img:login}
+  \elaboradopor{\autorTFG}
+  \fuente{Captura de pantalla del prototipo}
+\end{imagen}
+
+\begin{imagen}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_Chatear.png}
-  \caption{Modo Chat Tradicional del Asistente Virtual.}
+  \caption{Modo Chat del Asistente Virtual.}
   \label{img:seccion_chat}
-  \elaboradopor{Estudiante}
-  \fuente{Captura de pantalla del sistema}
-\end{figure}
-\begin{figure}[htbp]
+  \elaboradopor{\autorTFG}
+  \fuente{Captura de pantalla del prototipo}
+\end{imagen}
+
+\begin{imagen}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{Logos/Seccion_Conversacional.png}
-  \caption{Modo Conversacional Inmersivo (Avatar en primer plano con controles de voz).}
+  \caption{Modo Conversacional (avatar en primer plano con controles de voz).}
   \label{img:seccion_conversacional}
-  \elaboradopor{Estudiante}
-  \fuente{Captura de pantalla del sistema}
-\end{figure}
+  \elaboradopor{\autorTFG}
+  \fuente{Captura de pantalla del prototipo}
+\end{imagen}
+
+\subsection{Paso 4: Despliegue}
+En \textbf{modo local}, el \textit{script} \texttt{iniciar\_\allowbreak{}local.\allowbreak{}sh} levanta el servidor con Uvicorn en \texttt{http:/\allowbreak{}/\allowbreak{}localhost:8000}; los navegadores permiten el uso de cámara y micrófono en \texttt{localhost} sin certificado. El LLM se sirve con el servicio de Ollama del mismo equipo, que el servidor precarga al iniciar y mantiene en memoria durante 60 minutos. Durante las pruebas se observó que, con su configuración por defecto, el proceso de inferencia de Ollama reserva hasta 8 GB de RAM para guardar estados de \textit{prompts} anteriores (81 MB por cada punto de control del modelo híbrido de Nemotron), hasta que el sistema operativo lo termina por falta de memoria; como en este caso de uso esos estados no se reutilizan, se desactivaron con las variables \texttt{LLAMA\_\allowbreak{}ARG\_\allowbreak{}CACHE\_\allowbreak{}RAM=0} y \texttt{LLAMA\_\allowbreak{}ARG\_\allowbreak{}CTX\_\allowbreak{}CHECKPOINTS=0} en el servicio, con lo que el proceso se estabiliza en menos de 1 GB de RAM. En \textbf{modo servidor}, \texttt{docker-\allowbreak{}compose.\allowbreak{}yml} construye el contenedor de la aplicación, monta un volumen persistente para la base vectorial y publica el servicio mediante Traefik con certificados de Let's Encrypt, administrado desde Coolify; un segundo contenedor mantiene el túnel SSH hacia el servidor Ollama de LabITI. En ambos modos, las claves de API y las contraseñas iniciales se definen en el archivo \texttt{.env}, excluido del control de versiones.
 
 \section{Pruebas y Validación}
-Para garantizar la fiabilidad técnica y operativa del Asistente Virtual Inteligente, se ejecutó una batería integral de pruebas en diversos niveles del software.
-
-\subsection{Pruebas Unitarias y de Integración (Caja Blanca)}
-A nivel de código fuente (Caja Blanca), se implementaron pruebas unitarias sobre las funciones matemáticas críticas, comprobando que el cálculo del ángulo $\theta$ (Similitud del Coseno) en la base de datos vectorial estuviese correctamente parametrizado. Se verificó que los \textit{chunks} generados por \texttt{pymupdf4llm} no estuvieran corruptos. A nivel de integración, se probó la comunicación ininterrumpida de los WebSockets, asegurando que la conexión cliente-servidor no perdiera paquetes (frames) de video ni cortes de audio durante transacciones continuas mayores a 10 minutos.
+\label{sec:pruebas}
+Las pruebas se ejecutaron en modo local entre el 21 de julio (primera sesión de la encuesta) y el 7 de octubre de 2026 (pruebas técnicas). Las pruebas técnicas se automatizaron con los \textit{scripts} de la carpeta \texttt{evaluacion/} del repositorio, que reutilizan las funciones de producción o se conectan al servidor en ejecución, de modo que cualquier evaluador puede repetirlas. Las mediciones técnicas corresponden a la versión final del prototipo (Fase 6), mientras que la encuesta de usabilidad se aplicó sobre las versiones de julio (Fase 3) y de inicios de octubre (Fase 5).
 
 \subsection{Pruebas Funcionales (Caja Negra)}
-Las pruebas de caja negra validaron el comportamiento del sistema desde la perspectiva del usuario final, evaluando la interacción conversacional sin conocer la lógica interna del código. Para este propósito, se estructuró un conjunto de pruebas diseñadas para evaluar tanto casos ideales (caminos felices) como situaciones límite (preguntas ambiguas o fuera de contexto). Se formularon 50 consultas académicas aleatorias que debían ser respondidas exclusivamente utilizando la información inyectada en la base de datos vectorial ChromaDB.
+La Tabla~\ref{tab:pruebas_funcionales} resume los casos ejecutados sobre los requerimientos funcionales y su resultado.
 
-Durante las pruebas, se prestó especial atención a la capacidad de comprensión del Asistente Virtual Multimodal frente a modismos locales y formulaciones gramaticales informales por parte de los estudiantes. Se comprobó que, ante preguntas fuera del dominio (ej. receta médica), el sistema respondiera correctamente "No dispongo de información reglamentaria para responder esto", mitigando eficazmente el riesgo de alucinaciones. 
+\begin{table}[H]
+  \caption{Resultado de las pruebas funcionales.}
+  \label{tab:pruebas_funcionales}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{1.3cm}|>{\raggedright\arraybackslash}p{5.1cm}|>{\raggedright\arraybackslash}p{4.0cm}|>{\centering\arraybackslash}p{1.6cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{RF} & \textbf{Caso de prueba} & \textbf{Resultado obtenido} & \textbf{Estado} \\ \hline
+    RF-01 & Fotograma con rostro y fotograma sin rostro (320$\times$240) con BlazeFace & 1 rostro detectado; ninguna detección sin rostro; 2,8 ms por fotograma & Cumple \\ \hline
+    RF-02 & Transcripción de 40 preguntas habladas & WER medio de 1,9\%; 35 de 40 exactas & Cumple \\ \hline
+    RF-03 & Recuperación sobre los bancos de desarrollo y de prueba (50 preguntas cada uno) & \textit{Hit Rate}@3 de 92\% y 94\% & Cumple \\ \hline
+    RF-04 & 80 preguntas del dominio y 10 fuera de dominio & 80\% y 90\% de respuestas correctas; 10/10 rechazos & Cumple \\ \hline
+    RF-05 & Síntesis de las 30 respuestas & 30/30 audios generados & Cumple \\ \hline
+    RF-06 & Llegada, salida, retorno y ruido frente a la cámara (secuencias de detecciones) & 5 de 5 casos con el evento esperado en el fotograma esperado & Cumple \\ \hline
+    RF-07 & Acceso sin sesión, con clave errónea y con rol regular & 401 / 4401 / 401 / 403 según corresponde & Cumple \\ \hline
+    RF-08 & Reconstrucción del índice del documento base & 89 fragmentos indexados en 10,0 s & Cumple \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Resultados de los \textit{scripts} de evaluación (\texttt{evaluacion/\allowbreak{}resultados/})}
+\end{table}
 
-El motor RAG fue configurado bajo un estricto patrón de "Contexto Cerrado". Si la métrica de similitud del coseno es inferior al umbral mínimo establecido, el prompt del sistema instruye al LLM a declinar la respuesta. Este proceso de validación externa garantizó que el sistema mantenga un alto grado de rigor y fiabilidad institucional.
-
-\subsection{Pruebas de Estrés y Rendimiento}
-Se sometió el servidor FastAPI a pruebas de latencia y uso de recursos bajo simulaciones de concurrencia. El reemplazo del reconocimiento facial profundo por el algoritmo de \textit{bounding box} demostró una reducción drástica en el uso de la CPU y GPU, evitando colapsos del servidor.
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    ybar,
-    bar width=20pt,
-    enlargelimits=0.2,
-    legend style={at={(0.5,-0.20)}, anchor=north,legend columns=-1},
-    ylabel={Uso del Procesador (\%)},
-    symbolic x coords={Red Neuronal Profunda, Bounding Box Ligero (Implementado)},
-    xtick=data,
-    nodes near coords,
-    nodes near coords align={vertical},
-    width=0.8\textwidth,
-    height=6cm,
-    ymin=0, ymax=100
-    ]
-\addplot[fill=red!40] coordinates {(Red Neuronal Profunda,85) (Bounding Box Ligero (Implementado),12)};
-\addplot[fill=blue!40] coordinates {(Red Neuronal Profunda,60) (Bounding Box Ligero (Implementado),4)};
-\legend{Uso de CPU (Subproceso OpenCV), Uso de GPU (Dedicada)}
-\end{axis}
-\end{tikzpicture}
-\caption{Comparativa del uso de CPU y GPU entre métodos de visión artificial.}
-\label{fig:cpu_usage}
-\end{figure}
-
-\subsection{Pruebas de Usabilidad}
-Se realizó una prueba empírica (evaluación heurística y encuestas de usabilidad) con 13 estudiantes reales de la carrera, analizando la percepción de integración de la inteligencia artificial, la eficacia en la resolución de sus dudas y la antropomorfización de la interfaz. Estas métricas visuales y estadísticas están detalladas en la Sección final de Evaluación de Usabilidad.
-
-\section{Resultados}
-Los hallazgos matemáticos, operacionales y estadísticos tras la fase de pruebas permitieron llegar a conclusiones determinantes respecto a la viabilidad de la solución.
-
-\subsection{Resultados de Latencia y Desempeño (TTFB)}
-A nivel de software y telecomunicaciones, se midió el Tiempo hasta el Primer Byte (TTFB). Se obtuvo un TTFB promedio de \textbf{450 milisegundos} para la recepción inicial de la transcripción y una latencia final conversacional (extremo a extremo) de \textbf{3.2 segundos} mediante HTTP Streaming Chunking. Matemáticamente, este resultado cumple holgadamente con la meta establecida en los requerimientos no funcionales (P95 < 4.0 segundos). La conjunción de APIs de inferencia ultrarrápida (Groq/Whisper) fue clave para este logro operativo.
-
-Para evaluar la reducción de latencia de forma rigurosa y determinar la fiabilidad del sistema en producción, se aplicaron las siguientes fórmulas estadísticas sobre los registros de telemetría:
+\subsection{Evaluación del Motor de Recuperación}
+Se construyeron dos bancos de 50 preguntas en lenguaje estudiantil sobre las categorías del documento (malla curricular, prácticas, perfil de egreso, titulación, inglés, aranceles, pagos, becas, homologación, contacto, admisiones y datos de la carrera). El \textbf{banco de desarrollo} se utilizó para comparar estrategias de recuperación y tamaños de fragmento; el \textbf{banco de prueba}, redactado antes de las optimizaciones y no utilizado para ajustar ningún parámetro, se reservó para la medición final de la configuración elegida, con el fin de evitar que el resultado reportado esté sobreajustado a las preguntas usadas durante el desarrollo. Para cada pregunta se definió como \textit{gold standard} una o más frases literales del documento que deben aparecer en el fragmento recuperado; el \textit{script} verifica que cada frase exista en el corpus antes de evaluar. Se calcularon el \textit{Hit Rate} en los $k$ primeros resultados (Ecuación~\ref{eq:hitrate}) y el Rango Recíproco Medio (MRR, Ecuación~\ref{eq:mrr}) \cite{voorhees1999trec}:
 
 \begin{equation}
+\label{eq:hitrate}
+\text{Hit Rate@}k = \frac{1}{N} \sum_{i=1}^{N} \mathbb{1}\left[\, r_i \leq k \,\right] \times 100
+\end{equation}
+\addeqtolist{Tasa de acierto de recuperación semántica (Hit Rate@k)}
+
+\begin{equation}
+\label{eq:mrr}
+\text{MRR@}5 = \frac{1}{N} \sum_{i=1}^{N} \frac{1}{r_i}, \qquad \frac{1}{r_i} = 0 \text{ si } r_i > 5
+\end{equation}
+\addeqtolist{Rango Recíproco Medio de la recuperación (MRR@5)}
+
+donde $N$ es el número de preguntas y $r_i$ la posición del primer fragmento relevante para la pregunta $i$. El \textit{Hit Rate}@3 es la métrica principal, porque el sistema entrega al LLM los 3 primeros fragmentos.
+
+\subsection{Evaluación de la Exactitud de las Respuestas}
+Las respuestas generadas para las 30 primeras preguntas del banco de desarrollo y para las 50 del banco de prueba, cada una en una sesión nueva y sin historial, se contrastaron manualmente con el documento fuente y se clasificaron como correctas, parciales, incorrectas o sin respuesta. Además, se enviaron las 10 preguntas fuera de dominio para verificar el rechazo.
+
+\subsection{Evaluación del Tiempo de Respuesta (TTFB)}
+El tiempo hasta el primer fragmento de la respuesta (TTFB, \textit{Time to First Byte}) se midió de extremo a extremo contra el servidor en ejecución, con un cliente que reproduce el comportamiento del navegador: abre el WebSocket \texttt{/ws/chat} con una sesión válida, envía cada pregunta del banco de prueba y registra el instante en que recibe el primer fragmento de texto (Ecuación~\ref{eq:ttfb}):
+
+\begin{equation}
+\label{eq:ttfb}
+TTFB = t_{\text{primer fragmento}} - t_{\text{envío de la consulta}}
+\end{equation}
+\addeqtolist{Tiempo hasta el primer fragmento de la respuesta por WebSocket}
+
+Las 50 preguntas se enviaron en una misma sesión, tras dos consultas de calentamiento, por lo que el \textit{prompt} incluye el historial de los turnos anteriores, como en una conversación real. El TTFB incluye la recuperación híbrida, el procesamiento del \textit{prompt} por el LLM y la transmisión por WebSocket.
+
+\subsection{Evaluación de Latencia de la Interacción por Voz}
+Para medir la latencia de una interacción completa por voz, cada pregunta del banco de desarrollo se sintetizó como audio con una voz neuronal de \textit{edge-tts} (simulando al estudiante) y se procesó con el mismo flujo que el prototipo: transcripción en Groq, recuperación y generación mediante la función de producción \texttt{generar\_\allowbreak{}respuesta()} y síntesis en ElevenLabs. Se midió el tiempo de cada etapa en 30 preguntas del dominio y 10 fuera de dominio, tras una consulta de calentamiento. Como el navegador solicita el audio cuando la respuesta está completa, la latencia percibida se define como el tiempo desde que el audio del estudiante llega al servidor hasta que se recibe el primer fragmento de audio de la respuesta (Ecuación~\ref{eq:latencia}):
+
+\begin{equation}
+\label{eq:latencia}
+L_{percibida} = t_{STT} + t_{respuesta} + TTFB_{TTS}
+\end{equation}
+\addeqtolist{Latencia percibida de una consulta por voz}
+
+donde $t_{respuesta}$ incluye la recuperación y la generación completa del texto. Para cada medición se calcularon la media ($\bar{x}$), la desviación estándar ($s$), el percentil 95 (P95) y el intervalo de confianza al 95\% de la media (Ecuaciones~\ref{eq:media} a \ref{eq:ic95}):
+
+\begin{equation}
+\label{eq:media}
 \bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i
 \end{equation}
-\addeqtolist{Media aritmética de la latencia (TTFB)}
+\addeqtolist{Media aritmética de la latencia}
 
 \begin{equation}
+\label{eq:desv}
 s = \sqrt{\frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2}
 \end{equation}
 \addeqtolist{Desviación estándar de los tiempos de respuesta}
 
 \begin{equation}
-IC_{95} = 1.96 \times \left( \frac{s}{\sqrt{n}} \right)
+\label{eq:ic95}
+IC_{95} = \bar{x} \pm 1.96 \times \frac{s}{\sqrt{n}}
 \end{equation}
-\addeqtolist{Intervalo de Confianza al 95\%}
+\addeqtolist{Intervalo de confianza al 95\% de la media}
 
-Estos cálculos garantizan que el sistema responde de forma estable dentro de los intervalos de confianza permitidos.
+\subsection{Evaluación del Módulo de Visión}
+Para cuantificar el costo de la detección de presencia se ejecutó el mismo modelo que usa el navegador (BlazeFace de corto alcance) con la API de Python de MediaPipe sobre un fotograma con rostro (imagen ``astronaut'' de la NASA, de dominio público) y uno sin rostro, en resoluciones de 320$\times$240 y 640$\times$480, con 300 repeticiones por caso. Se midió además el tamaño del mensaje enviado al servidor y se comparó con el del esquema anterior, que enviaba el fotograma JPEG en Base64. En el navegador la inferencia se ejecuta con WebAssembly o WebGL, por lo que su tiempo exacto depende del equipo del usuario.
 
-A continuación, la Tabla~\ref{tab:registro_telemetria} muestra el registro piloto de prueba de campo con 10 interacciones para fundamentar los cálculos empíricos:
+\subsection{Pruebas de Presencia y de Seguridad}
+La lógica de presencia se probó alimentando la clase \texttt{Detector\allowbreak{}Presencia} con secuencias de detecciones (llegada, salida y retorno; un rostro en un solo fotograma; una ausencia breve de 3 fotogramas) y, de extremo a extremo, abriendo el WebSocket \texttt{/ws} con y sin sesión. En seguridad, con el cliente de pruebas de FastAPI y una copia temporal de la base de usuarios se verificó que los \textit{endpoints} de chat, voz y diagnóstico rechazan peticiones sin sesión (código 401), que los WebSocket se cierran con el código 4401 sin sesión, que un usuario regular no accede a las rutas de administración (código 403) y que las contraseñas almacenadas con el esquema anterior (SHA-256 sin \textit{salt}) se migran a PBKDF2 al iniciar sesión.
+
+\subsection{Pruebas de Usabilidad}
+Un total de 16 estudiantes de la carrera utilizaron el prototipo en modo local y respondieron el cuestionario del Anexo~B, previo consentimiento informado (Anexo~C): 13 el 21 de julio de 2026 y 3 entre el 3 y el 4 de octubre de 2026. La encuesta evaluó las versiones de las Fases 3 y 5, anteriores a la migración del LLM local y a las optimizaciones de recuperación y latencia de la Fase 6.
+
+\section{Resultados}
+
+\subsection{Resultados del Motor de Recuperación}
+\label{sec:resultados_rag}
+La Tabla~\ref{tab:resultados_rag} compara, sobre el banco de desarrollo, la configuración anterior (solo búsqueda semántica con fragmentos de 1.500 caracteres) con las estrategias evaluadas en la Fase 6 sobre fragmentos de 800 caracteres.
 
 \begin{table}[H]
-  \caption{Registro Piloto de Prueba de Campo y Latencia Extremo a Extremo.}
-  \label{tab:registro_telemetria}
+  \caption{Comparación de estrategias de recuperación (banco de desarrollo, 50 preguntas).}
+  \label{tab:resultados_rag}
   \centering
   \small
-  \renewcommand{\arraystretch}{1.25}
-  \resizebox{\textwidth}{!}{
-  \begin{tabular}{|c|p{4cm}|c|c|p{6.5cm}|}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|l|c|c|c|c|}
     \hline
     \rowcolor[HTML]{EFEFEF}
-    \textbf{ID de Prueba} & \textbf{Usuario (Estudiante)} & \textbf{Latencia (ms)} & \textbf{RAG Top-3} & \textbf{Observación / Contexto} \\ \hline
-    \textbf{PR-01} & Estudiante 1 - 4to Sem & 3120 & SÍ & Consulta sobre prerrequisitos de Redes I. Luz normal, voz clara. \\ \hline
-    \textbf{PR-02} & Estudiante 2 - 4to Sem & 3450 & SÍ & Consulta sobre reglamento de prácticas. Voz baja, detectado con éxito. \\ \hline
-    \textbf{PR-03} & Estudiante 3 - 8vo Sem & 4100 & SÍ & Consulta de modalidades de titulación. Latencia alta en red local. \\ \hline
-    \textbf{PR-04} & Estudiante 4 - 8vo Sem & 2980 & SÍ & Consulta sobre malla curricular. Respuesta semántica directa. \\ \hline
-    \textbf{PR-05} & Estudiante 5 - 3er Sem & 3200 & SÍ & Consulta de horarios. Similitud coseno alta (0.85). \\ \hline
-    \textbf{PR-06} & Estudiante 6 - 3er Sem & 3310 & SÍ & Consulta de reglamentos de homologación. Respuesta contextualizada. \\ \hline
-    \textbf{PR-07} & Estudiante 7 - 4to Sem & 5200 & NO & Consulta capciosa sobre deportes. Se activó restricción de dominio. \\ \hline
-    \textbf{PR-08} & Estudiante 8 - 4to Sem & 3050 & SÍ & Consulta sobre syllabus de Programación. Audio claro. \\ \hline
-    \textbf{PR-09} & Estudiante 9 - 1er Sem & 3500 & SÍ & Consulta sobre ubicación de laboratorios. Detección por cámara normal. \\ \hline
-    \textbf{PR-10} & Estudiante 10 - 8vo Sem & 3800 & SÍ & Consulta sobre carpeta de titulación. Ruido de fondo moderado. \\ \hline
+    \textbf{Estrategia} & \textbf{Hit@1} & \textbf{Hit@3} & \textbf{Hit@5} & \textbf{MRR@5} \\ \hline
+    Semántica, 1.500/300 (versión anterior) & 34\% & 62\% & 70\% & 0,489 \\ \hline
+    Semántica (MiniLM), 800/160 & 42\% & 60\% & 66\% & 0,511 \\ \hline
+    Léxica (BM25), 800/160 & 56\% & 76\% & 78\% & 0,654 \\ \hline
+    Híbrida (RRF), 800/160 & 42\% & 72\% & 80\% & 0,566 \\ \hline
+    \textbf{Híbrida + reordenamiento, 800/160} & \textbf{60\%} & \textbf{92\%} & \textbf{96\%} & \textbf{0,748} \\ \hline
   \end{tabular}
-  }
+  \elaboradopor{\autorTFG}
+  \fuente{\texttt{evaluacion/\allowbreak{}experimento\_\allowbreak{}recuperacion.\allowbreak{}py}}
 \end{table}
-\subsection{Resultados Semánticos e Hipótesis}
-A nivel del Motor de IA, la exactitud y capacidad resolutiva se cuantificó a través de un \textit{Hit Rate} (Ecuación~\ref{eq:hitrate}), que evalúa rigurosamente el motor de recuperación semántica de la siguiente manera:
 
-\begin{equation}
-\label{eq:hitrate}
-\text{Hit Rate} = \left( \frac{\text{Consultas Correctas}}{N_{total}} \right) \times 100
-\end{equation}
-\addeqtolist{Tasa de Acierto de Recuperación Semántica (Hit Rate)}
-
-El sistema demostró que, en el 92,0\% de las consultas académicas, el fragmento normativo exacto fue recuperado en los primeros tres lugares (\textit{Top-3}) por la base vectorial. 
-
-Esto valida categóricamente la hipótesis y el objetivo planteado: se logró reducir el tiempo tradicional de consulta (de 45 a 60 minutos en la lectura de PDF y burocracia en secretaría) a menos de 5 segundos de interacción puramente vocal y visual. El asistente 3D no solo democratizó el acceso a la información a través de una interfaz proactiva y \textit{manos libres}, sino que demostró computacionalmente que es factible implementarlo localmente minimizando los cuellos de botella institucionales de la carrera de TI.
-
-\section{Cronograma y Presupuesto}
-Para la ejecución del proyecto, se elaboró un presupuesto estimado mensualizado (OPEX) y de inversión inicial (CAPEX) considerando los costos de las APIs utilizadas y la infraestructura del servidor local (Tabla~\ref{tab:presupuesto}).
+La búsqueda semántica por sí sola no distingue bien fragmentos de vocabulario similar, como las listas de asignaturas de niveles distintos, mientras que BM25 aprovecha los términos exactos de la consulta. La fusión de ambas amplía los candidatos, y el reordenamiento con el \textit{cross-encoder} es el paso decisivo: eleva el \textit{Hit Rate}@3 de 72\% a 92\%. La Tabla~\ref{tab:chunking} muestra la sensibilidad de esta estrategia al tamaño de fragmento.
 
 \begin{table}[H]
-  \caption{Presupuesto referencial de implementación y operación.}
-  \label{tab:presupuesto}
+  \caption{Sensibilidad de la recuperación híbrida con reordenamiento al tamaño de fragmento (banco de desarrollo).}
+  \label{tab:chunking}
   \centering
-  
-  
-  \begin{tabular}{|l|p{6cm}|r|}
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|c|c|c|c|c|}
     \hline
     \rowcolor[HTML]{EFEFEF}
-    \textbf{Categoría} & \textbf{Descripción} & \textbf{Costo (USD)} \\ \hline
-    \textbf{Hardware (CAPEX)} & Servidor Local (i7, 32GB RAM, RTX 3060 12GB) & \$ 1,200.00 \\ \hline
-    \textbf{Infraestructura} & Despliegue en DigitalOcean (Droplet básico - Opcional) & \$ 10.00 / mes \\ \hline
-    \textbf{APIs de IA (OPEX)} & Groq (Whisper-v3) y ElevenLabs (TTS Streaming) & \$ 25.00 / mes \\ \hline
-    \textbf{Mantenimiento} & Soporte y actualización de mallas & \$ 50.00 / mes \\ \hline
+    \textbf{Tamaño / solapamiento} & \textbf{Fragmentos} & \textbf{Hit@1} & \textbf{Hit@3} & \textbf{MRR@5} \\ \hline
+    1.500 / 300 & 42 & 72\% & 94\% & 0,828 \\ \hline
+    1.000 / 200 & 64 & 56\% & 92\% & 0,733 \\ \hline
+    \textbf{800 / 160 (producción)} & \textbf{89} & \textbf{60\%} & \textbf{92\%} & \textbf{0,748} \\ \hline
+    700 / 140 & 104 & 60\% & 92\% & 0,751 \\ \hline
+    600 / 120 & 120 & 54\% & 86\% & 0,698 \\ \hline
   \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{\texttt{evaluacion/\allowbreak{}experimento\_\allowbreak{}recuperacion.\allowbreak{}py}}
 \end{table}
 
-Los valores presentados constituyen una estimación de referencia. Los costos asociados a APIs dependen del volumen real de uso, minutos de audio procesado, número de consultas y condiciones comerciales de los proveedores; por tanto, pueden variar durante una implementación institucional.
-
-El desarrollo se planificó y ejecutó a lo largo de un periodo de cinco meses, estructurado según las iteraciones ágiles detalladas en la Tabla~\ref{tab:cronograma}.
+Entre 700 y 1.500 caracteres el \textit{Hit Rate}@3 varía entre 92\% y 94\%, una diferencia de una sola pregunta. Se eligió 800/160 porque, con un acierto equivalente, el contexto de 3 fragmentos ocupa aproximadamente la mitad de \textit{tokens} que con fragmentos de 1.500 caracteres (unos 390 frente a unos 750), lo que a la velocidad de procesamiento del \textit{prompt} medida en el equipo (cerca de 3.000 \textit{tokens} por segundo) supone unos 120 ms menos de TTFB por consulta (estimación). La Tabla~\ref{tab:rag_final} presenta la medición final de la configuración de producción en ambos bancos.
 
 \begin{table}[H]
-  \caption{Cronograma de ejecución del proyecto.}
-  \label{tab:cronograma}
+  \caption{Resultado de la configuración de producción (híbrida + reordenamiento, 800/160, Top-3).}
+  \label{tab:rag_final}
   \centering
-  
-  
-  \resizebox{\textwidth}{!}{
+  \small
+  \renewcommand{\arraystretch}{1.2}
   \begin{tabular}{|l|c|c|c|c|c|}
     \hline
     \rowcolor[HTML]{EFEFEF}
-    \textbf{Fase / Mes} & \textbf{Mes 1} & \textbf{Mes 2} & \textbf{Mes 3} & \textbf{Mes 4} & \textbf{Mes 5} \\ \hline
-    Fase 1: Configuración Local e Indexación RAG & X & & & & \\ \hline
-    Fase 2: Motor Cognitivo (LLM y Nemotron) & & X & X & & \\ \hline
-    Fase 3: Desarrollo Sensorial (STT y TTS) & & & X & X & \\ \hline
-    Fase 4: Integración Avatar 3D & & & & X & \\ \hline
-    Fase 5: Pruebas de Latencia y Usabilidad & & & & & X \\ \hline
+    \textbf{Banco} & \textbf{Hit@1} & \textbf{Hit@3} & \textbf{Hit@5} & \textbf{MRR@5} & \textbf{Tiempo (ms)} \\ \hline
+    Desarrollo (50) & 60\% & \textbf{92,0\%} & 96\% & 0,748 & 28,6 \\ \hline
+    Prueba reservado (50) & 84\% & \textbf{94,0\%} & 100\% & 0,893 & 28,9 \\ \hline
   \end{tabular}
-  }
+  \elaboradopor{\autorTFG}
+  \fuente{\texttt{evaluacion/\allowbreak{}evaluar\_\allowbreak{}rag.\allowbreak{}py}}
 \end{table}
 
-\section{Evaluación de Usabilidad y Experiencia de Usuario}
-Para validar la efectividad de la solución, se aplicó una encuesta de usabilidad a una muestra de 13 estudiantes de la carrera de Tecnologías de la Información de diferentes semestres. La evaluación midió factores de integración, antropomorfismo, latencia percibida e intención de uso futuro. A continuación, se detallan los resultados gráficos de las preguntas clave.
+La configuración de producción alcanzó un \textit{Hit Rate}@3 de 92,0\% en el banco de desarrollo (46 de 50 preguntas) y de 94,0\% en el banco de prueba reservado (47 de 50), cuyo fragmento correcto apareció siempre entre los 5 primeros. Que el resultado se mantenga en preguntas no usadas durante el ajuste indica que la mejora no se debe a un sobreajuste al banco de desarrollo. La recuperación completa, incluido el reordenamiento en la GPU, tomó en promedio 29 ms. Los fallos restantes corresponden a preguntas cuya respuesta está en fragmentos con vocabulario muy cercano a otros (por ejemplo, las asignaturas del segundo nivel frente a las de otros niveles, o la ponderación de la experiencia profesional frente a sus años mínimos en la homologación). La Figura~\ref{fig:rag_categoria} presenta el desempeño por categoría en el banco de prueba.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA1.png}
-\caption{Nivel de avance actual de los estudiantes encuestados.}
+\begin{tikzpicture}
+\begin{axis}[
+    xbar,
+    bar width=8pt,
+    width=0.8\textwidth,
+    height=8.0cm,
+    xmin=0, xmax=118,
+    xlabel={\textit{Hit Rate}@3 (\%)},
+    symbolic y coords={Inglés, Homologación, Pagos, Admisiones, Becas, Aranceles, Perfil de egreso, Prácticas, Malla curricular, Contacto, Carrera},
+    ytick=data,
+    y tick label style={font=\small},
+    nodes near coords,
+    nodes near coords style={font=\scriptsize},
+    point meta=explicit symbolic
+]
+\addplot[fill=cyan!50, draw=black!70] coordinates {
+    (80,Inglés) [4/5]
+    (83.3,Homologación) [5/6]
+    (88.9,Pagos) [8/9]
+    (100,Admisiones) [1/1]
+    (100,Becas) [4/4]
+    (100,Aranceles) [7/7]
+    (100,Perfil de egreso) [3/3]
+    (100,Prácticas) [1/1]
+    (100,Malla curricular) [7/7]
+    (100,Contacto) [6/6]
+    (100,Carrera) [1/1]
+};
+\end{axis}
+\end{tikzpicture}
+\caption{\textit{Hit Rate}@3 por categoría en el banco de prueba (aciertos / preguntas).}
+\label{fig:rag_categoria}
+\elaboradopor{\autorTFG}
+\fuente{\texttt{evaluacion/\allowbreak{}resultados/\allowbreak{}rag\_\allowbreak{}detalle.\allowbreak{}csv}}
 \end{figure}
+
+\subsection{Exactitud de las Respuestas Generadas}
+La Tabla~\ref{tab:exactitud} presenta la clasificación de las respuestas de la versión final y, como referencia, la de la versión anterior (Llama 3.2 11B por la API de NVIDIA y búsqueda solo semántica) sobre las mismas 30 preguntas de desarrollo. El detalle de cada respuesta y su justificación se encuentra en \texttt{evaluacion/\allowbreak{}resultados/\allowbreak{}respuestas\_\allowbreak{}ollama.\allowbreak{}csv}.
+
+\begin{table}[H]
+  \caption{Clasificación de las respuestas generadas.}
+  \label{tab:exactitud}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|l|>{\centering\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{3.2cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Clasificación} & \textbf{Versión anterior, desarrollo (30)} & \textbf{Versión final, desarrollo (30)} & \textbf{Versión final, prueba (50)} \\ \hline
+    Correcta & 14 (46,7\%) & \textbf{24 (80,0\%)} & \textbf{45 (90,0\%)} \\ \hline
+    Parcial & 3 (10,0\%) & 2 (6,7\%) & 2 (4,0\%) \\ \hline
+    Sin respuesta & 7 (23,3\%) & 2 (6,7\%) & 1 (2,0\%) \\ \hline
+    Incorrecta & 6 (20,0\%) & 2 (6,7\%) & 2 (4,0\%) \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{\texttt{evaluacion/\allowbreak{}resultados/\allowbreak{}exactitud\_\allowbreak{}respuestas.\allowbreak{}csv} y \texttt{respuestas\_\allowbreak{}ollama.\allowbreak{}csv}}
+\end{table}
+
+Las respuestas correctas pasaron de 46,7\% a 80,0\% en las mismas preguntas y alcanzaron el 90,0\% en el banco de prueba. De las 4 respuestas incorrectas de la versión final, 2 se deben a fallos de recuperación (el fragmento correcto no estaba entre los 3 primeros) y 2 a que el modelo, con el fragmento correcto disponible, respondió con datos cercanos: indicó dónde se realizan las prácticas preprofesionales en lugar de su nivel y enumeró las asignaturas del octavo nivel como competencias del perfil de egreso. Durante el ajuste se detectó que el modelo añadía a veces la frase de ``información no encontrada'' después de una respuesta correcta; se precisó la regla correspondiente del \textit{prompt} del sistema usando solo el banco de desarrollo. Las 10 preguntas fuera de dominio (recetas, deportes, política, otras carreras, generación de código, intento de \textit{jailbreak}, entre otras) fueron rechazadas; el intento de \textit{jailbreak} fue bloqueado por el filtro de código sin consultar al LLM.
+
+\subsection{Resultados del Tiempo de Respuesta (TTFB)}
+La Tabla~\ref{tab:ttfb} presenta el TTFB medido por WebSocket sobre las 50 preguntas del banco de prueba.
+
+\begin{table}[H]
+  \caption{Tiempo hasta el primer fragmento de la respuesta por WebSocket (banco de prueba, 50 consultas, en milisegundos).}
+  \label{tab:ttfb}
+  \centering
+  \small
+  \setlength{\tabcolsep}{3.5pt}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|l|r|r|r|r|r|r|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Medición} & \textbf{Media} & \textbf{$s$} & \textbf{Mediana} & \textbf{P95} & \textbf{Máx.} & \textbf{$IC_{95}$} \\ \hline
+    RAG híbrido & 34,5 & 4,1 & 33,8 & 44,5 & 46,0 & $\pm$1,1 \\ \hline
+    \textbf{TTFB (WebSocket)} & \textbf{385,2} & \textbf{38,7} & \textbf{383,1} & \textbf{440,8} & \textbf{473,5} & \textbf{$\pm$10,7} \\ \hline
+    Respuesta completa & 711,7 & 155,4 & 710,0 & 1.031,8 & 1.042,1 & $\pm$43,1 \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{\texttt{evaluacion/\allowbreak{}evaluar\_\allowbreak{}ttfb\_\allowbreak{}ws.\allowbreak{}py}, ejecutado el 7 de octubre de 2026}
+\end{table}
+
+El TTFB promedio fue de 385 ms (IC 95\%: 375 a 396 ms), con 49 de las 50 consultas por debajo de 450 ms y un máximo de 474 ms, por lo que se cumple la meta de un TTFB promedio no mayor a 450 ms (RNF-02). La diferencia entre el tiempo medido por el cliente y el registrado en el servidor fue inferior a 1 ms, de modo que el WebSocket no añade latencia apreciable. Una repetición independiente de la misma prueba dio un promedio de 390 ms. Antes de desactivar la caché de \textit{prompts} de Ollama, el TTFB promedio en las mismas condiciones era de 460 a 490 ms y el servicio llegó a detenerse por falta de memoria, lo que muestra la importancia de esa configuración. Con la versión anterior, que esperaba la respuesta completa del LLM remoto, el primer texto llegaba en promedio a los 4,7 s.
+
+\subsection{Resultados de Latencia de la Interacción por Voz}
+La Tabla~\ref{tab:latencia} y la Figura~\ref{fig:latencia_etapas} presentan las latencias de la interacción por voz medidas en modo local.
+
+\begin{table}[H]
+  \caption{Latencia por etapa de la interacción por voz en modo local (30 preguntas del dominio, en milisegundos).}
+  \label{tab:latencia}
+  \centering
+  \small
+  \setlength{\tabcolsep}{3.5pt}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|l|r|r|r|r|r|r|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Etapa} & \textbf{Media} & \textbf{$s$} & \textbf{Mediana} & \textbf{P95} & \textbf{Máx.} & \textbf{$IC_{95}$} \\ \hline
+    STT (Groq Whisper) & 375 & 139 & 310 & 513 & 1.133 & $\pm$43 \\ \hline
+    RAG híbrido (local) & 38 & 4 & 37 & 45 & 49 & $\pm$2 \\ \hline
+    TTFB (texto) & 384 & 38 & 385 & 446 & 453 & $\pm$14 \\ \hline
+    Respuesta completa (RAG + LLM) & 848 & 156 & 841 & 1.128 & 1.138 & $\pm$56 \\ \hline
+    TTS primer byte & 642 & 79 & 621 & 811 & 812 & $\pm$28 \\ \hline
+    TTS audio completo & 968 & 106 & 985 & 1.112 & 1.112 & $\pm$38 \\ \hline
+    \textbf{Latencia percibida} & \textbf{1.869} & \textbf{208} & \textbf{1.839} & \textbf{2.151} & \textbf{2.565} & \textbf{$\pm$74} \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{\texttt{evaluacion/\allowbreak{}evaluar\_\allowbreak{}latencia.\allowbreak{}py}, ejecutado el 7 de octubre de 2026}
+\end{table}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA2.png}
-\caption{Frecuencia de interacción previa con IA generativa.}
+\begin{tikzpicture}
+\begin{axis}[
+    xbar stacked,
+    bar width=16pt,
+    width=0.78\textwidth,
+    height=5.2cm,
+    xmin=0,
+    xlabel={Tiempo (ms)},
+    xticklabel style={/pgf/number format/1000 sep={.}},
+    symbolic y coords={Versión anterior, Versión final},
+    ytick=data,
+    y tick label style={font=\small},
+    legend style={at={(0.5,-0.45)}, anchor=north, legend columns=3, font=\small},
+    reverse legend=false
+]
+\addplot[fill=cyan!50] coordinates {(356,Versión anterior) (310,Versión final)};
+\addplot[fill=orange!60] coordinates {(3014,Versión anterior) (841,Versión final)};
+\addplot[fill=red!40] coordinates {(2504,Versión anterior) (621,Versión final)};
+\legend{STT, RAG + LLM (respuesta completa), TTS (primer byte)}
+\end{axis}
+\end{tikzpicture}
+\caption{Composición de la latencia percibida por etapa: versión anterior y versión final (medianas).}
+\label{fig:latencia_etapas}
+\elaboradopor{\autorTFG}
+\fuente{\texttt{evaluacion/\allowbreak{}resultados/\allowbreak{}latencia\_\allowbreak{}resumen.\allowbreak{}json} y mediciones de la versión anterior}
 \end{figure}
 
-El perfil de los usuarios indica que la mayoría se encuentra en el 4to y 8vo semestre, y presentan una alta frecuencia de uso previo de herramientas como ChatGPT o Claude, lo que evidencia familiaridad previa de la mayoría de los participantes con herramientas de IA generativa.
+La latencia percibida tuvo una media de 1,87 s y una mediana de 1,84 s, frente a la mediana de 6,0 s de la versión anterior; 24 de las 30 consultas comenzaron a sonar en menos de 2 s y todas en menos de 3 s, con un P95 de 2,15 s, por lo que el requisito RNF-02 (P95 menor a 4 s) \textbf{se cumple}. La mejora proviene del LLM local, que eliminó la cola del servicio remoto (antes de 1,2 a 24,8 s por consulta, ahora de 0,6 a 1,1 s para la respuesta completa), y del modelo de síntesis Flash v2.5, que redujo el primer byte de audio de 2,5 s a 0,6 s. En la versión final, la respuesta completa explica el 45\% de la latencia percibida, la síntesis de voz el 34\% y la transcripción el 20\%. La transcripción fue rápida y precisa: WER medio de 1,9\%, con 35 de 40 transcripciones exactas; los errores afectaron a términos como ``Python'' o ``B1''.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA3.png}
-\caption{Conocimiento técnico en renderización 3D.}
-\end{figure}
+\subsection{Resultados del Módulo de Visión}
+La Tabla~\ref{tab:vision} presenta el costo de la detección de presencia con BlazeFace y el tamaño del mensaje enviado al servidor, comparado con el del esquema anterior.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA4.png}
-\caption{Percepción de integración de los módulos del sistema.}
-\end{figure}
+\begin{table}[H]
+  \caption{Costo de la detección de presencia por fotograma (300 repeticiones).}
+  \label{tab:vision}
+  \centering
+  \small
+  \setlength{\tabcolsep}{3.5pt}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|l|c|c|c|c|c|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Fotograma} & \textbf{Resolución} & \textbf{ms ($\bar{x} \pm s$)} & \textbf{Rostros} & \textbf{Cajas (B)} & \textbf{JPEG (B)} \\ \hline
+    Con rostro & 320$\times$240 & 2,84 $\pm$ 0,45 & 1 & 30 & 13.407 \\ \hline
+    Con rostro & 640$\times$480 & 2,92 $\pm$ 0,42 & 1 & 33 & 34.199 \\ \hline
+    Sin rostro & 320$\times$240 & 2,74 $\pm$ 0,42 & 0 & 13 & 7.359 \\ \hline
+    Sin rostro & 640$\times$480 & 2,77 $\pm$ 0,42 & 0 & 13 & 54.615 \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{\texttt{evaluacion/\allowbreak{}evaluar\_\allowbreak{}vision.\allowbreak{}py} (AMD Ryzen 7 7735HS, MediaPipe 0.10.14). B: bytes del mensaje con cajas delimitadoras y del JPEG en Base64 del esquema anterior}
+\end{table}
 
-Respecto a la integración, la mayoría de los usuarios consideraron que la interfaz, el micrófono y el modelo 3D estaban de acuerdo o totalmente de acuerdo en estar bien integrados, demostrando una experiencia fluida.
+BlazeFace detectó el rostro de la imagen de prueba y no produjo falsas detecciones en el fotograma sin rostro, con un tiempo de inferencia de unos 3 ms por fotograma, prácticamente independiente de la resolución, frente a los 15 a 54 ms que requería el clasificador Haar Cascade en el servidor. A un fotograma por segundo, la detección ocupa menos del 0,3\% de un núcleo del equipo del usuario, y cada mensaje al servidor pasa de 7 a 55 KB (imagen JPEG) a menos de 40 bytes (coordenadas), es decir, una reducción de más de 400 veces en el tráfico del módulo de visión. Las pruebas de presencia obtuvieron el evento esperado en los 5 casos: la llegada se confirmó en el segundo fotograma, la salida en el cuarto fotograma sin rostro, un rostro aislado no generó evento y una ausencia de 3 fotogramas no se interpretó como salida. En seguridad, los 12 casos obtuvieron el resultado esperado y la contraseña con el esquema anterior se migró a PBKDF2 tras el inicio de sesión.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA5.png}
-\caption{Claridad y precisión de la información académica.}
-\end{figure}
+\subsection{Resultados de la Evaluación de Usabilidad}
+Participaron 16 estudiantes: 13 el 21 de julio de 2026, sobre la versión de la Fase 3, y 3 entre el 3 y el 4 de octubre de 2026, sobre la versión de la Fase 5. Por nivel, 8 cursaban cuarto semestre, 4 octavo, 3 tercero y 1 sexto (Figura~\ref{fig:enc_nivel}). Todos reportaron un uso frecuente de herramientas de IA generativa (media de 4,75 sobre 5), mientras que su conocimiento en renderización 3D fue heterogéneo (media de 3,0). La Tabla~\ref{tab:usabilidad} resume los ítems de evaluación del prototipo; el porcentaje de acuerdo corresponde a las respuestas ``De acuerdo'' y ``Totalmente de acuerdo'' (o 4 y 5 en el diferencial semántico), y el de desacuerdo, a ``En desacuerdo'' y ``Totalmente en desacuerdo'' (o 1 y 2).
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA6.png}
-\caption{Gestión de mensajes de error o fallos técnicos.}
-\end{figure}
+\begin{table}[H]
+  \caption{Resultados de la encuesta de usabilidad (n = 16).}
+  \label{tab:usabilidad}
+  \centering
+  \small
+  \setlength{\tabcolsep}{3.5pt}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{6.8cm}|c|c|c|c|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Ítem} & \textbf{Media} & \textbf{Med.} & \textbf{\% Acuer.} & \textbf{\% Desac.} \\ \hline
+    Las funciones del sistema están bien integradas & 3,50 & 4 & 69 & 25 \\ \hline
+    El sistema es innecesariamente complejo (ítem inverso) & 2,75 & 2 & 44 & 56 \\ \hline
+    La información es clara, precisa y fácil de entender & 3,44 & 4 & 56 & 25 \\ \hline
+    Mensajes de error claros ante fallos & 3,19 & 3 & 44 & 31 \\ \hline
+    Explicó su propósito y límites al inicio & 3,38 & 4 & 56 & 25 \\ \hline
+    Comprendió mis intenciones con precisión & 3,38 & 4 & 56 & 25 \\ \hline
+    Respuestas útiles y relevantes & 3,56 & 4 & 69 & 25 \\ \hline
+    Reconduce la conversación ante malentendidos & 3,31 & 4 & 56 & 31 \\ \hline
+    Antropomorfismo del avatar (1 a 5) & 4,19 & 4 & 81 & 0 \\ \hline
+    Animacidad: movimientos y sincronización labial (1 a 5) & 4,06 & 4 & 69 & 0 \\ \hline
+    Afinidad visual y empatía (1 a 5) & 4,25 & 4,5 & 75 & 0 \\ \hline
+    Inteligencia percibida (1 a 5) & 4,19 & 4 & 81 & 0 \\ \hline
+    Latencia aceptable & 3,19 & 3,5 & 50 & 31 \\ \hline
+    Uso de la cámara poco invasivo y confiable & 3,38 & 4 & 56 & 31 \\ \hline
+    Aumentaría mi eficiencia para encontrar información & 3,25 & 4 & 62 & 31 \\ \hline
+    Preferiría usar el asistente en el futuro & 3,38 & 4 & 69 & 31 \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Respuestas al cuestionario del Anexo~B (21 de julio y 3 a 4 de octubre de 2026)}
+\end{table}
 
-En la claridad de la información, predominan valoraciones positivas, evidenciando que el motor RAG cumplió su objetivo de reducir la fricción documental.
+Los ítems del avatar obtuvieron las valoraciones más altas (69\% a 81\% de acuerdo, sin respuestas desfavorables). En los ítems funcionales y de aceptación, la mayoría expresó acuerdo en la integración de las funciones, la utilidad de las respuestas y la intención de uso futuro (62\% a 69\%), mientras que los aspectos peor valorados fueron los mensajes de error (44\% de acuerdo) y la latencia (50\% de acuerdo y 31\% de desacuerdo), lo que coincide con las mediciones técnicas de las versiones evaluadas (mediana de 6,0 s hasta el inicio de la respuesta hablada en la versión de julio). Estos resultados motivaron las optimizaciones de la Fase 6, que redujeron esa mediana a 1,8 s; la percepción de los estudiantes sobre la versión final no se ha medido todavía. Se observó además que 4 de los 16 participantes, todos de la sesión de julio, marcaron ``Totalmente en desacuerdo'' en todos o casi todos los ítems Likert, incluido el ítem inverso sobre complejidad, mientras valoraban positivamente al avatar; este patrón de respuesta uniforme puede indicar una lectura incorrecta de la escala, por lo que los porcentajes deben interpretarse con cautela. Las sugerencias abiertas se concentraron en la interfaz (4 menciones), la velocidad de respuesta (3, una de ellas mediante caché), la ampliación de la base documental (3), la interpretación y calidad de las respuestas (2), la arquitectura (2), la fluidez y pronunciación de la voz (2) y la concurrencia (1); un participante indicó que el sistema estaba bien estructurado. Las Figuras~\ref{fig:enc_nivel} a \ref{fig:enc_aceptacion} presentan la distribución de las respuestas.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA8.png}
-\caption{Comprensión precisa de las intenciones del usuario.}
-\end{figure}
+\input{Logos/graficos_encuesta.tex}
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA9.png}
-\caption{Relevancia y utilidad de las respuestas de la IA.}
-\end{figure}
+\subsection{Comparación entre la Situación Inicial y la Propuesta}
+La Tabla~\ref{tab:matriz_comparativa} contrasta la situación inicial con los resultados medidos del prototipo y la Tabla~\ref{tab:cumplimiento_rnf}, el cumplimiento de los requerimientos no funcionales.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.95\textwidth]{Extras/PREGUNTA10.png}
-\caption{Capacidad de reconducción ante malentendidos.}
-\end{figure}
+\begin{table}[H]
+  \caption{Matriz comparativa: situación inicial frente al prototipo.}
+  \label{tab:matriz_comparativa}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{4.4cm}|>{\raggedright\arraybackslash}p{5.2cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Criterio} & \textbf{Situación inicial} & \textbf{Prototipo (valor medido)} \\ \hline
+    Modo de interacción & Navegación manual por menús y PDF & Conversación por voz o texto con avatar 3D \\ \hline
+    Búsqueda & Palabras clave o lectura completa & Híbrida con reordenamiento: \textit{Hit Rate}@3 de 92,0\% (desarrollo) y 94,0\% (prueba) \\ \hline
+    Exactitud de la respuesta & Depende del personal o de la lectura del estudiante & 90\% correctas, 4\% parciales, 2\% sin respuesta y 4\% incorrectas (banco de prueba) \\ \hline
+    Tiempo de respuesta & Sujeto al horario de atención (08h00 a 17h00) & TTFB promedio de 385 ms por WebSocket; mediana de 1,8 s hasta el inicio de la respuesta hablada (P95 de 2,2 s) \\ \hline
+    Disponibilidad & Lunes a viernes en horario de oficina & Mientras el servidor local y los servicios de voz estén disponibles \\ \hline
+    Carga operativa & 76 h-hombre/mes estimadas & No medida; requiere un piloto con registro de consultas \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Diagnóstico (Capítulo~\ref{chap:metodologia}) y resultados de este capítulo}
+\end{table}
 
-\begin{figure}[htbp]
-  {\centering
-  \includegraphics[width=0.85\textwidth]{Extras/PREGUNTA11.png}
-  \caption{Preferencia futura de uso del asistente virtual.}\par}
-  
-  \vspace{0.4cm}
-  Finalmente, la mayoría de los participantes seleccionó las categorías 'De acuerdo' o 'Totalmente de acuerdo' respecto a su intención de utilizar nuevamente el asistente frente a la búsqueda web tradicional. Entre las sugerencias de mejora emitidas por los estudiantes se destacó optimizar aún más la latencia y ampliar la base de datos documental.
-\end{figure}
+\begin{table}[H]
+  \caption{Cumplimiento de los requerimientos no funcionales.}
+  \label{tab:cumplimiento_rnf}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{1.5cm}|>{\raggedright\arraybackslash}p{3.9cm}|>{\raggedright\arraybackslash}p{4.8cm}|>{\centering\arraybackslash}p{1.9cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{RNF} & \textbf{Meta} & \textbf{Resultado} & \textbf{Estado} \\ \hline
+    RNF-01 & Sin transmisión ni persistencia de imágenes & Solo se envían coordenadas (13 a 33 bytes) & Cumple \\ \hline
+    RNF-02 & TTFB promedio $\leq$ 450 ms y latencia percibida P95 $<$ 4,0 s & TTFB promedio de 385 ms; P95 percibido de 2,2 s & Cumple \\ \hline
+    RNF-03 & 100\% de rechazo fuera de dominio & 10 de 10 rechazos & Cumple \\ \hline
+    RNF-04 & Sin conexión con el SGA & Sin credenciales ni conexión & Cumple \\ \hline
+    RNF-05 & Reindexación $<$ 60 s & 10,0 s & Cumple \\ \hline
+    RNF-06 & Usabilidad aceptable & 44\% a 69\% de acuerdo en ítems funcionales; 69\% a 81\% en el avatar (n = 16) & Parcial \\ \hline
+    RNF-07 & Dos modos de despliegue & Modo local y VPS con Docker & Cumple \\ \hline
+    RNF-08 & 401/403 sin autorización & 12 de 12 casos & Cumple \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Resultados de las pruebas de este capítulo}
+\end{table}
+
+\section{Cronograma y Presupuesto}
+
+\subsection{Cronograma}
+El proyecto se ejecutó entre enero y octubre de 2026. La Tabla~\ref{tab:cronograma} presenta las fases y los meses en que se ejecutaron, contrastados con las fechas del historial de versiones del repositorio.
+
+\begin{table}[H]
+  \caption{Cronograma de ejecución del proyecto (2026).}
+  \label{tab:cronograma}
+  \centering
+  \small
+  \setlength{\tabcolsep}{3pt}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{4.4cm}|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Fase} & \textbf{Ene} & \textbf{Feb} & \textbf{Mar} & \textbf{Abr} & \textbf{May} & \textbf{Jun} & \textbf{Jul} & \textbf{Ago} & \textbf{Sep} & \textbf{Oct} \\ \hline
+    Diagnóstico, revisión documental y estado del arte & X & X & X & X & & & & & & \\ \hline
+    Fase 1: Avatar 3D y motor RAG inicial & & & & & X & & & & & \\ \hline
+    Fase 2: Interfaz dual y panel RAG & & & & & & X & & & & \\ \hline
+    Fase 3: Visión, voz, autenticación y despliegue & & & & & & & X & & & \\ \hline
+    Encuesta de usabilidad (21 de julio y 3 a 4 de octubre) & & & & & & & X & & & X \\ \hline
+    Fase 4: Proveedor LLM, interfaz y manuales & & & & & & & & X & X & \\ \hline
+    Fase 5: Seguridad, ajuste RAG y evaluación técnica & & & & & & & & & & X \\ \hline
+    Fase 6: RAG híbrido, LLM local, \textit{streaming} y visión en el cliente & & & & & & & & & & X \\ \hline
+    Redacción del documento & & & X & X & X & X & X & X & X & X \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Historial de versiones del repositorio}
+\end{table}
+
+\subsection{Presupuesto}
+No se adquirió hardware para el proyecto: el desarrollo y las pruebas se realizaron en el equipo personal del autor, cuya GPU ejecuta el LLM local, y el servidor del despliegue piloto y la GPU de LabITI fueron facilitados por la infraestructura del laboratorio. Los costos corresponden a los servicios de voz consumidos por API (Tabla~\ref{tab:presupuesto}).
+
+\begin{table}[H]
+  \caption{Presupuesto referencial de operación del prototipo.}
+  \label{tab:presupuesto}
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{6.2cm}|>{\raggedright\arraybackslash}p{3.3cm}|}
+    \hline
+    \rowcolor[HTML]{EFEFEF}
+    \textbf{Rubro} & \textbf{Descripción} & \textbf{Costo (USD)} \\ \hline
+    Hardware & Equipo de desarrollo existente (no adquirido) & 0,00 \\ \hline
+    Servidor (VPS) & Infraestructura del laboratorio para el despliegue piloto & 0,00 (facilitado) \\ \hline
+    TTS & ElevenLabs, plan Creator (100.000 caracteres/mes) & 22,00 / mes \\ \hline
+    LLM & Nemotron 3 Nano local con Ollama (licencia abierta de NVIDIA), sin costo por consulta; no incluye el consumo eléctrico del equipo & 0,00 \\ \hline
+    STT & Groq Whisper \texttt{large-v3}, plan gratuito (USD 0,111 por hora de audio en el plan de pago) & 0,00 \\ \hline
+    Dominio y certificados & Subdominio institucional y Let's Encrypt & 0,00 \\ \hline
+    \textbf{Total mensual} & & \textbf{22,00 / mes} \\ \hline
+  \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Precios de lista de los proveedores a octubre de 2026 (referenciales)}
+\end{table}
+
+El costo variable por consulta se estima con la Ecuación~\ref{eq:costo_consulta}. Con una respuesta media de 129 caracteres en la versión final, el plan de ElevenLabs (22 USD por 100.000 caracteres) y unos 10 segundos de audio facturados por Groq en el plan de pago:
+
+\begin{equation}
+\label{eq:costo_consulta}
+C_{consulta} = \underbrace{129 \times \frac{22}{100.000}}_{TTS} + \underbrace{\frac{10}{3.600} \times 0{,}111}_{STT} \approx 0{,}028 + 0{,}0003 \approx 0{,}03 \text{ USD}
+\end{equation}
+\addeqtolist{Costo variable estimado por consulta por voz}
+
+Con la carga estimada de 304 consultas mensuales del diagnóstico, el costo de voz sería de unos 9 USD al mes, dentro de la cuota del plan; el LLM local no genera costo por consulta. La síntesis de voz es, por tanto, el rubro dominante del costo por consulta. Los valores son referenciales y dependen de las condiciones comerciales vigentes de cada proveedor.

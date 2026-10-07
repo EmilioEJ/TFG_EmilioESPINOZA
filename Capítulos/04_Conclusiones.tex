@@ -1,40 +1,50 @@
 \chapter{Conclusiones y Recomendaciones}
 
 \section{Conclusiones}
-A partir del desarrollo e implementación del Asistente Virtual Inteligente, se han establecido las siguientes conclusiones respecto al cumplimiento de los objetivos planteados:
+A partir del desarrollo y la evaluación del Asistente Virtual Inteligente, se establecen las siguientes conclusiones, una por cada objetivo específico:
 
 \begin{itemize}
-    \item El análisis de los procesos actuales permitió identificar limitaciones asociadas con la consulta manual de documentos y la ausencia de mecanismos de búsqueda semántica, lo cual permitió establecer los requerimientos funcionales y no funcionales del prototipo.
+    \item \textbf{Objetivo 1 (análisis):} La revisión documental permitió consolidar en un único documento base la información de malla curricular, aranceles, pagos, becas, homologación, inglés y contacto de la carrera, y definir ocho requerimientos funcionales y ocho no funcionales trazables con el código. Al no existir registros institucionales de consultas, la carga operativa del proceso actual se estimó en 76 horas-hombre mensuales a partir de supuestos explícitos; esta cifra es una estimación y no una medición.
 
-    \item Se diseñó una arquitectura modular cliente-servidor que integró el motor RAG, los servicios de voz, el módulo de interacción visual y el avatar 3D. El uso de WebSockets permitió implementar comunicación bidireccional y procesamiento asíncrono entre cliente y backend.
+    \item \textbf{Objetivo 2 (diseño):} Se diseñó una arquitectura cliente-servidor modular e híbrida: el navegador realiza la detección de presencia por cajas delimitadoras y el renderizado 3D en WebGL; el servidor local, un monolito modular en FastAPI, orquesta el RAG y el LLM Nemotron servido por Ollama y se comunica con el cliente mediante WebSockets; y la transcripción y la síntesis de voz se consumen como servicios externos. El proveedor del LLM es intercambiable mediante configuración. El diseño admite dos modos de despliegue con el mismo código: el modo local, principal y utilizado en todas las pruebas, y un despliegue piloto en un servidor virtual con Docker, Coolify y un túnel hacia la GPU de LabITI.
 
-    \item Se implementó el motor RAG utilizando el modelo de embeddings \texttt{paraphrase-multilingual-}\allowbreak\texttt{MiniLM-L12-v2}, obteniendo un \textit{Hit Rate} Top-3 global de 92,0\% y un MRR de 0,84 en el conjunto de consultas empleado para la evaluación. Estos resultados evidencian un desempeño favorable del mecanismo de recuperación dentro de las condiciones evaluadas.
+    \item \textbf{Objetivo 3 (implementación):} Se implementó un prototipo funcional que integra un avatar VRM con sincronización labial por amplitud, transcripción con Whisper (WER medio de 1,9\%), recuperación híbrida local con el modelo de \textit{embeddings} \texttt{paraphrase-\allowbreak{}multilingual-\allowbreak{}MiniLM-\allowbreak{}L12-\allowbreak{}v2}, BM25 y reordenamiento (29 ms por consulta), generación local con Nemotron 3 Nano entregada en \textit{streaming} por WebSocket, síntesis de voz con ElevenLabs y detección de presencia con MediaPipe en el navegador (unos 3 ms por fotograma y mensajes de menos de 40 bytes). Durante el proceso se corrigieron diferencias entre el diseño y el código, como la métrica coseno de la base vectorial, la unificación de los parámetros del RAG y la autenticación de los \textit{endpoints} de voz, diagnóstico y WebSocket, y se identificó y resolvió un consumo excesivo de memoria del servidor de inferencia.
 
-    \item La integración del avatar 3D, reconocimiento de voz, síntesis de voz y mecanismos de visión artificial permitió obtener un prototipo multimodal funcional. Las mediciones realizadas evidenciaron tiempos compatibles con una interacción conversacional en el entorno de prueba, aunque el rendimiento final depende de la infraestructura y de los servicios externos empleados.
-
-    \item La evaluación piloto realizada con 13 estudiantes presentó una tendencia favorable en la percepción de integración, utilidad e intención futura de uso del prototipo. Debido al carácter exploratorio y al tamaño de la muestra, estos resultados se interpretan como evidencia inicial de aceptación y no como resultados generalizables a toda la población estudiantil.
+    \item \textbf{Objetivo 4 (evaluación):} La evaluación reproducible permitió iterar el diseño según el ciclo DSRM. La primera medición evidenció las limitaciones de la versión inicial (\textit{Hit Rate}@3 de 62\% y mediana de 6,0 s hasta la respuesta hablada), y tras las optimizaciones el motor de recuperación alcanzó un \textit{Hit Rate}@3 de 92,0\% en el banco de desarrollo y de 94,0\% en un banco de prueba reservado; el 90\% de las respuestas del banco de prueba fueron correctas; el TTFB promedio por WebSocket fue de 385 ms, por debajo de la meta de 450 ms; y la latencia percibida por voz bajó a una mediana de 1,8 s con un P95 de 2,2 s, dentro de la meta de 4 s. La restricción de dominio funcionó en las 10 preguntas fuera de dominio y la seguridad de acceso en los 12 casos probados. La encuesta piloto con 16 estudiantes, aplicada sobre las versiones de julio y de inicios de octubre, valoró muy bien al avatar (69\% a 81\% de acuerdo, sin respuestas desfavorables) y de forma mayoritariamente positiva la integración, la utilidad de las respuestas y la intención de uso (62\% a 69\%), con la latencia y los mensajes de error como aspectos peor valorados. Por el tamaño de la muestra y su carácter exploratorio, estos resultados de usabilidad son evidencia inicial y no generalizable.
 \end{itemize}
 
+En conjunto, el prototipo demuestra la viabilidad técnica de integrar un avatar 3D, voz, visión y RAG en una aplicación web para orientar a los estudiantes, con una arquitectura que mantiene en el equipo local la recuperación, el LLM y las imágenes de la cámara. Aunque los resultados técnicos cumplen las metas planteadas, antes de un despliegue institucional se requiere validar la versión final con usuarios, ampliar la base documental y monitorear las respuestas incorrectas que aún se producen.
+
 \section{Recomendaciones}
-Con base en los retos enfrentados y el análisis técnico del sistema en producción, se presentan las siguientes recomendaciones:
+Con base en las limitaciones demostradas en el Capítulo~\ref{chap:implementacion}, se presentan las siguientes recomendaciones:
 
 \begin{itemize}
-    \item \textbf{Escalabilidad y Pruebas de Estrés Exhaustivas:} Dado que las pruebas de concurrencia mediante JMeter tuvieron un alcance exploratorio para validar el funcionamiento asíncrono, se recomienda realizar pruebas de estrés a gran escala antes de un despliegue institucional definitivo. Esto permitirá dimensionar adecuadamente la infraestructura requerida e implementar estrategias de balanceo de carga en entornos en la nube (cloud) cuando el sistema migre desde el servidor local de desarrollo.
+    \item \textbf{Validar la versión final con usuarios:} Repetir la encuesta de usabilidad sobre la versión con LLM local y respuesta en \textit{streaming}, para comprobar si la reducción de la latencia mejora la percepción del aspecto peor valorado.
 
-    \item \textbf{Dependencia de Red y Latencia (Limitación de APIs de Terceros):} Dado que los tiempos de respuesta de la transcripción y síntesis de voz dependen de servicios en la nube externos (ElevenLabs y Groq), el sistema es susceptible a variaciones en el ancho de banda institucional. Se recomienda explorar o implementar localmente modelos de voz (\textit{On-Premise}) o sistemas de caché para mitigar retrasos si la conexión a internet de la universidad presenta intermitencias.
-    
-    \item \textbf{Calidad de la Base Documental (Limitación de Recuperación):} El motor RAG demostró mitigar efectivamente las alucinaciones siempre y cuando los documentos indexados sean de alta legibilidad semántica. Se recomienda que la administración del sistema aplique un protocolo estricto de curaduría de archivos PDF antes de cargarlos, rechazando documentos escaneados sin Reconocimiento Óptico de Caracteres (OCR) válido, ya que degradan la capacidad de búsqueda.
-    
-    \item \textbf{Control de costos operativos:} Debido a que los servicios externos de voz pueden incrementar su costo en función del volumen de solicitudes, se recomienda monitorear el consumo real durante una eventual implementación institucional y evaluar alternativas locales o esquemas de control de uso cuando sean necesarios.
+    \item \textbf{Mantener la evaluación de la recuperación:} Cada vez que se actualice la base documental, ejecutar los bancos de desarrollo y de prueba del repositorio y ampliarlos con preguntas sobre los nuevos documentos, de modo que el \textit{Hit Rate} se mantenga como indicador de calidad.
+
+    \item \textbf{Reducir las respuestas incorrectas:} Las respuestas incorrectas restantes provienen de fallos de recuperación y de confusiones entre datos cercanos. Se recomienda pedir al modelo que cite el fragmento usado, probar modelos locales de mayor tamaño si se dispone de más memoria de GPU y ampliar la evaluación manual con un segundo evaluador para medir la concordancia.
+
+    \item \textbf{Reducir la latencia de la voz:} La síntesis de voz aporta ahora el 34\% de la latencia percibida. Se recomienda enviar el texto al TTS por oraciones a medida que llega por el WebSocket, de modo que el avatar comience a hablar antes de que termine la generación, y evaluar un servicio de transcripción local.
+
+    \item \textbf{Configurar el servidor de inferencia:} En cualquier despliegue con Ollama, desactivar la caché de \textit{prompts} en RAM (\texttt{LLAMA\_\allowbreak{}ARG\_\allowbreak{}CACHE\_\allowbreak{}RAM=0}) o limitarla según la memoria disponible, ya que con la configuración por defecto el servicio puede detenerse por falta de memoria.
+
+    \item \textbf{Fortalecer la seguridad del despliegue:} Antes de cualquier uso con estudiantes en el servidor público, definir contraseñas propias mediante las variables \texttt{INITIAL\_\allowbreak{}USER\_\allowbreak{}PASSWORD} e \texttt{INITIAL\_\allowbreak{}ADMIN\_\allowbreak{}PASSWORD}, cambiar las cuentas existentes y asignar los roles mediante una columna en la base de datos en lugar de un nombre de usuario fijo.
+
+    \item \textbf{Validar el impacto operativo:} La reducción de la carga administrativa no pudo medirse. Se recomienda un piloto de al menos un periodo académico que registre el número de consultas resueltas por el asistente y las atendidas por secretaría, para contrastar la estimación de 76 horas-hombre mensuales.
+
+    \item \textbf{Control de costos operativos:} La síntesis de voz representa casi todo el costo variable estimado (0,03 USD por consulta), ya que el LLM local no tiene costo por uso. Se recomienda monitorear el consumo de caracteres y ofrecer respuestas solo en texto cuando el usuario no utilice el modo conversacional.
 \end{itemize}
 
 \section{Trabajos Futuros}
-El prototipo actual sienta una base tecnológica sólida sobre la cual pueden derivarse múltiples líneas de investigación o ampliación de producto:
+El prototipo actual sienta una base tecnológica sobre la cual pueden derivarse las siguientes líneas de investigación o ampliación:
 
 \begin{itemize}
-    \item \textbf{Integración Profunda con el SGA Institucional:} Una evolución natural del proyecto consistiría en integrar la sesión autenticada del estudiante con las bases de datos transaccionales de la universidad (mediante APIs RESTful). Esto permitiría al asistente no solo informar sobre normas generales, sino brindar respuestas hiper-personalizadas, tales como "Dada tu nota actual, te sugiero tomar estas dos materias como prerrequisito".
-    
-    \item \textbf{Generación de Emociones Dinámicas (Affective Computing):} Actualmente el avatar realiza sincronización labial y animaciones programadas. Como trabajo futuro, se puede entrenar un modelo de análisis de sentimientos que evalúe la carga emocional de la respuesta del LLM en tiempo real, activando \textit{blendshapes} específicos (sonrisas ante buenas noticias o expresiones de empatía ante problemas) para dotar al avatar de inteligencia emocional.
-    
-    \item \textbf{Análisis Longitudinal del Impacto Estudiantil:} Ejecutar el protocolo de Google Forms diseñado a lo largo de uno o dos periodos académicos completos para analizar estadísticamente si la disponibilidad continua del asistente reduce el abandono estudiantil provocado por la desinformación de procesos administrativos.
+    \item \textbf{Integración con el SGA Institucional:} Integrar la sesión autenticada del estudiante con las bases de datos académicas mediante APIs RESTful permitiría respuestas personalizadas, por ejemplo sobre el avance en la malla o los pagos pendientes, con los controles de privacidad correspondientes.
+
+    \item \textbf{Interacción manos libres:} Incorporar detección de actividad de voz (VAD) y de fin de habla para eliminar la necesidad de pulsar el micrófono, aprovechando la detección de presencia ya implementada para activar la escucha.
+
+    \item \textbf{Generación de Emociones Dinámicas (\textit{Affective Computing}):} Clasificar el tono de cada respuesta del LLM para activar expresiones del avatar acordes al contenido y evaluar su efecto en la percepción de empatía.
+
+    \item \textbf{Evaluación con una muestra representativa:} Repetir la encuesta con una muestra probabilística de estudiantes de ambas sedes e instrumentos validados (por ejemplo, la escala SUS), y analizar el patrón de respuestas uniformes observado en el piloto.
 \end{itemize}

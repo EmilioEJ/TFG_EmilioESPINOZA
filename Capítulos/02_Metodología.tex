@@ -2,9 +2,10 @@
 \label{chap:metodologia}
 
 \section{Diagnóstico de la Situación Actual}
+\label{sec:diagnostico_ref}
 La gestión actual de la información académica en la carrera de Tecnologías de la Información de la Universidad Tecnológica Indoamérica (UTI) se apoya en una infraestructura transaccional robusta conocida como Sistema de Gestión Académica (SGA). Si bien este sistema cumple eficientemente con los procesos de matriculación y registro de calificaciones, presenta limitaciones significativas en su capa de difusión de información de consulta rápida.
 
-En la actualidad, si un estudiante requiere resolver inquietudes de carácter operativo (tales como la secuenciación de prerrequisitos en su malla curricular, modalidades de titulación o revisión de los reglamentos de prácticas preprofesionales), el flujo de interacción resulta ser puramente estático y asíncrono. El estudiante debe autenticarse en el portal, navegar a través de una arquitectura de información basada en menús jerárquicos y, finalmente, descargar archivos en formato PDF.
+En la actualidad, si un estudiante requiere resolver inquietudes de carácter operativo (tales como la secuenciación de asignaturas en su malla curricular, el valor de los aranceles, el procedimiento para registrar un comprobante de pago, la acreditación del inglés B1 o los requisitos de homologación), el flujo de interacción resulta estático y asíncrono. El estudiante debe autenticarse en el portal, navegar a través de menús jerárquicos y descargar archivos en formato PDF, o bien acudir a los canales de atención humana (secretaría, correo electrónico, teléfono o WhatsApp institucional), que operan de lunes a viernes de 08h00 a 17h00.
 
 La relevancia de mejorar este proceso de difusión se sustenta en la rigurosidad de las normativas internas. Por ejemplo, el Reglamento de Régimen Académico Interno de la Universidad Tecnológica Indoamérica establece directrices críticas que el estudiante debe interpretar correctamente para no retrasar su progreso académico:
 
@@ -12,70 +13,82 @@ La relevancia de mejorar este proceso de difusión se sustenta en la rigurosidad
 ``Las prácticas preprofesionales se realizarán en entornos organizacionales, institucionales, empresariales, comunitarios u otros relacionados al ámbito profesional de la carrera o programa, públicos o privados, nacionales o internacionales, que garanticen el desarrollo de competencias para el ejercicio profesional'' (UTI, 2024, Art. 45).
 \end{quote}
 
-Esta dispersión y complejidad documental exige una interfaz más inteligente. Las principales limitaciones técnicas de este enfoque estático son:
+Esta dispersión y complejidad documental exige una interfaz más inteligente. Las principales limitaciones técnicas del enfoque actual son:
 \begin{itemize}
-    \item \textbf{Carencia de búsqueda semántica:} Los repositorios actuales dependen de búsquedas por palabras clave exactas o navegación manual. El sistema no comprende la intención del usuario ni puede extraer párrafos específicos de un documento extenso (por ejemplo, un reglamento de 50 páginas) para responder una duda puntual.
-    \item \textbf{Ausencia de proactividad en la interfaz:} El sistema requiere que el usuario inicie la interacción mediante el uso de un periférico tradicional (teclado/ratón), sin aprovechar las capacidades del entorno físico, como la detección de presencia.
-    \item \textbf{Sobrecarga administrativa:} Al no existir un primer nivel de soporte interactivo capaz de interpretar las mallas curriculares, los estudiantes que no logran comprender los documentos estáticos acuden presencialmente a las secretarías, generando cuellos de botella para tareas inherentemente automatizables.
+    \item \textbf{Carencia de búsqueda semántica:} Los repositorios actuales dependen de búsquedas por palabras clave exactas o de la navegación manual. El sistema no comprende la intención del usuario ni puede extraer el párrafo específico de un documento extenso para responder una duda puntual.
+    \item \textbf{Ausencia de proactividad en la interfaz:} La interacción depende de que el usuario inicie la búsqueda; no existe un agente que salude, oriente o sugiera preguntas frecuentes.
+    \item \textbf{Concentración de consultas en canales humanos:} Al no existir un primer nivel de soporte automatizado, las dudas repetitivas sobre malla, aranceles, becas y homologación se canalizan hacia secretaría y coordinación.
 \end{itemize}
 
-Para fundamentar cuantitativamente el diagnóstico de la situación actual y evaluar las deficiencias operativas que resuelve la solución propuesta, se analizaron las métricas institucionales del servicio de orientación académica y atención por secretaría en la carrera de Tecnologías de la Información \cite{uti2025rc}:
+\subsection{Estimación de la Carga Operativa}
+La institución no dispone de bitácoras públicas que registren el número de consultas ni su tiempo de atención por carrera; por ello, este trabajo no reporta mediciones directas del proceso actual. Para dimensionar el problema se construyó un modelo de estimación con supuestos explícitos, cuyos valores deben validarse con registros institucionales en una implementación definitiva:
 
 \begin{itemize}
-    \item \textbf{Tiempos promedio de consulta manual:} En la actualidad, una consulta tradicional ---que involucra la autenticación obligatoria en el SGA, navegación por menús jerárquicos, descarga e interpretación de archivos PDF estáticos (mallas, sílabos o reglamentos institucionales) y, en muchos casos, el desplazamiento físico a la secretaría por dudas de interpretación--- consume un tiempo promedio de \textbf{45 a 60 minutos por estudiante} \cite{uti2025rc}. La medición de esta métrica operativa se estructuró a través de un estudio de tiempos, empleando cronometría digital y el análisis de bitácoras de atención. Para el cálculo del tiempo promedio se aplicó la fórmula estadística de la media aritmética ($\bar{X} = \frac{\sum t_i}{n}$), donde $t_i$ representa el tiempo individual de resolución de la consulta y $n$ el tamaño total de la muestra observada. Cuando la orientación se realiza en ventanilla de secretaría académica, el personal de coordinación invierte entre \textbf{15 y 20 minutos (0.25 h) por caso}. Asimismo, para consultas canalizadas vía correo electrónico institucional, el tiempo de respuesta varía entre \textbf{24 y 48 horas en días laborables}, extendiéndose hasta 12 o 20 días hábiles en revisiones documentales complejas de homologación \cite{unescoin2024}.
-    \item \textbf{Volumen de solicitudes y carga laboral administrativa:} En la carrera de Ingeniería en Tecnologías de la Información, con un universo poblacional activo de aproximadamente \textbf{380 estudiantes cursando la malla curricular} en las sedes Quito y Ambato \cite{uti2025rc}, un 25\% de los estudiantes realiza de manera recurrente al menos una consulta reglamentaria o curricular al mes. Ello genera alrededor de \textbf{300 consultas mensuales} de carácter repetitivo en secretaría académica, demandando aproximadamente \textbf{75 a 100 horas-hombre al mes} dedicadas exclusivamente a tareas repetitivas y de baja complejidad cognitiva.
-
-    \begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}
-    \begin{axis}[
-        ybar,
-        bar width=30pt,
-        enlargelimits=0.15,
-        ylabel={Volumen / Horas},
-        symbolic x coords={Universo Estudiantil, Estudiantes Consultantes, Consultas Mensuales, Horas-Hombre (Promedio)},
-        xtick=data,
-        nodes near coords,
-        nodes near coords align={vertical},
-        x tick label style={text width=3cm, align=center},
-        width=0.95\textwidth,
-        height=7.5cm,
-        ymin=0, ymax=450
-        ]
-    \addplot[fill=cyan!40, draw=black!70] coordinates {
-        (Universo Estudiantil,380) 
-        (Estudiantes Consultantes,95) 
-        (Consultas Mensuales,300) 
-        (Horas-Hombre (Promedio),88)
-    };
-    \end{axis}
-    \end{tikzpicture}
-    \caption{Estadísticas del volumen mensual de consultas y carga laboral asociada.}
-    \label{fig:estadisticas_consultas}
-    \end{figure}
-    \item \textbf{Nivel de satisfacción, errores de interpretación e ``Ilusión de aprendizaje'':} La dependencia de repositorios estáticos y la carencia de indexación semántica propician un índice recurrente de errores en la interpretación de prerrequisitos y normativas de titulación. Además, el estudio latinoamericano de adopción tecnológica muestra que un 74\% de la comunidad académica acepta y demanda interfaces interactivas de asistencia digital \cite{ilia2024ecuador}, confirmando la insatisfacción con los portales estáticos tradicionales.
-    \item \textbf{Contraste operativo con el Asistente Virtual Multimodal:} Frente a este diagnóstico, el motor de Generación Aumentada por Recuperación (RAG) multilingüe desarrollado en esta tesis ha demostrado empíricamente una precisión de recuperación semántica del \textbf{92,0\%} en mallas y normativas institucionales. El sistema resuelve la consulta de manera instantánea, con un tiempo hasta el primer byte (\textit{Time-to-First-Byte} - TTFB) de \textbf{450 milisegundos} y un tiempo total de generación conversacional de \textbf{3,2 segundos}, reduciendo el tiempo de consulta estudiantil de 60 minutos a pocos segundos y generando un ahorro operativo estimado de \textbf{69 a 85 horas-hombre mensuales} para la administración académica \cite{uti2025rc}.
+    \item \textbf{Población:} 380 estudiantes activos en la carrera de Tecnologías de la Información (sedes Quito y Ambato), según el informe de rendición de cuentas institucional \cite{uti2025rc}.
+    \item \textbf{Frecuencia (supuesto):} cuatro consultas administrativas o reglamentarias por estudiante y semestre, lo que equivale a 1.520 consultas por semestre y, para un semestre de cinco meses, a unas 304 consultas mensuales.
+    \item \textbf{Tiempo de atención (supuesto):} 15 minutos por consulta para escuchar el requerimiento, revisar el documento o el SGA y responder, valor coherente con los referentes nacionales de automatización académica \cite{diaz2025asistente}.
 \end{itemize}
 
-La Tabla~\ref{tab:metricas_diagnostico_metodologia} presenta el contraste cuantitativo entre las métricas del sistema actual y la proyección de rendimiento con el Asistente Virtual Multimodal.
+Con estos supuestos, la carga operativa estimada se calcula mediante la Ecuación~\ref{eq:carga_operativa}:
+
+\begin{equation}
+\label{eq:carga_operativa}
+H_{mes} = \frac{N_{est} \times C_{sem} \times t_{c}}{60 \times M_{sem}} = \frac{380 \times 4 \times 15}{60 \times 5} = 76 \text{ horas-hombre/mes}
+\end{equation}
+\addeqtolist{Estimación de la carga operativa mensual de atención de consultas}
+
+donde $N_{est}$ es el número de estudiantes, $C_{sem}$ las consultas por estudiante y semestre, $t_c$ el tiempo de atención en minutos y $M_{sem}$ la duración del semestre en meses. La Figura~\ref{fig:estadisticas_consultas} resume los valores del modelo.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=34pt,
+    enlargelimits=0.2,
+    ylabel={Cantidad},
+    symbolic x coords={Estudiantes activos, Consultas por mes (estimadas), Horas-hombre por mes (estimadas)},
+    xtick=data,
+    nodes near coords,
+    nodes near coords align={vertical},
+    x tick label style={text width=3.4cm, align=center},
+    width=0.9\textwidth,
+    height=7cm,
+    ymin=0, ymax=450
+    ]
+\addplot[fill=cyan!40, draw=black!70] coordinates {
+    (Estudiantes activos,380)
+    (Consultas por mes (estimadas),304)
+    (Horas-hombre por mes (estimadas),76)
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Modelo de estimación del volumen mensual de consultas y de la carga operativa asociada.}
+\label{fig:estadisticas_consultas}
+\elaboradopor{\autorTFG}
+\fuente{Población según UTI \cite{uti2025rc}; frecuencia y tiempo de atención supuestos por el autor}
+\end{figure}
+
+La Tabla~\ref{tab:metricas_diagnostico_metodologia} resume los indicadores del diagnóstico y el instrumento con el que cada uno se contrasta en la validación del prototipo (Capítulo~\ref{chap:implementacion}).
 
 \begin{table}[H]
-  \caption{Contraste Cuantitativo del Diagnóstico Operativo vs. Asistente Virtual Multimodal.}
+  \caption{Indicadores del diagnóstico y forma de verificación en el prototipo.}
   \label{tab:metricas_diagnostico_metodologia}
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.25}
-\begin{tabular}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{2.8cm}|}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{4.4cm}|>{\raggedright\arraybackslash}p{5.3cm}|}
 \hline
 \rowcolor[HTML]{EFEFEF}
-\textbf{Métrica / Variable Operativa} & \textbf{Sistema Actual (Manual / PDF Estático)} & \textbf{Asistente Virtual (RAG + Avatar 3D)} & \textbf{Impacto / Mejora Estimada} \\ \hline
-\textbf{Tiempo total de consulta estudiante} & 45 a 60 minutos (búsqueda y lectura PDF) & 3,2 segundos (respuesta semántica conversacional) & Reducción del \textbf{$>$95\%} en tiempo del usuario \\ \hline
-\textbf{Tiempo de respuesta del servidor (TTFB)} & 24 a 48 horas vía correo / presencial & \textbf{450 milisegundos} vía WebSockets y LLM local & Inmediatez en línea 24/7 \\ \hline
-\textbf{Carga operativa de secretaría (mes)} & 75 a 100 h-hombre/mes (~300 consultas) & Automatización del \textbf{92,0\%} de dudas recurrentes & Ahorro de \textbf{69 a 85 h-hombre/mes} \\ \hline
-\textbf{Precisión de recuperación semántica} & Baja (búsqueda literal por palabras clave) & \textbf{92,0\%} (\textit{Hit Rate} RAG en normativas UTI) & Eliminación de errores de interpretación \\ \hline
+\textbf{Indicador} & \textbf{Situación actual} & \textbf{Verificación en el prototipo} \\ \hline
+\textbf{Mecanismo de búsqueda} & Navegación manual y búsqueda por palabras clave en PDF & \textit{Hit Rate} y MRR sobre un banco de 50 preguntas con respuesta de referencia \\ \hline
+\textbf{Tiempo de respuesta} & Atención presencial o por correo, sujeta a horario (08h00 a 17h00) & Latencia medida por etapa (STT, RAG, LLM y TTS) \\ \hline
+\textbf{Carga operativa} & 76 h-hombre/mes estimadas (Ecuación~\ref{eq:carga_operativa}) & No medible en el piloto; requiere registro institucional de consultas \\ \hline
+\textbf{Percepción del usuario} & Sin mediciones previas & Encuesta piloto de usabilidad con 16 estudiantes \\ \hline
 \end{tabular}
-
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia}
 \end{table}
 
 \section{Área de Estudio}
@@ -84,8 +97,6 @@ La Tabla~\ref{tab:metricas_diagnostico_metodologia} presenta el contraste cuanti
   \caption{Área de estudio.}
   \label{tab:area_estudio}
   \centering
-  
-  
   \renewcommand{\arraystretch}{1.35}
   \begin{tabular}{|p{0.39\textwidth}|p{0.53\textwidth}|}
     \hline
@@ -99,22 +110,24 @@ La Tabla~\ref{tab:metricas_diagnostico_metodologia} presenta el contraste cuanti
     \hline
     \textbf{Área:} & Desarrollo de Software e Interfaces Humano-Computadora \\
     \hline
-    \textbf{Aspectos:} & Procesamiento de Lenguaje Natural (PLN), Visión Artificial, Interacción Multimodal, Renderizado 3D \\
+    \textbf{Aspectos:} & Recuperación semántica de información (RAG), procesamiento de lenguaje natural, reconocimiento y síntesis de voz, detección de presencia por visión artificial y renderizado de avatares 3D en la web \\
     \hline
-    \textbf{Objeto de estudio:} & Asistente virtual inteligente para difusión de información académica \\
+    \textbf{Objeto de estudio:} & Difusión de información académica de la carrera de Ingeniería en Tecnologías de la Información de la UTI mediante un asistente virtual multimodal \\
     \hline
-    \textbf{Periodo de estudio:} & Enero 2026 - Julio 2026 \\
+    \textbf{Periodo de estudio:} & Enero 2026 - Octubre 2026 \\
     \hline
   \end{tabular}
+  \elaboradopor{\autorTFG}
+  \fuente{Formato institucional UTI}
 \end{table}
 
 \section{Metodología de Desarrollo o Implementación}
 
-Para el desarrollo del proyecto se adoptó como metodología principal la Metodología de Investigación en Ciencia de Diseño (DSRM), debido a que el trabajo se orienta al diseño, construcción y evaluación de un artefacto tecnológico destinado a resolver una problemática específica \cite{hevner2004design}.
+Para el desarrollo del proyecto se adoptó como metodología de investigación la Metodología de Investigación en Ciencia del Diseño (DSRM), debido a que el trabajo se orienta al diseño, construcción y evaluación de un artefacto tecnológico destinado a resolver una problemática específica \cite{hevner2004design,peffers2007dsrm}.
 
-Como apoyo para la construcción técnica del prototipo se utilizó un enfoque iterativo e incremental, permitiendo desarrollar y ajustar progresivamente los módulos de recuperación de información, visión artificial, procesamiento de voz y avatar 3D. Este enfoque resultó pertinente debido a la necesidad de realizar pruebas sucesivas sobre modelos de lenguaje, parámetros de recuperación semántica y tiempos de respuesta.
+Como metodología de construcción del prototipo se utilizó un enfoque ágil, iterativo e incremental inspirado en Scrum, organizado en iteraciones cortas al final de las cuales se obtenía una versión funcional del asistente. Este enfoque resultó pertinente debido a la necesidad de realizar pruebas sucesivas sobre modelos de lenguaje, parámetros de recuperación semántica, servicios de voz y tiempos de respuesta. El historial de versiones del repositorio (Anexo~A) documenta cada incremento.
 
-La aplicación de las etapas de la metodología DSRM en el contexto de este trabajo se sintetiza en la Tabla~\ref{tab:dsrm}.
+La aplicación de las etapas de la metodología DSRM en el contexto de este trabajo se sintetiza en la Tabla~\ref{tab:dsrm} y su relación con las iteraciones de construcción se representa en la Figura~\ref{fig:modelo_operativo}.
 
 \begin{table}[H]
   \caption{Aplicación de la metodología DSRM en el proyecto.}
@@ -123,64 +136,98 @@ La aplicación de las etapas de la metodología DSRM en el contexto de este trab
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.25}
-\begin{tabular}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{6.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{5.8cm}|>{\raggedright\arraybackslash}p{3.4cm}|}
 \hline
 \rowcolor[HTML]{EFEFEF}
 \textbf{Etapa DSRM} & \textbf{Aplicación en el proyecto} & \textbf{Evidencia} \\ \hline
-Identificación del problema & Análisis del acceso actual a información académica & Diagnóstico, Cap. II \\ \hline
-Definición de objetivos & Requerimientos funcionales y no funcionales & Sección 2.5 \\ \hline
-Diseño y desarrollo & Arquitectura RAG, visión, voz y avatar & Secciones 2.6 y 3.2 \\ \hline
-Demostración & Implementación del prototipo & Capturas y repositorio \\ \hline
-Evaluación & Pruebas técnicas y pruebas con estudiantes & Secciones 3.3 y 3.6 \\ \hline
-Comunicación & Documentación del trabajo y repositorio & Tesis y anexos \\ \hline
+Identificación del problema & Análisis del acceso actual a información académica & Sección~\ref{sec:diagnostico_ref} \\ \hline
+Definición de objetivos & Requerimientos funcionales y no funcionales & Sección~\ref{sec:requerimientos} \\ \hline
+Diseño y desarrollo & Arquitectura RAG, visión, voz y avatar & Sección~\ref{sec:diseno_solucion} y Capítulo~\ref{chap:implementacion} \\ \hline
+Demostración & Ejecución del prototipo en modo local y despliegue piloto en servidor & Capturas, repositorio (Anexo~A) \\ \hline
+Evaluación & Banco de preguntas, latencia, visión y encuesta a estudiantes & Sección~\ref{sec:pruebas} \\ \hline
+Comunicación & Documentación del trabajo, manuales y repositorio & Tesis y anexos \\ \hline
 \end{tabular}
-
+\elaboradopor{\autorTFG}
+\fuente{Adaptado de Peffers et al. \cite{peffers2007dsrm}}
 \end{table}
 
-El desarrollo iterativo se estructuró en las siguientes fases:
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.85, transform shape,
+    etapa/.style={draw, rounded corners, fill=blue!8, minimum width=3.0cm, minimum height=1.1cm, align=center, text width=2.8cm, font=\small},
+    iter/.style={draw, rounded corners, fill=green!10, minimum height=0.75cm, align=center, text width=5.2cm, font=\footnotesize},
+    flecha/.style={->, >=stealth, thick}
+]
+\node[etapa] (e1) at (0,0) {1. Identificación del problema};
+\node[etapa] (e2) at (3.8,0) {2. Definición de objetivos};
+\node[etapa] (e3) at (7.6,0) {3. Diseño y desarrollo};
+\node[etapa] (e4) at (11.4,0) {4. Demostración};
+\node[etapa] (e5) at (11.4,-3.2) {5. Evaluación};
+\node[etapa] (e6) at (11.4,-6.4) {6. Comunicación};
+\draw[flecha] (e1) -- (e2);
+\draw[flecha] (e2) -- (e3);
+\draw[flecha] (e3) -- (e4);
+\draw[flecha] (e4) -- (e5);
+\draw[flecha] (e5) -- (e6);
+\draw[flecha, dashed] (e5.west) -| node[pos=0.3, above, font=\footnotesize] {iterar el diseño} (e3.south);
+\node[iter] (i1) at (2.6,-2.4) {Fase 1: Avatar 3D y RAG inicial (mayo)};
+\node[iter] (i2) at (2.6,-3.4) {Fase 2: Interfaz dual y panel RAG (junio)};
+\node[iter] (i3) at (2.6,-4.4) {Fase 3: Visión, voz y despliegue (julio)};
+\node[iter] (i4) at (2.6,-5.4) {Fase 4: Proveedor LLM y ajustes (agosto-septiembre)};
+\node[iter] (i5) at (2.6,-6.4) {Fase 5: Seguridad, RAG y evaluación (octubre)};
+\node[iter] (i6) at (2.6,-7.4) {Fase 6: Optimización y LLM local (octubre)};
+\node[draw, dashed, rounded corners, fit=(i1)(i6), inner sep=6pt] (bloque) {};
+\node[font=\footnotesize, anchor=south] at (bloque.north) {Iteraciones de construcción (2026)};
+\draw[flecha, dotted] (bloque.east) -- node[above, font=\footnotesize, sloped] {incrementos} ([xshift=-4mm]e3.south);
+\end{tikzpicture}
+\caption{Modelo operativo: etapas DSRM e iteraciones de construcción del prototipo.}
+\label{fig:modelo_operativo}
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia a partir de Peffers et al. \cite{peffers2007dsrm} y del historial del repositorio}
+\end{figure}
+
+El desarrollo iterativo se estructuró en las siguientes fases, cuyo detalle temporal se presenta en el cronograma del Capítulo~\ref{chap:implementacion}:
 
 \begin{itemize}
-    \item \textbf{Fase 1 - Configuración del Entorno Local y Análisis de Datos:} Se recopilaron, limpiaron y segmentaron (\textit{chunking}) los documentos oficiales en formato PDF para su indexación en la base de datos vectorial local.
-    \item \textbf{Fase 2 - Desarrollo del Motor Cognitivo (RAG):} Se implementó la Generación Aumentada por Recuperación. Se probaron modelos de incrustación (\textit{embeddings}) y LLMs optimizados para ejecución en servidor local, iterando hasta reducir las alucinaciones del modelo.
-    \item \textbf{Fase 3 - Desarrollo Sensorial (Visión y Voz):} Se programaron algoritmos ligeros de visión artificial para la detección de presencia efímera, y se acoplaron las APIs de Speech-to-Text (STT) y Text-to-Speech (TTS).
-    \item \textbf{Fase 4 - Integración Multimodal (Avatar 3D):} Se consolidó el flujo. El audio generado por el TTS se sincronizó (\textit{lip-sync}) con las mallas faciales del avatar renderizado mediante WebGL.
-    \item \textbf{Fase 5 - Pruebas y Ajustes de Rendimiento:} Se desplegó en el servidor local destino. Se realizaron pruebas de estrés para medir el uso de GPU/CPU y la latencia end-to-end de las respuestas.
+    \item \textbf{Fase 1 - Avatar 3D y motor RAG inicial:} Se construyó la interfaz web con Three.js y el avatar en formato VRM, y se implementó la primera versión del motor de Generación Aumentada por Recuperación: extracción del documento institucional en formato Markdown, fragmentación (\textit{chunking}) e indexación en ChromaDB.
+    \item \textbf{Fase 2 - Interfaz dual y administración:} Se incorporaron el modo conversacional (avatar en primer plano y control de voz) junto al modo chat, y un panel de administración para reemplazar los documentos PDF de la base de conocimiento.
+    \item \textbf{Fase 3 - Visión, voz y despliegue:} La detección de presencia, que inicialmente leía la cámara del equipo con OpenCV, se migró a un esquema en el que el navegador envía fotogramas por WebSocket, condición necesaria para operar en un servidor sin cámara. Se integró la transcripción con Whisper (Groq) y se sustituyó la síntesis de voz \textit{edge-tts} por ElevenLabs. Se añadieron autenticación de usuarios, el modelo de \textit{embeddings} multilingüe y el despliegue con Docker en un servidor virtual.
+    \item \textbf{Fase 4 - Proveedor del modelo de lenguaje:} Se integró la API de NVIDIA como proveedor compatible con OpenAI, junto con soporte de Markdown, subtítulos y control de cámara en la interfaz.
+    \item \textbf{Fase 5 - Seguridad, ajuste del RAG y evaluación:} Se añadieron control de acceso por roles, el filtro anti-\textit{jailbreak}, la normalización y expansión de consultas, la limitación del contexto a los tres fragmentos más relevantes, la métrica coseno en la base vectorial y los \textit{scripts} de evaluación reproducible.
+    \item \textbf{Fase 6 - Optimización según la evaluación:} A partir de las limitaciones medidas en la Fase 5 (recuperación y latencia), se incorporó la recuperación híbrida con reordenamiento, se migró el LLM al modelo local Nemotron servido con Ollama en la GPU del equipo, se implementó la entrega de la respuesta en \textit{streaming} por WebSocket, se adoptó un modelo de síntesis de voz de baja latencia y la detección de presencia se trasladó al navegador con MediaPipe, enviando al servidor solo las cajas delimitadoras.
 \end{itemize}
 
-%\textit{[Describir y justificar la metodología empleada según la naturaleza del proyecto, indicando las fases y actividades a ejecutar. Por ejemplo, metodologías ágiles o tradicionales para software, o modelos de diseño, implementación o despliegue para hardware o infraestructura.]}
-
-
 \section{Técnicas e Instrumentos de Recolección de Información}
-Para garantizar la validez científica y el correcto desempeño técnico del prototipo, la recolección de información se dividió en dos etapas metodológicas: la etapa de diagnóstico/desarrollo y la etapa de validación.
+Para garantizar la validez de los resultados, la recolección de información se dividió en dos etapas: diagnóstico/desarrollo y evaluación.
 
 \subsection{Técnicas para la Fase de Diagnóstico y Desarrollo}
 \begin{itemize}
-    \item \textbf{Revisión Documental:} Se empleó para alimentar el núcleo de conocimiento de la IA. El instrumento fue una \textit{matriz de extracción de datos}, donde se catalogaron y normalizaron los textos de mallas curriculares, estatutos y sílabos de la carrera de TI antes de inyectarlos en la base de datos vectorial.
-    \item \textbf{Observación Directa No Participante:} Se utilizó para analizar la afluencia y el tipo de interacciones que tienen los estudiantes en las oficinas administrativas, lo que permitió diseñar \textit{prompts} base (instrucciones de sistema) que preparen al asistente virtual para los escenarios de consulta más comunes.
+    \item \textbf{Revisión Documental:} Se revisaron los documentos públicos de la carrera (malla curricular, aranceles del periodo A26, reglamentos de homologación, política de becas, acreditación de inglés y canales de contacto) y se consolidaron en un documento base de conocimiento, \textit{Investigación Carrera TI Indoamérica Quito}, que constituye el corpus indexado por el motor RAG.
+    \item \textbf{Registro de Decisiones de Arquitectura (ADR):} Cada cambio técnico relevante (migración de la visión a WebSockets y luego al navegador, modelo de \textit{embeddings} multilingüe, migración del TTS, estandarización del RAG, recuperación híbrida y LLM local) se documentó con su contexto, decisión y consecuencias.
 \end{itemize}
 
 \subsection{Técnicas para la Fase de Evaluación y Validación}
 \begin{itemize}
-    \item \textbf{Métricas de Registro Automático (\textit{Logging}):} Para evaluar el rendimiento técnico (Requerimientos No Funcionales), el sistema incluyó \textit{scripts} que registraron variables cuantitativas como el tiempo de respuesta del sistema (latencia en milisegundos desde que el usuario deja de hablar hasta que el avatar responde) y el porcentaje de uso de la memoria/procesador del servidor local.
-    \item \textbf{Cuestionario de Usabilidad y Experiencia de Usuario:} Para evaluar la interacción con el prototipo se diseñó un cuestionario estructurado en escala Likert y diferencial semántico. El instrumento permitió recopilar la percepción de los participantes respecto a integración de componentes, comprensión de las respuestas, apariencia y animacidad del avatar, privacidad percibida, latencia e intención futura de uso.
+    \item \textbf{Bancos de preguntas con respuesta de referencia (\textit{gold standard}):} un banco de desarrollo de 50 preguntas redactadas en lenguaje estudiantil sobre once categorías del documento, usado para comparar configuraciones, y un banco de prueba reservado de otras 50 preguntas, redactado antes de las optimizaciones y utilizado solo para la medición final. Cada pregunta se asocia a frases literales del documento oficial que deben aparecer en el fragmento recuperado. Se añadieron 10 preguntas fuera de dominio para verificar la restricción temática.
+    \item \textbf{Medición instrumentada:} \textit{Scripts} reproducibles incluidos en el repositorio (carpeta \texttt{evaluacion/}) que ejecutan el mismo código de producción y registran el tiempo hasta el primer fragmento de respuesta (TTFB) por WebSocket, la latencia de cada etapa, la tasa de error de palabras (WER) de la transcripción y el costo de la detección de presencia.
+    \item \textbf{Cuestionario de Usabilidad y Experiencia de Usuario:} Cuestionario en Google Forms con escala Likert y diferencial semántico (Anexo~B), basado en los constructos de utilidad y facilidad de uso percibidas \cite{davis1989tam} y en las dimensiones de antropomorfismo, animacidad e inteligencia percibida \cite{bartneck2009godspeed}. Fue precedido por un consentimiento informado (Anexo~C).
 \end{itemize}
 
-Para la evaluación de usabilidad se trabajó con una muestra piloto de 13 estudiantes de la carrera de Tecnologías de la Información pertenecientes a diferentes niveles académicos. La evaluación tuvo un carácter exploratorio y estuvo orientada a identificar la percepción inicial de los usuarios y oportunidades de mejora del prototipo, por lo que sus resultados no pretenden generalizarse estadísticamente a la totalidad de estudiantes de la carrera. Se utilizó un muestreo no probabilístico por conveniencia. 
-
-
-%\textit{[Describir las técnicas utilizadas para obtener información durante el diagnóstico y la validación del proyecto, tales como entrevistas, encuestas u observación directa.]}
+Para la evaluación de usabilidad se trabajó con una muestra piloto de 16 estudiantes de la carrera de Tecnologías de la Información de tercer, cuarto, sexto y octavo semestre, seleccionados mediante muestreo no probabilístico por conveniencia en dos sesiones: 13 el 21 de julio de 2026 y 3 entre el 3 y el 4 de octubre de 2026. La evaluación tuvo un carácter exploratorio, orientado a identificar la percepción inicial de los usuarios y oportunidades de mejora, por lo que sus resultados no pretenden generalizarse estadísticamente a la totalidad de estudiantes de la carrera.
 
 \section{Requerimientos del Proyecto}
+\label{sec:requerimientos}
 
-La definición de los requerimientos establece las directrices técnicas y operativas que el sistema debe cumplir. A continuación se detallan los requerimientos funcionales (RF) y no funcionales (RNF) en formato de tabla para asegurar su trazabilidad.
+La definición de los requerimientos establece las directrices técnicas y operativas que el sistema debe cumplir. A continuación se detallan los requerimientos funcionales (RF) y no funcionales (RNF) en formato de tabla para asegurar su trazabilidad con el código fuente y con las pruebas del Capítulo~\ref{chap:implementacion}.
 
 \begin{landscape}
 \subsection{Requerimientos Funcionales (RF)}
 
 \begingroup
 \small
-\renewcommand{\arraystretch}{1.25}
-\begin{xltabular}{\linewidth}{|>{\centering\arraybackslash}p{1.4cm}|>{\raggedright\arraybackslash\hsize=0.8\hsize}X|>{\raggedright\arraybackslash\hsize=1.0\hsize}X|>{\raggedright\arraybackslash\hsize=1.4\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|}
+\renewcommand{\arraystretch}{1.2}
+\begin{xltabular}{\linewidth}{|>{\centering\arraybackslash}p{1.4cm}|>{\raggedright\arraybackslash\hsize=0.7\hsize}X|>{\raggedright\arraybackslash\hsize=1.0\hsize}X|>{\raggedright\arraybackslash\hsize=1.5\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|}
 \caption{Requerimientos Funcionales del Sistema.}
 \label{tab:rf_formal} \\
 \hline
@@ -196,21 +243,25 @@ La definición de los requerimientos establece las directrices técnicas y opera
 \hline \multicolumn{6}{|r|}{{Continúa en la siguiente página}} \\ \hline
 \endfoot
 \endlastfoot
-\textbf{RF-01} & Detección No Biométrica de Presencia & Flujo de video continuo en formato Base64 (640x480 a 15 fps) transmitido por el cliente mediante WebSockets. & El backend evalúa la presencia detectando la caja delimitadora (Bounding Box) del rostro. Si el área ($W \times H$) supera el umbral de píxeles tau durante 3 frames consecutivos, se activa la interacción. & Mensaje lógico en formato JSON \{\texttt{'status': 'active'}\} para iniciar el avatar en el frontend. & Aprobación del 100\% en condiciones de luz normal ($>150$ lux) a una distancia de 50 cm a 1.5 m. \\ \hline
-\textbf{RF-02} & Transcripción de Voz a Texto (STT) & Fragmento de audio digital en formato WebM capturado asíncronamente por el micrófono del cliente. & El backend FastAPI extrae el audio y realiza una solicitud API REST HTTPS al modelo Whisper-v3 (en la infraestructura Groq) para transcribir el flujo de audio en español. & String de texto decodificado con la consulta del estudiante en formato UTF-8. & Tasa de error de palabras (WER) $< 5$\% en un entorno controlado con ruido de fondo $< 45$ dB. \\ \hline
-\textbf{RF-03} & Búsqueda Semántica RAG & Consulta textual del estudiante transcrita o ingresada manualmente por teclado. & Generación de vector de consulta (384 dimensiones) usando paraphrase-multilingual-MiniLM-L12-v2 y cálculo de similitud del coseno contra ChromaDB local. & Lista priorizada de los 3 fragmentos documentales con mayor similitud semántica (Top-3). & Hit Rate de recuperación semántica del Top-3 $\ge 90.0$\% evaluado con un banco de 50 preguntas piloto. \\ \hline
-\textbf{RF-04} & Generación de Respuesta por LLM & Contexto académico recuperado (Top-3) insertado dentro de un prompt estructurado de 'Contexto Cerrado'. & Inferencia local en el servidor del LLM Qwen 2.5 / Nemotron a través de Ollama. Si la similitud del coseno de los fragmentos recuperados es inferior a 0.65, el modelo debe rechazar cortésmente la respuesta. & Respuesta de texto precisa y estrictamente verídica basada en los reglamentos oficiales de la UTI. & Tasa de alucinación o invención de datos del 0.0\% (Validación ciega por expertos en reglamentos). \\ \hline
-\textbf{RF-05} & Síntesis de Texto a Voz (TTS) & Respuesta de texto generada por el LLM. & FastAPI segmenta el texto y realiza llamadas asíncronas a la API de ElevenLabs (voz Valeria), devolviendo el audio mediante fragmentos en tiempo real (HTTP Chunking Streaming). & Flujo binario de audio MP3/WAV reproducido asíncronamente en los altavoces del cliente. & Latencia de inicio de reproducción (Time to First Byte - TTFB) $< 500$ milisegundos tras recibir el texto del LLM. \\ \hline
-\textbf{RF-06} & Gestión de Sesión y Retorno a Reposo & Contador lógico de inactividad conversacional activo (timeout timer). & El sistema monitorea la interacción por voz y video. Si no se detectan rostros ni actividad de audio en 45 segundos, se envía señal de despedida. & Mensaje JSON \{\texttt{'status': 'reposo'}\} que activa animación de despedida y apaga la cámara y micrófono del cliente. & Prueba de caja negra: retorno inmediato al estado de reposo al cumplirse el timeout (desviación $< 1.0$s). \\ \hline
+\textbf{RF-01} & Detección no biométrica de presencia & Video de la cámara web (320$\times$240) en el navegador. & Cada segundo, MediaPipe Face Detector (modelo BlazeFace, confianza mínima 0,5) obtiene en el navegador las cajas delimitadoras del rostro, que se envían como JSON por WebSocket (\texttt{/ws}). El backend declara presencia con rostro en 2 fotogramas consecutivos y ausencia con 4 fotogramas sin rostro. & Mensajes \texttt{person\_\allowbreak{}arrived} o \texttt{person\_left} hacia el frontend, que saluda o reanuda el diálogo. & Detección en imagen de prueba con rostro, ausencia de falsos positivos en imagen sin rostro, tiempo de inferencia por fotograma y tamaño del mensaje. \\ \hline
+\textbf{RF-02} & Transcripción de voz a texto (STT) & Audio WebM grabado al pulsar el botón de micrófono (\textit{push-to-talk}). & El endpoint \texttt{/api/stt} envía el audio a Whisper \texttt{large-v3} en la API de Groq con idioma español \cite{radford2023whisper}. & Texto UTF-8 con la consulta del estudiante. & Tasa de error de palabras (WER) y latencia sobre las preguntas del banco. \\ \hline
+\textbf{RF-03} & Búsqueda semántica RAG & Consulta textual transcrita o escrita. & Normalización de términos (p. ej. ``semestre'' $\rightarrow$ ``nivel'') y expansión de consulta; búsqueda semántica con \texttt{paraphrase-\allowbreak{}multilingual-\allowbreak{}MiniLM-\allowbreak{}L12-\allowbreak{}v2} (distancia coseno en ChromaDB) y léxica con BM25, fusión RRF y reordenamiento con un \textit{cross-encoder} multilingüe. & Los 3 fragmentos más relevantes (Top-3). & \textit{Hit Rate}@3 y MRR@5 sobre los bancos de desarrollo y de prueba (50 preguntas cada uno). \\ \hline
+\textbf{RF-04} & Generación de respuesta con LLM & Consulta y Top-3 de contexto dentro de un \textit{prompt} con reglas del sistema. & Filtro anti-\textit{jailbreak} por expresiones regulares; inferencia local con Nemotron 3 Nano 4B servido por Ollama en la GPU del equipo (proveedor configurable), temperatura 0,1 y máximo 500 \textit{tokens}; la respuesta se envía por fragmentos (\textit{streaming}) mediante el WebSocket \texttt{/ws/chat}. & Respuesta breve en texto plano basada en el documento oficial. & Exactitud de las respuestas, rechazo de las 10 preguntas fuera de dominio y TTFB por WebSocket. \\ \hline
+\textbf{RF-05} & Síntesis de texto a voz (TTS) & Respuesta de texto generada por el LLM. & El endpoint \texttt{/api/tts} reenvía el texto a ElevenLabs (\texttt{eleven\_\allowbreak{}flash\_\allowbreak{}v2\_5}, voz ``Ana Sofía'') y transmite el audio MP3 por fragmentos (\textit{streaming}). & Audio reproducido en el navegador con sincronización labial por amplitud. & Tiempo hasta el primer byte de audio (TTFB). \\ \hline
+\textbf{RF-06} & Gestión del diálogo por presencia & Eventos de presencia y estado de habla del avatar. & Saludo de bienvenida en la primera detección; si el usuario se retira o regresa, se envía al LLM un evento oculto para responder de forma contextual (pausa, retorno). & Mensaje hablado y estado del indicador de cámara. & Prueba automatizada de los escenarios llegada, salida, retorno y ruido. \\ \hline
+\textbf{RF-07} & Autenticación y roles & Credenciales de usuario. & Inicio de sesión con contraseña cifrada y \textit{token} de sesión en \textit{cookie}; rol \texttt{admin} para el panel RAG; cierre de sesión con revocación del \textit{token}. & Acceso a la interfaz según rol. & Acceso denegado a rutas protegidas sin sesión o sin rol. \\ \hline
+\textbf{RF-08} & Administración de la base de conocimiento & Uno o varios archivos PDF cargados por el administrador. & Extracción a Markdown, fragmentación (800/160 caracteres), cálculo de \textit{embeddings} y reconstrucción de la colección en segundo plano, con registro de progreso. & Base vectorial actualizada sin reiniciar el servidor. & Tiempo de reindexación del documento base. \\ \hline
 \end{xltabular}
 \endgroup
+\elaboradopor{\autorTFG}
+\fuente{Código fuente del prototipo (\texttt{api.py}, \texttt{rag\_\allowbreak{}manager.\allowbreak{}py}, \texttt{static/\allowbreak{}script.\allowbreak{}js})}
 
 \newpage
 \subsection{Requerimientos No Funcionales (RNF)}
 
 \begingroup
 \small
-\renewcommand{\arraystretch}{1.25}
+\renewcommand{\arraystretch}{1.2}
 \begin{xltabular}{\linewidth}{|>{\centering\arraybackslash}p{1.4cm}|>{\raggedright\arraybackslash\hsize=0.8\hsize}X|>{\raggedright\arraybackslash\hsize=1.0\hsize}X|>{\raggedright\arraybackslash\hsize=1.4\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|>{\raggedright\arraybackslash\hsize=0.9\hsize}X|}
 \caption{Requerimientos No Funcionales del Sistema.}
 \label{tab:rnf_formal} \\
@@ -227,91 +278,238 @@ La definición de los requerimientos establece las directrices técnicas y opera
 \hline \multicolumn{6}{|r|}{{Continúa en la siguiente página}} \\ \hline
 \endfoot
 \endlastfoot
-\textbf{RNF-01} & Privacidad por Diseño (Seguridad) & Fotogramas e imágenes de cámara web procesados en la memoria RAM del servidor. & Se prohíbe explícitamente guardar imágenes, videos o mallas biométricas en discos locales o bases de datos persistentes. Los frames se destruyen inmediatamente de la memoria tras calcular el bounding box. & Garantía de anonimato absoluto en el uso de la cámara por parte del estudiante. & Verificación mediante auditoría de código del backend y monitoreo de almacenamiento en disco local (0 bytes creados por OpenCV). \\ \hline
-\textbf{RNF-02} & Rendimiento y Latencia Conversacional & Consulta completa por voz del estudiante. & El pipeline total (STT + RAG + LLM + TTS) debe estar optimizado asíncronamente mediante WebSockets y programación concurrente con asyncio. & Interacción fluida con un tiempo de respuesta total controlado. & Latencia extremo a extremo P95 $< 4.0$ segundos en la red local universitaria bajo una carga de 1 usuario activo. \\ \hline
-\textbf{RNF-03} & Restricción de Dominio Académico & Consultas del usuario con intenciones no académicas o externas. & Evaluación mediante el prompt del sistema. Si la consulta está fuera del ámbito de mallas, reglamentos y titulación de TI, el LLM activa una salida controlada. & Mensaje estándar de denegación cortés: 'Disculpa, solo puedo ayudarte con temas académicos de la carrera de TI.' & Aprobación del 100\% de rechazo sistemático ante un set de 20 preguntas capciosas de prueba. \\ \hline
-\textbf{RNF-04} & Aislamiento y Seguridad de Datos & Arquitectura de base de datos relacional externa de la UTI (SGA). & El sistema de asistente opera en un servidor independiente con ChromaDB, sin credenciales de escritura ni lectura directa a la base transaccional SQL del SGA. & Imposibilidad física de realizar cambios transaccionales en expedientes de alumnos. & Comprobación de que la red del asistente no contiene puertos abiertos ni credenciales de conexión al SGA. \\ \hline
-\textbf{RNF-05} & Mantenibilidad y Escalabilidad & Nuevos documentos reglamentarios o actualizaciones de mallas en formato PDF. & El sistema utiliza un portal administrativo protegido por contraseña para procesar nuevos PDF, generar embeddings e insertarlos dinámicamente en ChromaDB. & Actualización del conocimiento del asistente de forma inmediata sin necesidad de fine-tuning. & Tiempo de actualización de un nuevo documento $< 60$ segundos por parte del administrador de TI. \\ \hline
-\textbf{RNF-06} & Usabilidad Manos Libres (Hands-Free) & Interfaz de usuario en un tótem físico o pantalla institucional. & Toda la navegación e interacción se diseña para operar exclusivamente a través de la cámara de presencia y el micrófono por reconocimiento de voz. & Uso interactivo autónomo sin teclado, ratón o toques físicos de pantalla. & Cumplimiento verificado mediante pruebas con estudiantes: tasa de éxito de consulta completa sin intervención de hardware físico = 100\%. \\ \hline
+\textbf{RNF-01} & Privacidad por diseño & Fotogramas de la cámara web. & Los fotogramas se procesan solo en la memoria del navegador; al servidor llegan únicamente las coordenadas de las cajas delimitadoras y ninguna imagen se transmite ni se almacena. La cámara puede desactivarse desde la interfaz. & Ningún dato biométrico transmitido ni persistido. & Revisión de código y del contenido del mensaje WebSocket. \\ \hline
+\textbf{RNF-02} & Rendimiento conversacional & Consulta escrita o por voz. & Pipeline STT + RAG + LLM + TTS con E/S asíncrona (FastAPI y \texttt{asyncio}), respuesta del LLM en \textit{streaming} por WebSocket y audio en \textit{streaming}. & Primer fragmento de la respuesta en menos de medio segundo e inicio de la respuesta hablada en pocos segundos. & TTFB promedio $\leq$ 450 ms por WebSocket y latencia percibida P95 $<$ 4,0 s, en modo local con 1 usuario. \\ \hline
+\textbf{RNF-03} & Restricción de dominio académico & Consultas ajenas a la carrera o intentos de cambiar el rol del asistente. & Reglas del \textit{prompt} del sistema y filtro anti-\textit{jailbreak} a nivel de código. & Mensaje de rechazo cortés y reorientación a la carrera de TI. & 100\% de rechazo en el conjunto de 10 preguntas fuera de dominio. \\ \hline
+\textbf{RNF-04} & Aislamiento del SGA & Sistemas transaccionales de la UTI. & El asistente no posee credenciales ni conexión con el SGA; solo consulta su propia base vectorial. & Imposibilidad de modificar expedientes. & Revisión de configuración: sin cadenas de conexión al SGA. \\ \hline
+\textbf{RNF-05} & Mantenibilidad & Nuevos documentos PDF. & Panel administrativo protegido por rol que reconstruye la base vectorial sin reentrenar modelos. & Conocimiento actualizado. & Reindexación del documento base en menos de 60 s. \\ \hline
+\textbf{RNF-06} & Usabilidad & Uso por estudiantes sin capacitación previa. & Dos modos de interacción (chat por texto y conversación por voz), preguntas sugeridas, subtítulos y diseño adaptable a móviles. & Interacción comprensible. & Encuesta piloto de usabilidad (Anexo~B). \\ \hline
+\textbf{RNF-07} & Portabilidad del despliegue & Equipo local o servidor. & Ejecución local con Uvicorn o en contenedores Docker con Docker Compose; configuración por variables de entorno. & Mismo código en ambos modos. & Ejecución del prototipo en los dos modos de despliegue. \\ \hline
+\textbf{RNF-08} & Seguridad de la API & Peticiones HTTP a los \textit{endpoints}. & Chat, voz, WebSockets y diagnóstico requieren sesión válida (diagnóstico solo para administradores); claves de API en archivo \texttt{.env} excluido del control de versiones. & Acceso restringido a usuarios autenticados. & Respuesta 401/403 a peticiones sin sesión y cierre 4401 de los WebSocket. \\ \hline
 \end{xltabular}
 \endgroup
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia}
 \end{landscape}
 
 \section{Diseño de la Solución}
-El diseño de la solución propuesta se articula sobre una arquitectura modular y desacoplada, operando bajo un entorno de despliegue en un servidor local para garantizar el rendimiento, la seguridad y el procesamiento en tiempo real. El sistema se desglosa en tres capas lógicas fundamentales:
+\label{sec:diseno_solucion}
+El diseño de la solución se articula sobre una arquitectura cliente-servidor modular y desacoplada. El cliente es una aplicación web que se ejecuta en el navegador del estudiante y realiza la detección de presencia; el servidor es una API en FastAPI \cite{fastapi2024} que orquesta los eventos de presencia, el motor RAG, el LLM local y los servicios de voz. La Figura~\ref{fig:diag_contexto} muestra el diagrama de contexto con las entidades externas del sistema.
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.95\textwidth]{Logos/nuevo_diagrama_contexto.jpeg}
-  \caption{Diagrama de Contexto (Nivel 0).}
-  \label{fig:diag_contexto}
+\centering
+\begin{tikzpicture}[
+    scale=0.72, transform shape,
+    externo/.style={draw, fill=gray!20, minimum width=3.8cm, minimum height=1.3cm, align=center, font=\small\bfseries},
+    sistema/.style={draw, very thick, rounded corners=8pt, fill=blue!70!black, text=white, minimum width=4.8cm, minimum height=2.2cm, align=center},
+    actor/.style={draw, fill=green!45!black, text=white, minimum width=2.8cm, minimum height=1.6cm, align=center, font=\small\bfseries},
+    flecha/.style={<->, >=stealth, thick, gray!40!black},
+    etq/.style={font=\footnotesize, align=center, fill=white, inner sep=1.5pt}
+]
+\node[sistema] (sis) at (0,0) {\textbf{Asistente Virtual ARIA}\\[2pt]\footnotesize Sistema central\\\footnotesize\itshape RAG, LLM y WebGL};
+\node[actor] (est) at (-9.2,0) {Estudiante};
+\node[externo] (doc) at (-3.5,4.2) {Documentos oficiales\\\normalfont\footnotesize\itshape PDF de la carrera};
+\node[externo] (adm) at (3.5,4.2) {Administrador\\\normalfont\footnotesize\itshape rol \texttt{admin}};
+\node[externo] (groq) at (-6,-4.6) {API Groq\\\normalfont\footnotesize\itshape Whisper large-v3 (STT)};
+\node[externo] (llm) at (0,-4.6) {Ollama (local)\\\normalfont\footnotesize\itshape LLM Nemotron 3 Nano};
+\node[externo] (eleven) at (6,-4.6) {API ElevenLabs\\\normalfont\footnotesize\itshape TTS multilingüe};
+\draw[flecha] (est) -- node[etq, above=2pt] {1. Voz, texto y cajas delimitadoras\\8. Texto, audio y animación} (sis);
+\draw[->, >=stealth, thick, dashed, gray!40!black] (doc) -- node[etq, left=3pt] {Carga de PDF} (sis);
+\draw[flecha] (adm) -- node[etq, right=3pt] {Gestiona la base RAG} (sis);
+\draw[flecha] (sis) -- node[etq] {2. Audio\\3. Texto transcrito} (groq);
+\draw[flecha] (sis) -- node[etq] {4. Prompt + contexto\\5. Respuesta (\textit{streaming})} (llm);
+\draw[flecha] (sis) -- node[etq] {6. Texto\\7. Audio (streaming)} (eleven);
+\end{tikzpicture}
+\caption{Diagrama de Contexto (Nivel 0).}
+\label{fig:diag_contexto}
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia}
 \end{figure}
+
+El diagrama de clases de la Figura~\ref{fig:diag_clases} representa la responsabilidad lógica de los componentes. En la implementación, \texttt{UserInterface}, \texttt{AvatarController}, \texttt{VisionHandler} (captura y detección facial con MediaPipe) y la grabación de audio residen en \texttt{static/\allowbreak{}script.\allowbreak{}js}; \texttt{InputRouter}, \texttt{LLMController} y la gestión de los eventos de presencia (\texttt{DetectorPresencia}), en \texttt{api.py}; y \texttt{RAGManager}, con el recuperador híbrido, en \texttt{rag\_\allowbreak{}manager.\allowbreak{}py}.
 
 \clearpage
 \begin{figure}[p]
   \centering
-  \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth,height=0.98\textheight,keepaspectratio]{Logos/FInal_Diagrama_Clases_cropped.pdf}}
+  \makebox[\textwidth][c]{\includegraphics[width=1.2\textwidth,height=0.86\textheight,keepaspectratio]{Logos/FInal_Diagrama_Clases_cropped.pdf}}
   \caption{Diagrama de Clases del Sistema (Arquitectura Completa y Flujo Circular).}
   \label{fig:diag_clases}
+  \elaboradopor{\autorTFG}
+  \fuente{Elaboración propia}
 \end{figure}
 \clearpage
 
+El comportamiento del avatar se modela como una máquina de estados. La Figura~\ref{fig:diag_estados} presenta el diseño conceptual inicial y la Figura~\ref{fig:diag_estados_impl}, los estados tal como quedaron implementados: la escucha se inicia con el botón de micrófono y la presencia se confirma o descarta con un número mínimo de fotogramas consecutivos.
+
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=1.0\textwidth]{Logos/3nuevo_diagrama_estados.png}
-  \caption{Diagrama de Estados del Avatar.}
+  \includegraphics[width=0.85\textwidth]{Logos/3nuevo_diagrama_estados.png}
+  \caption{Diagrama de Estados del Avatar (diseño conceptual inicial).}
   \label{fig:diag_estados}
+  \elaboradopor{\autorTFG}
+  \fuente{Elaboración propia}
 \end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.69, transform shape,
+    estado/.style={draw, rounded corners, fill=blue!10, minimum width=3.4cm, minimum height=1.1cm, align=center, font=\small},
+    flecha/.style={->, >=stealth, thick},
+    etq/.style={font=\scriptsize, align=center, fill=white, inner sep=1pt}
+]
+\node[circle, fill=black, minimum size=8pt, inner sep=0] (ini) at (0,2.2) {};
+\node[estado] (reposo) at (0,0) {\textbf{Reposo}\\\scriptsize parpadeo y respiración};
+\node[estado] (saludo) at (5.5,0) {\textbf{Saludando}\\\scriptsize bienvenida (1.ª vez)};
+\node[estado] (espera) at (11,0) {\textbf{Esperando pregunta}\\\scriptsize sugerencias visibles};
+\node[estado] (escucha) at (16,-3.5) {\textbf{Escuchando}\\\scriptsize MediaRecorder activo};
+\node[estado] (pensando) at (11,-7) {\textbf{Pensando}\\\scriptsize STT, RAG y LLM};
+\node[estado] (hablando) at (6,-3.5) {\textbf{Hablando}\\\scriptsize TTS y \textit{lip-sync}};
+\node[estado] (ausente) at (0,-7) {\textbf{Usuario ausente}\\\scriptsize aviso breve del avatar};
+\draw[flecha] (ini) -- node[etq, right=2pt] {carga del VRM} (reposo);
+\draw[flecha] (reposo) -- node[etq, above=3pt] {\texttt{person\_arrived}\\(2 fotogramas)} (saludo);
+\draw[flecha] (saludo) -- node[etq, above=3pt] {fin del audio} (espera);
+\draw[flecha] (espera) -- node[etq, above right] {pulsa micrófono} (escucha);
+\draw[flecha] (escucha) -- node[etq, below right] {pulsa de nuevo} (pensando);
+\draw[flecha] (espera) -- node[etq] {pregunta escrita\\o sugerencia} (pensando);
+\draw[flecha] (pensando) -- node[etq, below left] {respuesta lista} (hablando);
+\draw[flecha] (hablando) -- node[etq, above left] {fin del audio} (espera);
+\draw[flecha] (hablando) -- node[etq, sloped, above] {\texttt{person\_left} ($\geq$4 fotogramas)} (ausente);
+\draw[flecha] (ausente) -- node[etq, below=3pt] {\texttt{person\_arrived}: evento de retorno al LLM} (pensando);
+\end{tikzpicture}
+\caption{Diagrama de Estados del Avatar implementado en el frontend.}
+\label{fig:diag_estados_impl}
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia a partir de \texttt{static/\allowbreak{}script.\allowbreak{}js}}
+\end{figure}
+
+La Figura~\ref{fig:diag_secuencia} muestra la secuencia de interacción de una consulta por voz. El navegador detecta el rostro localmente y envía solo las cajas delimitadoras; la consulta se transcribe con \texttt{/api/stt}, la respuesta del LLM llega por fragmentos a través del WebSocket \texttt{/ws/chat} y el audio se recibe como flujo MP3 por HTTP desde \texttt{/api/tts}.
 
 \begin{landscape}
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\linewidth,height=0.95\textheight,keepaspectratio]{Logos/diagrama_secuencia.pdf}
-  \caption{Diagrama de Secuencia de Interacción.}
+  \resizebox{!}{0.8\textheight}{\input{Logos/diagrama_secuencia.tex}}
+  \caption{Diagrama de Secuencia de Interacción (consulta por voz).}
   \label{fig:diag_secuencia}
+  \elaboradopor{\autorTFG}
+  \fuente{Elaboración propia}
 \end{figure}
 \end{landscape}
 
-\subsection{Capa de Percepción y Captura (Frontend Físico)}
-Esta capa actúa como el sensor del sistema. A través de una cámara web, un modelo ligero de visión artificial procesa el flujo de video en tiempo real. El diseño estipula que el sistema no guardará fotogramas; únicamente extraerá las coordenadas de la caja delimitadora (\textit{bounding box}) del rostro. Cuando el área del rostro supera un umbral específico de píxeles (indicando que el estudiante se ha acercado a la pantalla), el sistema envía un disparador (\textit{trigger}) lógico para despertar al asistente. Simultáneamente, un micrófono direccional se activa para capturar la solicitud del usuario.
+En cuanto a su estilo, la solución es una arquitectura \textbf{cliente-servidor en capas}, cuyo servidor es un \textbf{monolito modular}: un único proceso FastAPI organizado en módulos con responsabilidades separadas (autenticación, chat con RAG, voz, visión y administración), que comparten configuración y se despliegan juntos. El cliente es ligero en lógica de negocio, pero asume la captura de medios y el renderizado 3D. La comunicación combina un WebSocket para el chat, por el que la respuesta del LLM se envía en fragmentos a medida que se genera; peticiones REST para la transcripción y la síntesis de voz; \textit{streaming} HTTP para el audio de respuesta; y un segundo WebSocket orientado a eventos para la presencia, que recibe únicamente cajas delimitadoras. La solución es una arquitectura \textbf{híbrida}: la detección visual y el renderizado se ejecutan en el dispositivo cliente; la recuperación y el LLM (Nemotron, servido por Ollama en la GPU del servidor local) se ejecutan en el servidor; y la transcripción y la síntesis de voz se consumen como servicios por API. El proveedor del LLM sigue siendo intercambiable mediante configuración (Ollama local o servicios compatibles con OpenAI). No se trata de una arquitectura de microservicios, ya que los módulos del servidor no se despliegan ni escalan de forma independiente.
 
-\subsection{Capa de Procesamiento Cognitivo (Motor de IA)}
-\label{sec:diseno_solucion}
+El sistema se desglosa en tres capas lógicas fundamentales:
+
+\subsection{Capa de Percepción y Captura (Frontend)}
+Esta capa actúa como el sensor del sistema y se ejecuta en el navegador. Con el permiso del usuario, la aplicación captura la cámara web mediante \texttt{getUserMedia} a 320$\times$240 píxeles y, cada segundo, ejecuta en el propio navegador el detector facial BlazeFace de MediaPipe (WebAssembly/WebGL) \cite{bazarevsky2019blazeface,lugaresi2019mediapipe}. Al servidor solo se envían por WebSocket las cajas delimitadoras detectadas (un mensaje JSON de unas decenas de bytes), y este responde con los eventos de llegada o salida; ninguna imagen sale del dispositivo. La captura de voz se realiza con \texttt{MediaRecorder} entre dos pulsaciones del botón de micrófono, y el usuario puede escribir su pregunta o elegir una de las preguntas sugeridas.
+
+\subsection{Capa de Procesamiento Cognitivo (Backend)}
 Es el núcleo lógico de la solución, estructurado mediante un flujo de datos secuencial:
 \begin{itemize}
-    \item \textbf{Speech-to-Text (STT):} Transcribe el audio del usuario a texto natural en español utilizando un procesamiento en \textit{backend} (Whisper-v3 vía API), desacoplado del navegador para asegurar compatibilidad y baja latencia.
-    \item \textbf{Generación Aumentada por Recuperación (RAG):} El texto ingresa a un motor de búsqueda semántica. Utilizando incrustaciones (\textit{embeddings}), el sistema compara la consulta del estudiante con una base de datos vectorial pre-indexada que contiene las mallas curriculares y reglamentos de la carrera de TI.
-    \item \textbf{Modelo de Lenguaje (LLM):} Un modelo de ejecución local recibe la consulta del usuario junto con el contexto extraído por el RAG, generando una respuesta coherente, precisa y libre de alucinaciones.
-    \item \textbf{Text-to-Speech (TTS):} El texto generado por el LLM se sintetiza nuevamente a un archivo de audio.
+    \item \textbf{Speech-to-Text (STT):} Transcribe el audio del usuario a texto en español con Whisper \texttt{large-v3} a través de la API de Groq \cite{radford2023whisper}.
+    \item \textbf{Generación Aumentada por Recuperación (RAG):} La consulta se normaliza y se busca en paralelo de forma semántica, con un modelo de \textit{embeddings} multilingüe y similitud del coseno en ChromaDB, y de forma léxica, con BM25; ambas listas se fusionan por RRF y un \textit{cross-encoder} multilingüe reordena los candidatos para elegir los tres fragmentos más relevantes \cite{lewis2020rag,chroma2024,robertson2009bm25,cormack2009rrf}.
+    \item \textbf{Modelo de Lenguaje (LLM):} Recibe las reglas del sistema, la consulta y los tres fragmentos más relevantes, y genera una respuesta breve que se envía al navegador por fragmentos. Se ejecuta localmente con el modelo Nemotron 3 Nano de 4 mil millones de parámetros, servido por Ollama en la GPU del servidor \cite{nemotron2025,ollama2025}. El proveedor es configurable mediante la variable \texttt{AI\_PROVIDER}, con alternativas como la API de NVIDIA, Groq, Gemini, SiliconFlow o un servidor Open WebUI propio.
+    \item \textbf{Text-to-Speech (TTS):} El texto generado se sintetiza con el modelo de baja latencia Flash v2.5 de ElevenLabs y se transmite al navegador por fragmentos \cite{elevenlabs2025}.
 \end{itemize}
 
 \subsection{Capa de Renderizado e Interacción (Frontend Gráfico)}
-El audio sintetizado y la cadena de texto se envían al motor gráfico basado en tecnologías web (WebGL/Three.js). En esta capa reside el Avatar 3D, el cual recibe el archivo de audio, analiza sus fonemas y ejecuta algoritmos de sincronización labial (\textit{lip-sync}) para emular el habla natural mientras reproduce animaciones predefinidas (como parpadeo y gestos de manos).
+El audio sintetizado y el texto se presentan en la interfaz web. El avatar 3D en formato VRM se renderiza con Three.js y \texttt{three-vrm} \cite{threevrm2024}; mientras se reproduce el audio, un analizador de frecuencias (\texttt{AnalyserNode}) calcula la energía de la señal y la traduce en la apertura de la boca (expresiones \texttt{aa} y \texttt{ou}). En paralelo se muestran subtítulos y el historial del chat, en el que el texto de la respuesta aparece a medida que llega por el WebSocket. La Figura~\ref{fig:arquitectura_logica} resume el flujo por capas.
 
-\begin{figure}
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\textwidth]{Logos/DiagramaFuncional2.png}
-  \caption{Arquitectura Lógica y flujo de datos del Asistente Virtual (Actualizado).}
+  \caption{Arquitectura lógica por capas y flujo de datos del Asistente Virtual (diseño conceptual; el bloque LLM puede ser local o remoto).}
   \label{fig:arquitectura_logica}
+  \elaboradopor{\autorTFG}
+  \fuente{Elaboración propia}
 \end{figure}
 
-%\textit{[Describir el diseño técnico de la solución propuesta. Puede incluir arquitectura del sistema o infraestructura, diagramas lógicos y físicos, modelos de datos, componentes o configuraciones técnicas.]}
+\subsection{Arquitectura de Despliegue}
+El mismo código fuente admite dos modos de despliegue (Figura~\ref{fig:despliegue}). El \textbf{modo local} es el principal y el utilizado en todas las pruebas de este trabajo: el servidor FastAPI se ejecuta con Uvicorn en el equipo del desarrollador, donde residen la base vectorial, los modelos de recuperación y el LLM Nemotron servido por Ollama en la GPU, mientras que la detección de presencia se ejecuta en el navegador; solo la transcripción y la síntesis de voz se consumen como servicios externos. Al evitar un salto adicional de red entre el navegador y un servidor remoto, este modo reduce la latencia de la interacción. El \textbf{modo servidor} es un despliegue piloto en un servidor virtual (VPS) administrado con Coolify y Traefik \cite{coolify2025}, publicado con HTTPS en \texttt{aria.\allowbreak{}indoamericatech.\allowbreak{}com}; incluye un contenedor auxiliar que establece un túnel SSH hacia el servidor Ollama con GPU del laboratorio LabITI, como alternativa para ejecutar el LLM en infraestructura propia.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.8, transform shape,
+    nodo/.style={draw, rounded corners, fill=white, minimum width=3.2cm, minimum height=0.9cm, align=center, font=\small},
+    nube/.style={draw, rounded corners, fill=orange!12, minimum width=3.2cm, minimum height=0.9cm, align=center, font=\small},
+    flecha/.style={<->, >=stealth, thick},
+    etq/.style={font=\scriptsize, align=center, fill=white, inner sep=1pt}
+]
+% Modo local
+\node[nodo] (nav1) at (0,0) {Navegador\\\scriptsize MediaPipe, cámara y micrófono};
+\node[nodo] (api1) at (0,-2.4) {FastAPI + Uvicorn\\\scriptsize \texttt{localhost:8000}};
+\node[nodo] (rag1) at (0,-4.4) {ChromaDB + BM25\\\scriptsize Ollama + Nemotron (GPU)};
+\draw[flecha] (nav1) -- node[etq, right] {HTTP / WebSocket\\(misma máquina)} (api1);
+\draw[flecha] (api1) -- (rag1);
+\node[draw, dashed, rounded corners, fit=(nav1)(api1)(rag1), inner sep=8pt, label={[font=\small\bfseries]above:Modo local (principal)}] (local) {};
+% Modo servidor
+\node[nodo] (nav2) at (11,0) {Navegador remoto\\\scriptsize HTTPS};
+\node[nodo] (trf) at (11,-1.9) {Traefik + Coolify\\\scriptsize TLS Let's Encrypt};
+\node[nodo] (api2) at (11,-3.6) {Contenedor \texttt{aria-web}\\\scriptsize FastAPI + ChromaDB};
+\node[nodo] (tun) at (11,-5.3) {Contenedor \texttt{ollama-tunnel}\\\scriptsize autossh};
+\draw[flecha] (nav2) -- (trf);
+\draw[flecha] (trf) -- (api2);
+\draw[flecha] (api2) -- (tun);
+\node[draw, dashed, rounded corners, fit=(nav2)(trf)(api2)(tun), inner sep=8pt, label={[font=\small\bfseries]above:Modo servidor (VPS piloto)}] (vps) {};
+% Servicios externos
+\node[nube] (groq) at (5.5,-1.0) {Groq\\\scriptsize Whisper STT};
+\node[nube] (nv) at (5.5,-2.6) {API compatible OpenAI\\\scriptsize LLM opcional};
+\node[nube] (el) at (5.5,-4.2) {ElevenLabs\\\scriptsize TTS};
+\node[nube] (lab) at (5.5,-6.6) {Ollama (GPU LabITI)\\\scriptsize LLM alternativo};
+\draw[->, >=stealth, thick] (local.east |- groq) -- (groq);
+\draw[->, >=stealth, thick, dashed] (local.east |- nv) -- (nv);
+\draw[->, >=stealth, thick] (local.east |- el) -- (el);
+\draw[->, >=stealth, thick, gray] (vps.west |- groq) -- (groq);
+\draw[->, >=stealth, thick, gray] (vps.west |- nv) -- (nv);
+\draw[->, >=stealth, thick, gray] (vps.west |- el) -- (el);
+\draw[->, >=stealth, thick, dashed, gray] (tun.west) -- node[etq, above=3pt, pos=0.4] {túnel SSH} (lab.east);
+\end{tikzpicture}
+\caption{Arquitectura de despliegue en modo local y en modo servidor.}
+\label{fig:despliegue}
+\elaboradopor{\autorTFG}
+\fuente{Elaboración propia a partir de \texttt{iniciar\_\allowbreak{}local.\allowbreak{}sh} y \texttt{docker-\allowbreak{}compose.\allowbreak{}yml}}
+\end{figure}
 
 \section{Justificación Técnica}
-La viabilidad técnica y operativa del Asistente Virtual Inteligente depende de una rigurosa selección de componentes y plataformas. A continuación, se justifican las decisiones arquitectónicas adoptadas para este proyecto:
+La viabilidad técnica y operativa del Asistente Virtual Inteligente depende de una rigurosa selección de componentes y plataformas. A continuación, se justifican las decisiones arquitectónicas adoptadas para este proyecto.
 
-\subsection{Despliegue en Servidor Local (Edge/Local Computing)}
-A diferencia de las arquitecturas basadas enteramente en la nube, el despliegue del pipeline principal en un servidor local asegura una latencia mínima, aspecto crítico para mantener la fluidez en una conversación humano-computadora. Además, procesar las imágenes de la cámara web de manera local (sin enviarlas a servidores externos) garantiza el cumplimiento estricto del Requerimiento No Funcional de privacidad \cite{lightweightgaze2024}.
+\subsection{Arquitectura Híbrida: Procesamiento Local y Servicios por API}
+El prototipo combina procesos locales y servicios remotos. La búsqueda híbrida y el cálculo de \textit{embeddings} se ejecutan en el servidor local porque son ligeros (decenas de milisegundos por consulta, según las mediciones del Capítulo~\ref{chap:implementacion}), y la detección de presencia se ejecuta en el navegador para que los fotogramas de la cámara no salgan del dispositivo del usuario. El LLM también se ejecuta localmente: el modelo Nemotron 3 Nano de 4 mil millones de parámetros, cuantizado a 4 bits (Q4\_K\_M), ocupa unos 3 GB y cabe por completo en la GPU de 8 GB del equipo, lo que elimina la dependencia de la cola de un servicio remoto, el costo por consulta y el envío de las preguntas a terceros. La transcripción y la síntesis de voz con calidad natural en español siguen consumiéndose mediante API. La arquitectura multiproveedor permite volver a un LLM remoto o usar el servidor Ollama de LabITI sin modificar el resto del sistema.
+
+\subsection{Selección Comparativa del Proveedor de LLM}
+Durante el desarrollo se integraron varios proveedores compatibles con la interfaz de OpenAI. La Tabla~\ref{tab:comparativa_llm} resume los criterios que llevaron a fijar, primero, la API de NVIDIA y, tras la evaluación de latencia, el modelo local Nemotron como opción por defecto.
+
+\begin{table}[H]
+  \caption{Comparación de los proveedores de LLM integrados en el prototipo.}
+  \label{tab:comparativa_llm}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.4cm}|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{3.3cm}|}
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Proveedor} & \textbf{Modelo configurado} & \textbf{Ventaja} & \textbf{Limitación observada} \\ \hline
+Google Gemini & \texttt{gemini-\allowbreak{}2.\allowbreak{}5-\allowbreak{}flash-\allowbreak{}lite} & Integración inicial sencilla & Recibe el documento completo en lugar del RAG; límites de cuota \\ \hline
+SiliconFlow & \texttt{DeepSeek-V3} & Modelo de alta capacidad & Servicio alojado en China (\texttt{api.\allowbreak{}siliconflow.\allowbreak{}cn}); mayor distancia de red \\ \hline
+Groq & \texttt{llama-\allowbreak{}3.\allowbreak{}1-\allowbreak{}8b-\allowbreak{}instant} & Inferencia muy rápida & Límites de \textit{tokens} por minuto en el plan gratuito \\ \hline
+Open WebUI / Ollama & \texttt{qwen3:14b} & Datos en infraestructura propia (GPU LabITI) & Depende de la disponibilidad del laboratorio y del túnel SSH \\ \hline
+NVIDIA API & \texttt{llama-\allowbreak{}3.\allowbreak{}2-\allowbreak{}11b-\allowbreak{}vision-\allowbreak{}instruct} & Catálogo gratuito para desarrollo y API estable & Cola del servicio gratuito: LLM de 1,2 a 24,8 s por consulta (Capítulo~\ref{chap:implementacion}) \cite{nvidianim2025} \\ \hline
+\textbf{Ollama local} & \texttt{nemotron-\allowbreak{}3-\allowbreak{}nano:4b} (Q4\_K\_M) & Sin costo ni cuotas; datos en el equipo; primer fragmento en menos de 0,5 s & Modelo pequeño; requiere GPU y desactivar la caché de \textit{prompts} en RAM \\ \hline
+\end{tabular}
+\elaboradopor{\autorTFG}
+\fuente{Configuración del prototipo (\texttt{.env.example}) e historial de cambios del repositorio}
+\end{table}
 
 \subsection{Implementación de la Arquitectura RAG frente a Fine-Tuning}
-Para dotar al LLM del conocimiento institucional, se seleccionó la arquitectura RAG (Retrieval-Augmented Generation) sobre el reentrenamiento (\textit{Fine-Tuning}). La literatura especializada demuestra que el \textit{Fine-Tuning} es computacionalmente costoso y altamente susceptible a alucinaciones cuando se le piden datos exactos \cite{pabon2025naia}. El enfoque RAG permite que la universidad actualice un reglamento (agregando un nuevo PDF a la base de datos) y el asistente adopte el nuevo conocimiento de forma inmediata sin necesidad de reentrenar el modelo, garantizando escalabilidad y bajo costo de mantenimiento.
+Para dotar al LLM del conocimiento institucional, se seleccionó la arquitectura RAG sobre el reentrenamiento (\textit{fine-tuning}). RAG permite responder con información actualizable sin modificar los pesos del modelo \cite{lewis2020rag}, mientras que el \textit{fine-tuning} es costoso y no garantiza la exactitud de datos puntuales como fechas o valores de aranceles \cite{pabon2025naia}. Con RAG, la universidad puede actualizar un documento desde el panel de administración y el asistente utiliza la nueva información de inmediato.
 
-\subsection{Visión Artificial mediante Modelos Ligeros}
-Para el módulo de detección de presencia, se opta por librerías optimizadas para inferencia rápida (como MediaPipe o configuraciones de Haar Cascades). Estas herramientas operan eficientemente sin necesidad de tarjetas gráficas (GPUs) de gama alta, permitiendo que todo el peso computacional del hardware se reserve para la inferencia del Modelo de Lenguaje y el renderizado 3D del avatar.
+\subsection{Modelo de Embeddings Multilingüe}
+Inicialmente se empleó \texttt{all-\allowbreak{}MiniLM-\allowbreak{}L6-\allowbreak{}v2}, entrenado principalmente en inglés, con el que las consultas en español no recuperaban los fragmentos correctos. Se adoptó \texttt{paraphrase-\allowbreak{}multilingual-\allowbreak{}MiniLM-\allowbreak{}L12-\allowbreak{}v2}, un modelo Sentence-BERT de 384 dimensiones entrenado para más de 50 idiomas \cite{reimers2019sbert}, que se ejecuta en CPU en milisegundos por consulta.
 
-\subsection{Plataformas de Avatar Estandarizadas}
-Se justifica el uso de plataformas de avatares basadas en estándares abiertos (como GLTF o GLB, facilitados por herramientas como Ready Player Me) ejecutadas sobre WebGL en el navegador. Esta decisión técnica evita la dependencia de motores de videojuegos pesados (como Unreal Engine), lo que reduce la carga del sistema operativo y facilita una futura portabilidad del asistente a otras pantallas o terminales de la institución sin requerir configuraciones de software complejas.
+\subsection{Visión Artificial en el Cliente mediante Cajas Delimitadoras}
+La primera versión aplicaba el clasificador Haar Cascade de OpenCV \cite{viola2001rapid} en el servidor, lo que obligaba al navegador a enviar cada segundo un fotograma JPEG de 7 a 55 KB y al servidor a decodificarlo y procesarlo por cada usuario conectado. Como el requerimiento se limita a saber si hay un rostro frente a la pantalla, sin reconocer identidades ni gestos, la detección se trasladó al navegador con MediaPipe Face Detector y el modelo BlazeFace de corto alcance, de 230 KB y licencia Apache 2.0 \cite{bazarevsky2019blazeface,lugaresi2019mediapipe}. El navegador obtiene las cajas delimitadoras y envía solo sus coordenadas, por lo que la imagen no sale del dispositivo, el mensaje se reduce a decenas de bytes y el costo de la visión deja de crecer con el número de usuarios en el servidor.
 
-%\textit{[Argumentar técnicamente la selección de tecnologías, herramientas, plataformas, equipos o servicios utilizados en el proyecto.]}
-
-
+\subsection{Avatar en Formato VRM sobre WebGL}
+Se utilizó el formato abierto VRM, basado en glTF, con modelos creados en VRoid y renderizados con Three.js y \texttt{three-vrm} \cite{threevrm2024}. El formato define expresiones estandarizadas (parpadeo y vocales) que permiten animar el rostro sin un motor de videojuegos, y el avatar se ejecuta en cualquier navegador moderno, incluidos los móviles, sin instalación adicional.

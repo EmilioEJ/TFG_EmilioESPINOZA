@@ -5,21 +5,41 @@
 \noindent\textit{Definición de los términos técnicos y acrónimos relevantes utilizados a lo largo del documento:}
 
 \begin{description}
-  \item[API (Application Programming Interface):] Interfaz que permite la comunicación entre diferentes componentes de software, utilizada en este proyecto para conectar servicios externos.
-  \item[Burbujas Flotantes:] Elementos de interfaz de usuario superpuestos dinámicamente sobre el canvas WebGL para presentar sugerencias de interacción de forma amigable.
-  \item[Chunking:] Proceso de dividir o fraccionar información. En este documento refiere al particionamiento de texto para indexación (RAG) o la transmisión de audio fragmentado (\textit{Streaming}).
-  \item[Cosine Similarity (Similitud Coseno):] Métrica matemática utilizada para medir la semejanza entre dos vectores en un espacio multidimensional, fundamental para la recuperación de información.
-  \item[Droplet:] Servidor virtual privado escalable provisto por la infraestructura en la nube de DigitalOcean.
+  \item[API (Application Programming Interface):] Interfaz que permite la comunicación entre componentes de software; en este proyecto, conecta el backend con los servicios de transcripción, generación y síntesis de voz.
+  \item[BlazeFace:] Detector facial neuronal ligero diseñado para ejecutarse en tiempo real en dispositivos de consumo; devuelve la caja delimitadora y puntos clave de cada rostro, sin identificar a la persona.
+  \item[BM25:] Función de puntuación de búsqueda léxica que ordena los documentos según la frecuencia de los términos de la consulta y su rareza en el corpus.
+  \item[Bounding box (caja delimitadora):] Rectángulo definido por su posición, ancho y alto que encierra un objeto detectado en una imagen; en el prototipo, el rostro del usuario.
+  \item[Chunking:] Fraccionamiento de un documento en fragmentos para su indexación (RAG), o transmisión de audio por partes (\textit{streaming}).
+  \item[Coolify:] Plataforma de código abierto para desplegar y administrar aplicaciones en contenedores en un servidor propio.
+  \item[Cosine Similarity (Similitud Coseno):] Métrica que mide la semejanza entre dos vectores por el ángulo que forman; se usa para comparar la consulta con los fragmentos del documento.
+  \item[Cross-encoder:] Modelo que procesa conjuntamente la consulta y un fragmento candidato para estimar su relevancia; se usa para reordenar los resultados de la búsqueda (\textit{re-ranking}).
+  \item[Docker:] Tecnología de contenedores que empaqueta una aplicación con sus dependencias para ejecutarla de forma idéntica en distintos servidores.
+  \item[DSRM (Design Science Research Methodology):] Metodología de investigación orientada a diseñar, construir y evaluar artefactos que resuelven un problema.
   \item[ECA (Embodied Conversational Agent):] Agente conversacional que cuenta con una representación corporal visible, como un avatar 3D.
-  \item[FastAPI:] Marco de trabajo (\textit{framework}) moderno y de alto rendimiento para construir APIs con Python.
-  \item[GPU (Graphics Processing Unit):] Unidad de procesamiento especializada, crucial para la aceleración de modelos de inteligencia artificial y el renderizado gráfico.
-  \item[LLM (Large Language Model):] Modelo de Inteligencia Artificial entrenado con cantidades masivas de texto capaz de comprender y generar lenguaje natural.
+  \item[Embedding:] Representación numérica (vector) del significado de un texto, utilizada para la búsqueda semántica.
+  \item[FastAPI:] Marco de trabajo (\textit{framework}) de alto rendimiento para construir APIs con Python.
+  \item[Haar Cascade:] Clasificador de objetos propuesto por Viola y Jones basado en características rectangulares evaluadas en cascada; utilizado en la primera versión del módulo de visión.
+  \item[Hit Rate@k:] Porcentaje de consultas en las que al menos un fragmento relevante aparece entre los $k$ primeros resultados de la búsqueda.
+  \item[Jailbreak:] Intento de manipular a un modelo de lenguaje para que ignore sus instrucciones o cambie su comportamiento.
+  \item[LLM (Large Language Model):] Modelo de Inteligencia Artificial entrenado con grandes volúmenes de texto, capaz de comprender y generar lenguaje natural.
+  \item[MediaPipe:] \textit{Framework} de Google para construir procesos de percepción (visión y audio) que pueden ejecutarse en el navegador mediante WebAssembly y WebGL.
+  \item[MRR (Mean Reciprocal Rank):] Promedio del inverso de la posición del primer resultado relevante en un conjunto de consultas.
+  \item[Nemotron:] Familia de modelos de lenguaje de NVIDIA con licencia abierta; el prototipo usa Nemotron 3 Nano de 4.000 millones de parámetros ejecutado localmente.
   \item[OCR (Optical Character Recognition):] Tecnología utilizada para extraer texto desde imágenes o documentos escaneados.
+  \item[Ollama:] Servidor de código abierto para descargar y ejecutar modelos de lenguaje de forma local mediante una API HTTP.
+  \item[PBKDF2:] Función de derivación de claves que aplica un \textit{hash} criptográfico de forma iterada con un \textit{salt} para almacenar contraseñas de forma segura.
   \item[PLN (Procesamiento de Lenguaje Natural):] Rama de la inteligencia artificial enfocada en la interacción entre las computadoras y el lenguaje humano.
-  \item[RAG (Retrieval-Augmented Generation):] Arquitectura de IA que mejora las respuestas de un LLM al recuperar previamente información relevante de una base de datos de conocimiento específica.
-  \item[Three.js:] Biblioteca de JavaScript que facilita la creación y visualización de gráficos 3D en el navegador web mediante WebGL.
-  \item[TTS (Text-to-Speech):] Tecnología capaz de convertir texto escrito a audio sintetizado.
-  \item[VRM (Virtual Reality Model):] Formato de archivo estándar diseñado específicamente para la representación de avatares 3D interoperables en aplicaciones de realidad virtual o navegadores.
-  \item[WebSockets:] Protocolo de comunicación bidireccional, simultánea y en tiempo real a través de una única conexión TCP.
-  \item[Whisper:] Modelo de reconocimiento de voz y traducción (\textit{Speech-to-Text}) de código abierto desarrollado por OpenAI.
+  \item[Push-to-talk:] Modo de captura de voz en el que el usuario pulsa un botón para iniciar y detener la grabación.
+  \item[RAG (Retrieval-Augmented Generation):] Arquitectura que mejora las respuestas de un LLM recuperando previamente información relevante de una base de conocimiento específica.
+  \item[RRF (Reciprocal Rank Fusion):] Técnica que combina varias listas de resultados sumando, para cada elemento, el inverso de su posición en cada lista.
+  \item[STT (Speech-to-Text):] Tecnología que convierte la voz en texto.
+  \item[Streaming:] Transmisión de una respuesta por partes a medida que se genera, en lugar de esperar a que esté completa.
+  \item[Three.js:] Biblioteca de JavaScript para crear y visualizar gráficos 3D en el navegador mediante WebGL.
+  \item[TTFB (Time to First Byte):] Tiempo transcurrido desde que se envía una petición hasta que se recibe el primer byte de la respuesta; en el prototipo, hasta el primer fragmento de texto recibido por WebSocket.
+  \item[TTS (Text-to-Speech):] Tecnología que convierte texto escrito en audio sintetizado.
+  \item[VPS (Virtual Private Server):] Servidor virtual con recursos dedicados en el que se ejecuta el despliegue piloto del prototipo.
+  \item[VRM:] Formato abierto basado en glTF para avatares 3D humanoides, con expresiones faciales y esqueleto estandarizados.
+  \item[WebSockets:] Protocolo de comunicación bidireccional en tiempo real sobre una única conexión TCP.
+  \item[WER (Word Error Rate):] Proporción de palabras sustituidas, omitidas o insertadas por un sistema de transcripción respecto al texto de referencia.
+  \item[Whisper:] Modelo de reconocimiento de voz de código abierto desarrollado por OpenAI.
 \end{description}

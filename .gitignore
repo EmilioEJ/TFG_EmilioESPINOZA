@@ -28,3 +28,8 @@ uploads/
 .agents/
 *.py
 *.zip
+
+# Fuentes con licencia (Century Gothic): solo uso local, no se publican
+fonts/
+# Diagramas en PDF incluidos por la tesis
+!Logos/*.pdf
