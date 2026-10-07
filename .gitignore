@@ -33,3 +33,10 @@ uploads/
 fonts/
 # Diagramas en PDF incluidos por la tesis
 !Logos/*.pdf
+
+# Fuentes de Windows (con licencia), plantillas de referencia y respuestas de la encuesta: solo uso local
+Fuentes de WINdows/
+Fuentes de WINdows.rar
+TFG_mejorado/
+TFG_mejorado.zip
+*.xlsx
